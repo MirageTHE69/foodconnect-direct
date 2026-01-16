@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Store, Users, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-hero pt-20">
       {/* Background decorative elements */}
@@ -33,11 +35,11 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-up" style={{ animationDelay: '0.3s' }}>
-            <Button variant="hero" size="xl" className="w-full sm:w-auto">
+            <Button variant="hero" size="xl" className="w-full sm:w-auto" onClick={() => navigate('/auth')}>
               I'm a Buyer
               <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button variant="hero-outline" size="xl" className="w-full sm:w-auto">
+            <Button variant="hero-outline" size="xl" className="w-full sm:w-auto" onClick={() => navigate('/auth')}>
               I'm a Supplier
               <ArrowRight className="w-5 h-5" />
             </Button>

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CTA = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-24 bg-background relative overflow-hidden">
       {/* Background elements */}
@@ -31,11 +33,11 @@ const CTA = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button variant="hero" size="xl">
+              <Button variant="hero" size="xl" onClick={() => navigate('/auth')}>
                 Start as Buyer
                 <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button variant="secondary" size="xl">
+              <Button variant="secondary" size="xl" onClick={() => navigate('/auth')}>
                 Start as Supplier
                 <ArrowRight className="w-5 h-5" />
               </Button>
