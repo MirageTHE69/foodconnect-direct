@@ -7,19 +7,28 @@ import {
   Apple, 
   Milk, 
   Cookie,
-  ArrowRight
+  ArrowRight,
+  Leaf,
+  Droplets,
+  Package,
+  Flame
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const categories = [
-  { icon: Wheat, name: "Grains & Cereals", count: "120+ Suppliers", color: "bg-amber-500/10 text-amber-600" },
-  { icon: Beef, name: "Meat & Poultry", count: "85+ Suppliers", color: "bg-red-500/10 text-red-600" },
-  { icon: Fish, name: "Seafood", count: "60+ Suppliers", color: "bg-blue-500/10 text-blue-600" },
-  { icon: Milk, name: "Dairy Products", count: "95+ Suppliers", color: "bg-sky-500/10 text-sky-600" },
-  { icon: Apple, name: "Fresh Produce", count: "150+ Suppliers", color: "bg-green-500/10 text-green-600" },
-  { icon: Cookie, name: "Bakery & Snacks", count: "110+ Suppliers", color: "bg-orange-500/10 text-orange-600" },
-  { icon: Coffee, name: "Beverages", count: "75+ Suppliers", color: "bg-brown-500/10 text-amber-800" },
-  { icon: IceCream, name: "Frozen Foods", count: "65+ Suppliers", color: "bg-cyan-500/10 text-cyan-600" },
+  { icon: Wheat, name: "Grains & Cereals", count: "120+ Suppliers", color: "bg-amber-500/10 text-amber-600", trending: false },
+  { icon: Beef, name: "Meat & Poultry", count: "85+ Suppliers", color: "bg-red-500/10 text-red-600", trending: false },
+  { icon: Fish, name: "Seafood", count: "60+ Suppliers", color: "bg-blue-500/10 text-blue-600", trending: false },
+  { icon: Milk, name: "Dairy Products", count: "95+ Suppliers", color: "bg-sky-500/10 text-sky-600", trending: true },
+  { icon: Apple, name: "Fresh Produce", count: "150+ Suppliers", color: "bg-green-500/10 text-green-600", trending: true },
+  { icon: Cookie, name: "Bakery & Snacks", count: "110+ Suppliers", color: "bg-orange-500/10 text-orange-600", trending: false },
+  { icon: Coffee, name: "Beverages", count: "75+ Suppliers", color: "bg-amber-700/10 text-amber-800", trending: false },
+  { icon: IceCream, name: "Frozen Foods", count: "65+ Suppliers", color: "bg-cyan-500/10 text-cyan-600", trending: false },
+  { icon: Flame, name: "Spices & Condiments", count: "130+ Suppliers", color: "bg-rose-500/10 text-rose-600", trending: true },
+  { icon: Droplets, name: "Oils & Fats", count: "55+ Suppliers", color: "bg-yellow-500/10 text-yellow-600", trending: false },
+  { icon: Package, name: "Packaged Foods", count: "90+ Suppliers", color: "bg-violet-500/10 text-violet-600", trending: false },
+  { icon: Leaf, name: "Organic Products", count: "70+ Suppliers", color: "bg-emerald-500/10 text-emerald-600", trending: false },
 ];
 
 const Categories = () => {
@@ -42,18 +51,25 @@ const Categories = () => {
           </Button>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Categories Grid - Now 12 items */}
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((category) => (
             <button
               key={category.name}
-              className="group relative overflow-hidden rounded-2xl p-6 bg-card border border-border/50 hover:border-primary/30 shadow-card hover:shadow-hover transition-all duration-300 text-left"
+              className="group relative overflow-hidden rounded-2xl p-6 bg-card border border-border/50 hover:border-primary/30 shadow-card hover:shadow-hover hover:-translate-y-1 transition-all duration-300 text-left"
             >
               {/* Background decoration */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl transform translate-x-16 -translate-y-16 group-hover:translate-x-12 group-hover:-translate-y-12 transition-transform duration-500" />
               
+              {/* Trending badge */}
+              {category.trending && (
+                <Badge variant="secondary" className="absolute top-4 right-4 bg-secondary text-secondary-foreground text-xs">
+                  Trending
+                </Badge>
+              )}
+              
               <div className="relative z-10">
-                <div className={`w-14 h-14 rounded-xl ${category.color.split(' ')[0]} flex items-center justify-center mb-4`}>
+                <div className={`w-14 h-14 rounded-xl ${category.color.split(' ')[0]} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                   <category.icon className={`w-7 h-7 ${category.color.split(' ')[1]}`} />
                 </div>
                 <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">

@@ -1,9 +1,12 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 const footerLinks = {
   platform: [
     { name: "How It Works", href: "#how-it-works" },
-    { name: "For Buyers", href: "#" },
+    { name: "For Buyers", href: "#for-buyers" },
     { name: "For Suppliers", href: "#for-suppliers" },
     { name: "Pricing", href: "#" },
   ],
@@ -12,6 +15,8 @@ const footerLinks = {
     { name: "Dairy Products", href: "#" },
     { name: "Fresh Produce", href: "#" },
     { name: "Meat & Seafood", href: "#" },
+    { name: "Spices", href: "#" },
+    { name: "Beverages", href: "#" },
   ],
   company: [
     { name: "About Us", href: "#" },
@@ -23,6 +28,7 @@ const footerLinks = {
     { name: "Privacy Policy", href: "#" },
     { name: "Terms of Service", href: "#" },
     { name: "Cookie Policy", href: "#" },
+    { name: "Refund Policy", href: "#" },
   ],
 };
 
@@ -34,8 +40,43 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Newsletter signup logic would go here
+    setEmail("");
+  };
+
   return (
     <footer className="bg-foreground text-background/90">
+      {/* Newsletter Section */}
+      <div className="border-b border-background/10">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <h3 className="text-2xl md:text-3xl font-bold mb-3">
+              Stay Updated with <span className="text-primary">FoodAdda</span>
+            </h3>
+            <p className="text-background/60 mb-6">
+              Get the latest supplier listings, industry news, and platform updates delivered to your inbox.
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background/10 border-background/20 text-background placeholder:text-background/40 focus:border-primary"
+              />
+              <Button type="submit" className="gradient-primary text-primary-foreground">
+                Subscribe
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
@@ -52,7 +93,7 @@ const Footer = () => {
               India's leading platform connecting food buyers with trusted suppliers. 
               Building stronger food industry relationships, one connection at a time.
             </p>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 text-sm text-background/60">
                 <Mail className="w-4 h-4" />
                 <span>hello@foodadda.in</span>
@@ -65,6 +106,12 @@ const Footer = () => {
                 <MapPin className="w-4 h-4" />
                 <span>Mumbai, India</span>
               </div>
+            </div>
+
+            {/* Made in India Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/10 border border-background/20">
+              <span className="text-lg">🇮🇳</span>
+              <span className="text-sm font-medium">Made in India</span>
             </div>
           </div>
 
