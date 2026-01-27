@@ -1,0 +1,412 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { ProductCard } from '@/components/shared/ProductCard';
+import { SaveButton } from '@/components/buyer/SaveButton';
+import { useSavedItems } from '@/hooks/useSavedItems';
+import { useEnquiries } from '@/hooks/useEnquiries';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  ChefHat,
+  MapPin,
+  Globe,
+  CheckCircle,
+  Package,
+  MessageSquare,
+  Loader2,
+  ArrowLeft,
+  Award,
+  Store,
+} from 'lucide-react';
+
+interface SupplierDetail {
+  id: string;
+  company_name: string;
+  business_description: string | null;
+  logo_url: string | null;
+  cover_image_url: string | null;
+  city: string | null;
+  state: string | null;
+  website: string | null;
+  certifications: string[] | null;
+  verification_status: 'pending' | 'verified' | 'rejected';
+}
+
+interface ProductItem {
+  id: string;
+  name: string;
+  description: string | null;
+  images: string[] | null;
+  product_categories: { name: string } | null;
+}
+
+export default function SupplierDetail() {
+  const { id } = useParams();
+  const [supplier, setSupplier] = useState<SupplierDetail | null>(null);
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [enquiryDialogOpen, setEnquiryDialogOpen] = useState(false);
+  const [enquirySubject, setEnquirySubject] = useState('');
+  const [enquiryMessage, setEnquiryMessage] = useState('');
+  const [sendingEnquiry, setSendingEnquiry] = useState(false);
+
+  const { isSupplierSaved, toggleSaveSupplier, isProductSaved, toggleSaveProduct } = useSavedItems();
+  const { createEnquiry } = useEnquiries();
+
+  useEffect(() => {
+    if (id) {
+      fetchSupplierDetails(id);
+    }
+  }, [id]);
+
+  const fetchSupplierDetails = async (supplierId: string) => {
+    setLoading(true);
+    try {
+      // Fetch supplier
+      const { data: supplierData, error: supplierError } = await supabase
+        .from('supplier_profiles')
+        .select('*')
+        .eq('id', supplierId)
+        .single();
+
+      if (supplierError) throw supplierError;
+      setSupplier(supplierData);
+
+      // Fetch supplier's products
+      const { data: productsData } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          description,
+          images,
+          product_categories (name)
+        `)
+        .eq('supplier_id', supplierId)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      setProducts(productsData || []);
+    } catch (error) {
+      console.error('Error fetching supplier:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendEnquiry = async () => {
+    if (!supplier || !enquirySubject.trim() || !enquiryMessage.trim()) return;
+
+    setSendingEnquiry(true);
+    const { error } = await createEnquiry(supplier.id, enquirySubject, enquiryMessage);
+    setSendingEnquiry(false);
+
+    if (!error) {
+      setEnquiryDialogOpen(false);
+      setEnquirySubject('');
+      setEnquiryMessage('');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!supplier) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Store className="h-16 w-16 text-muted-foreground/50 mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Supplier Not Found</h1>
+        <p className="text-muted-foreground mb-4">The supplier you're looking for doesn't exist</p>
+        <Button asChild>
+          <Link to="/suppliers">Browse Suppliers</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const location = [supplier.city, supplier.state].filter(Boolean).join(', ');
+  const isVerified = supplier.verification_status === 'verified';
+
+  return (
+    <div className="min-h-screen bg-muted/30">
+      {/* Header */}
+      <header className="bg-background border-b sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <ChefHat className="h-8 w-8 text-primary" />
+              <span className="font-bold text-xl">FoodAdda</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/products">
+                <Button variant="ghost">Products</Button>
+              </Link>
+              <Link to="/suppliers">
+                <Button variant="ghost">Suppliers</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Cover Image */}
+        <div className="relative h-48 md:h-64 bg-gradient-to-r from-primary/20 to-primary/5">
+          {supplier.cover_image_url && (
+            <img
+              src={supplier.cover_image_url}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+        </div>
+
+        <div className="container mx-auto px-4">
+          {/* Supplier Info */}
+          <div className="relative -mt-16 mb-8">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Logo */}
+              <div className="w-32 h-32 rounded-xl overflow-hidden bg-background shadow-lg border flex-shrink-0">
+                {supplier.logo_url ? (
+                  <img
+                    src={supplier.logo_url}
+                    alt={supplier.company_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Store className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 pt-4 md:pt-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h1 className="text-2xl md:text-3xl font-bold">{supplier.company_name}</h1>
+                      {isVerified && (
+                        <Badge className="bg-green-500">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm">
+                      {location && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {location}
+                        </span>
+                      )}
+                      {supplier.website && (
+                        <a
+                          href={supplier.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 hover:text-primary"
+                        >
+                          <Globe className="h-4 w-4" />
+                          Website
+                        </a>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Package className="h-4 w-4" />
+                        {products.length} products
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <SaveButton
+                      isSaved={isSupplierSaved(supplier.id)}
+                      onToggle={() => toggleSaveSupplier(supplier.id)}
+                      variant="outline"
+                    />
+                    <Button onClick={() => setEnquiryDialogOpen(true)}>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Contact Supplier
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              <Tabs defaultValue="products">
+                <TabsList>
+                  <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
+                  <TabsTrigger value="about">About</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="products" className="mt-6">
+                  {products.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Package className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                      <p className="text-muted-foreground">No products listed yet</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {products.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                          name={product.name}
+                          description={product.description}
+                          images={product.images}
+                          categoryName={product.product_categories?.name}
+                          showSaveButton={true}
+                          isSaved={isProductSaved(product.id)}
+                          onSaveToggle={() => toggleSaveProduct(product.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="about" className="mt-6">
+                  <Card>
+                    <CardContent className="pt-6">
+                      {supplier.business_description ? (
+                        <p className="text-muted-foreground whitespace-pre-wrap">
+                          {supplier.business_description}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground italic">
+                          No description provided
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Certifications */}
+              {supplier.certifications && supplier.certifications.length > 0 && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <h3 className="font-semibold flex items-center gap-2 mb-4">
+                      <Award className="h-5 w-5 text-primary" />
+                      Certifications
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {supplier.certifications.map((cert) => (
+                        <Badge key={cert} variant="secondary">
+                          {cert}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Quick Actions */}
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <Button
+                    className="w-full"
+                    onClick={() => setEnquiryDialogOpen(true)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Enquiry
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => toggleSaveSupplier(supplier.id)}
+                  >
+                    {isSupplierSaved(supplier.id) ? 'Remove from Saved' : 'Save Supplier'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Enquiry Dialog */}
+      <Dialog open={enquiryDialogOpen} onOpenChange={setEnquiryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contact {supplier.company_name}</DialogTitle>
+            <DialogDescription>
+              Send an enquiry to this supplier. They will respond via email.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={enquirySubject}
+                onChange={(e) => setEnquirySubject(e.target.value)}
+                placeholder="What is your enquiry about?"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea
+                id="message"
+                value={enquiryMessage}
+                onChange={(e) => setEnquiryMessage(e.target.value)}
+                placeholder="Describe what you're looking for..."
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEnquiryDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendEnquiry}
+              disabled={sendingEnquiry || !enquirySubject.trim() || !enquiryMessage.trim()}
+            >
+              {sendingEnquiry ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                'Send Enquiry'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
