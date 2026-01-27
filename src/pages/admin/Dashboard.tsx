@@ -1,124 +1,162 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, Building2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { DashboardLayout } from '@/components/shared/DashboardLayout';
+import { useAdminStats } from '@/hooks/useAdminStats';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Package, Building2, ShieldCheck, Clock, CheckCircle, TrendingUp, Loader2 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const { data: stats, isLoading } = useAdminStats();
 
-  if (loading) {
+  const statCards = [
+    {
+      title: 'Total Users',
+      value: stats?.totalUsers ?? 0,
+      description: `${stats?.totalBuyers ?? 0} buyers, ${stats?.totalSuppliers ?? 0} suppliers`,
+      icon: Users,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
+    },
+    {
+      title: 'Suppliers',
+      value: stats?.totalSuppliers ?? 0,
+      description: `${stats?.verifiedSuppliers ?? 0} verified`,
+      icon: Building2,
+      color: 'text-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+    },
+    {
+      title: 'Products',
+      value: stats?.totalProducts ?? 0,
+      description: `${stats?.approvedProducts ?? 0} approved`,
+      icon: Package,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+    },
+    {
+      title: 'Pending Actions',
+      value: (stats?.pendingVerifications ?? 0) + (stats?.pendingProducts ?? 0),
+      description: `${stats?.pendingVerifications ?? 0} suppliers, ${stats?.pendingProducts ?? 0} products`,
+      icon: Clock,
+      color: 'text-amber-500',
+      bgColor: 'bg-amber-500/10',
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: 'Manage Users',
+      description: `${stats?.totalUsers ?? 0} total users`,
+      icon: Users,
+      href: '/admin/users',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+    },
+    {
+      title: 'Supplier Verification',
+      description: `${stats?.pendingVerifications ?? 0} pending`,
+      icon: ShieldCheck,
+      href: '/admin/suppliers',
+      color: 'text-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+    },
+    {
+      title: 'Product Moderation',
+      description: `${stats?.pendingProducts ?? 0} pending`,
+      icon: Package,
+      href: '/admin/products',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+    },
+    {
+      title: 'Analytics',
+      description: 'View platform trends',
+      icon: TrendingUp,
+      href: '/admin',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
+    },
+  ];
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          </div>
-          <Button variant="outline" onClick={() => signOut()}>
-            Sign Out
-          </Button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Admin Panel</h2>
-          <p className="text-muted-foreground">{user?.email}</p>
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Platform overview and management</p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardDescription>Total Users</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Suppliers</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Products</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Pending Verification</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
-            </CardHeader>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statCards.map((stat) => (
+            <Card key={stat.title}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardDescription>{stat.title}</CardDescription>
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/users')}>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Manage Users</CardTitle>
-                <CardDescription>View and manage all users</CardDescription>
-              </div>
-            </CardHeader>
-          </Card>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action) => (
+              <Card 
+                key={action.title}
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(action.href)}
+              >
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <div className={`w-12 h-12 rounded-lg ${action.bgColor} flex items-center justify-center`}>
+                    <action.icon className={`w-6 h-6 ${action.color}`} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">{action.title}</CardTitle>
+                    <CardDescription>{action.description}</CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/suppliers')}>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-secondary" />
+        {/* Recent Activity Placeholder */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+          <Card>
+            <CardContent className="py-8">
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="p-4 rounded-full bg-muted mb-4">
+                  <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-medium">All caught up!</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Check the moderation pages for pending items
+                </p>
               </div>
-              <div>
-                <CardTitle className="text-lg">Suppliers</CardTitle>
-                <CardDescription>Verify and manage suppliers</CardDescription>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/products')}>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                <Package className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Products</CardTitle>
-                <CardDescription>Moderate product listings</CardDescription>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/verification')}>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-green-500" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Verification</CardTitle>
-                <CardDescription>Review pending verifications</CardDescription>
-              </div>
-            </CardHeader>
+            </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
