@@ -28,6 +28,9 @@ import SupplierEnquiries from "./pages/supplier/Enquiries";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminSuppliers from "./pages/admin/Suppliers";
+import AdminProducts from "./pages/admin/Products";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +124,30 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/users" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminUsers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/suppliers" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminSuppliers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/products" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminProducts />
                 </ProtectedRoute>
               } 
             />
