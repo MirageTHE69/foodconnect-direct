@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { SaveButton } from '@/components/buyer/SaveButton';
 import { useSavedItems } from '@/hooks/useSavedItems';
 import { useEnquiries } from '@/hooks/useEnquiries';
+import { useChat } from '@/hooks/useChat';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +33,7 @@ import {
   ArrowLeft,
   Award,
   Store,
+  MessageCircle,
 } from 'lucide-react';
 
 interface SupplierDetail {
@@ -56,6 +59,8 @@ interface ProductItem {
 
 export default function SupplierDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, userRole } = useAuth();
   const [supplier, setSupplier] = useState<SupplierDetail | null>(null);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,9 +68,11 @@ export default function SupplierDetail() {
   const [enquirySubject, setEnquirySubject] = useState('');
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [sendingEnquiry, setSendingEnquiry] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
 
   const { isSupplierSaved, toggleSaveSupplier, isProductSaved, toggleSaveProduct } = useSavedItems();
   const { createEnquiry } = useEnquiries();
+  const { startConversation } = useChat();
 
   useEffect(() => {
     if (id) {
@@ -121,6 +128,20 @@ export default function SupplierDetail() {
       setEnquiryMessage('');
     }
   };
+
+  const handleStartChat = async () => {
+    if (!supplier) return;
+    
+    setStartingChat(true);
+    const { data, error } = await startConversation(supplier.id);
+    setStartingChat(false);
+    
+    if (!error && data) {
+      navigate(`/chat/${data.id}`);
+    }
+  };
+
+  const canChat = user && userRole === 'buyer';
 
   if (loading) {
     return (
@@ -245,6 +266,20 @@ export default function SupplierDetail() {
                       onToggle={() => toggleSaveSupplier(supplier.id)}
                       variant="outline"
                     />
+                    {canChat && (
+                      <Button 
+                        variant="outline" 
+                        onClick={handleStartChat}
+                        disabled={startingChat}
+                      >
+                        {startingChat ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Chat
+                      </Button>
+                    )}
                     <Button onClick={() => setEnquiryDialogOpen(true)}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Contact Supplier
@@ -332,6 +367,21 @@ export default function SupplierDetail() {
               {/* Quick Actions */}
               <Card>
                 <CardContent className="pt-6 space-y-3">
+                  {canChat && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleStartChat}
+                      disabled={startingChat}
+                    >
+                      {startingChat ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                      )}
+                      Start Chat
+                    </Button>
+                  )}
                   <Button
                     className="w-full"
                     onClick={() => setEnquiryDialogOpen(true)}
