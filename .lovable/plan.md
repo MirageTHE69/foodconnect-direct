@@ -1,327 +1,349 @@
 
-
-# Phase 3 Implementation Plan
+# Phase 3A: Communication & Content Features - Implementation Plan
 
 ## Overview
-Phase 3 focuses on building the Admin control panel, advanced features (real-time chat, recipe management), and laying the groundwork for the payment system. This phase will complete the platform's core functionality.
+This plan details the implementation of the **Real-time Chat System** and **Recipe Management** features. I will follow existing codebase patterns strictly to ensure consistency and avoid bugs.
 
 ---
 
-## Current Status Summary
+## Part 1: Real-time Chat System
 
-### Already Completed (Phase 1 & 2)
-- 12 database tables fully configured with RLS
-- Role-based authentication (buyer/supplier/admin)
-- 4 storage buckets with RLS policies
-- Complete Supplier features (profile, products, enquiries)
-- Complete Buyer features (browse, detail pages, saved items)
-- Landing page with 12 sections
-- Basic dashboard placeholders for all roles
+### Database Setup
 
-### Admin Dashboard Current State
-- Only `/admin` route exists with placeholder stats (all showing 0)
-- Quick action cards link to non-existent pages:
-  - `/admin/users` (not built)
-  - `/admin/suppliers` (not built)
-  - `/admin/products` (not built)
-  - `/admin/verification` (not built)
-
----
-
-## Phase 3 Scope
-
-### Part A: Admin Features (High Priority)
-
-#### 1. Admin Dashboard Enhancement (`/admin`)
-**Purpose:** Real analytics and quick overview
-
-**Features:**
-- Live stats from database (total users, suppliers, products, pending verifications)
-- Recent activity feed
-- Quick action cards with counts
-- Use `DashboardLayout` with admin navigation
-
----
-
-#### 2. User Management Page (`/admin/users`)
-**Purpose:** View and manage all platform users
-
-**Features:**
-- Data table with all users from `profiles` + `user_roles`
-- Columns: Name, Email, Role, Created Date, Status
-- Search by name/email
-- Filter by role (buyer/supplier/admin)
-- View user details modal
-- Ability to change user role (admin action)
-
-**Security:**
-- Admin-only access via `has_role()` function
-- All actions server-validated
-
----
-
-#### 3. Supplier Verification Page (`/admin/suppliers`)
-**Purpose:** Review and verify supplier profiles
-
-**Features:**
-- Data table with all suppliers from `supplier_profiles`
-- Columns: Company Name, Owner Email, Location, Status, Created Date
-- Filter by verification status (pending/verified/rejected)
-- View full profile details in side panel
-- Approve/Reject actions with status update
-- View uploaded documents (GST, FSSAI, certifications)
-
-**Actions:**
-- Verify supplier (status -> 'verified')
-- Reject supplier (status -> 'rejected')
-- Request more info (optional note field)
-
----
-
-#### 4. Product Moderation Page (`/admin/products`)
-**Purpose:** Review and approve/reject product listings
-
-**Features:**
-- Data table with all products from `products`
-- Columns: Product Name, Supplier, Category, Status, Created Date
-- Filter by status (pending/approved/rejected)
-- View product details in side panel
-- Approve/Reject actions
-- Feature/Unfeature product toggle
-
-**Actions:**
-- Approve product (status -> 'approved')
-- Reject product (status -> 'rejected')
-- Toggle featured status
-
----
-
-### Part B: Advanced Features
-
-#### 5. Real-time Chat System
-**Purpose:** Enable direct messaging between buyers and suppliers
-
-**Database:** Already has `conversations` and `messages` tables
-
-**Features:**
-- Chat list page showing all conversations
-- Real-time message updates using Supabase Realtime
-- Message input with send functionality
-- Read/unread status indicators
-- Start new conversation from product/supplier detail pages
-
-**Pages:**
-- `/chat` - Conversation list
-- `/chat/:conversationId` - Individual chat view
-
-**Components:**
-- `ChatList.tsx` - List of conversations
-- `ChatWindow.tsx` - Message thread
-- `MessageInput.tsx` - Compose message
-
----
-
-#### 6. Recipe Management for Suppliers
-**Purpose:** Allow suppliers to showcase recipes using their products
-
-**Database:** Already has `recipes` and `recipe_ingredients` tables
-
-**Features:**
-- Recipe CRUD (create, read, update, delete)
-- Image gallery upload
-- Ingredient management (link to products)
-- Instructions editor (rich text)
-- Prep time, cook time, servings, difficulty
-
-**Pages:**
-- `/supplier/recipes` - Recipe list
-- `/supplier/recipes/new` - Create recipe
-- `/supplier/recipes/:id` - Edit recipe
-
-**Public Pages:**
-- `/recipes` - Browse all approved recipes
-- `/recipes/:id` - Recipe detail page
-
----
-
-### Part C: Payment System Foundation
-
-#### 7. Database Schema for Packages & Subscriptions
-
-**New Tables:**
-
-```text
-packages
-- id (uuid)
-- name (text) - e.g., "Basic", "Premium", "Enterprise"
-- description (text)
-- price_monthly (decimal)
-- price_yearly (decimal)
-- features (jsonb) - list of included features
-- user_type (enum: buyer/supplier)
-- is_active (boolean)
-- created_at, updated_at
-
-subscriptions
-- id (uuid)
-- user_id (uuid) -> auth.users
-- package_id (uuid) -> packages
-- status (enum: active/cancelled/expired/trial)
-- current_period_start (timestamp)
-- current_period_end (timestamp)
-- payment_provider (text) - 'stripe' or 'razorpay'
-- provider_subscription_id (text)
-- created_at, updated_at
+**Enable Realtime on Messages Table**
+```sql
+-- Enable realtime for messages table
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ```
 
+No new tables needed - `conversations` and `messages` tables already exist with proper RLS policies.
+
 ---
 
-#### 8. Pricing Page (`/pricing`)
-**Purpose:** Display subscription packages for buyers and suppliers
+### New Hook: `src/hooks/useChat.ts`
+
+**Purpose:** Manage all chat-related logic including conversations, messages, and realtime subscriptions.
 
 **Features:**
-- Toggle between Buyer and Supplier plans
-- Package comparison cards
-- Feature list per package
-- CTA buttons to start subscription
-- FAQ section
+- Fetch user's conversations with last message preview
+- Fetch messages for a specific conversation
+- Send new messages
+- Create new conversations (or find existing)
+- Mark messages as read
+- Real-time subscription for new messages
+- Unread message count
+
+**Pattern:** Follow existing `useEnquiries.ts` and `useSavedItems.ts` patterns with proper error handling and toast notifications.
 
 ---
 
-#### 9. Checkout Flow (Placeholder)
-**Purpose:** Prepare for payment gateway integration
+### New Pages
+
+#### 1. Chat List Page: `src/pages/Chat.tsx`
+
+**Route:** `/chat`
+
+**Access:** Both buyers and suppliers (protected route)
 
 **Features:**
-- Package selection confirmation
-- Billing cycle selection (monthly/yearly)
-- Payment method placeholder (Stripe/Razorpay to be added)
-- Success/failure handling
+- List all conversations with:
+  - Other party's name (supplier company name or buyer name)
+  - Last message preview (truncated)
+  - Timestamp of last message
+  - Unread indicator
+- Search/filter conversations
+- Click to navigate to individual chat
+- Empty state when no conversations
+- Loading state
+
+**UI Pattern:** Follow `SavedItems.tsx` list pattern with cards.
 
 ---
 
-### Part D: Dashboard Analytics
+#### 2. Chat Room Page: `src/pages/ChatRoom.tsx`
 
-#### 10. Enhanced Dashboards with Real Stats
+**Route:** `/chat/:id`
 
-**Supplier Dashboard:**
-- Total products count (live)
-- Total recipes count (live)
-- Pending enquiries count (live)
-- Profile views (future)
-- Verification status indicator
+**Access:** Only participants of the conversation
 
-**Buyer Dashboard:**
-- Saved products count (live)
-- Saved suppliers count (live)
-- Recent enquiries sent
-- Active conversations count
+**Features:**
+- Header with other party's info and back button
+- Message list with:
+  - Messages grouped by date
+  - Sender avatar/initial
+  - Message content
+  - Timestamp
+  - Read indicator
+- Message input at bottom with send button
+- Auto-scroll to latest message
+- Real-time updates when new messages arrive
+- Loading skeleton while fetching
 
-**Admin Dashboard:**
-- Total users by role
-- New signups (daily/weekly)
-- Products by status
-- Suppliers by verification status
-- Platform activity trends
+**UI Pattern:** Modern chat interface with ScrollArea for messages.
+
+---
+
+### New Components
+
+#### 1. `src/components/chat/ChatListItem.tsx`
+- Avatar, name, last message preview, timestamp
+- Unread badge indicator
+- Click handler for navigation
+
+#### 2. `src/components/chat/MessageBubble.tsx`
+- Different styling for sent vs received
+- Timestamp display
+- Read indicator (checkmarks)
+
+#### 3. `src/components/chat/MessageInput.tsx`
+- Textarea for message
+- Send button (disabled when empty)
+- Loading state while sending
+- Keyboard shortcut (Enter to send, Shift+Enter for newline)
+
+---
+
+### Integration Points
+
+**Start Conversation Button:**
+Add "Start Chat" button to `SupplierDetail.tsx` and `ProductDetail.tsx` alongside existing "Contact Supplier" button.
+
+**Navigation Updates:**
+- Add Chat link to `DashboardLayout.tsx` for both buyer and supplier navItems
+- Already exists in dashboards as placeholder - just needs working route
+
+---
+
+## Part 2: Recipe Management
+
+### New Hook: `src/hooks/useRecipes.ts`
+
+**Purpose:** CRUD operations for recipes and ingredients.
+
+**Features:**
+- Fetch all recipes (public approved OR supplier's own)
+- Fetch single recipe with ingredients
+- Create recipe with ingredients
+- Update recipe with ingredients
+- Delete recipe (cascades to ingredients)
+- Fetch supplier's products (for ingredient linking)
+
+**Pattern:** Follow `useProducts.ts` pattern exactly.
+
+---
+
+### Supplier Pages
+
+#### 1. Recipe List: `src/pages/supplier/Recipes.tsx`
+
+**Route:** `/supplier/recipes`
+
+**Features:**
+- Table view of supplier's recipes (same pattern as `supplier/Products.tsx`)
+- Columns: Image, Title, Status, Prep Time, Cook Time, Updated
+- Search and filter by status
+- Add/Edit/Delete/View actions
+- Stats cards (Total, Approved, Pending)
+
+---
+
+#### 2. Recipe Edit: `src/pages/supplier/RecipeEdit.tsx`
+
+**Route:** `/supplier/recipes/new` and `/supplier/recipes/:id`
+
+**Features:**
+- Form sections (same pattern as `ProductEdit.tsx`):
+  1. **Basic Info:** Title, Description
+  2. **Details:** Prep Time, Cook Time, Servings, Difficulty dropdown
+  3. **Images:** MultiImageUpload (max 5, using `recipes` bucket)
+  4. **Instructions:** Textarea for step-by-step
+  5. **Ingredients:** Dynamic list with:
+     - Ingredient name (text input)
+     - Quantity (text input)
+     - Unit (text input)
+     - Link to Product (optional Select dropdown from supplier's products)
+  6. **Tags:** Same tag input pattern as products
+- Save/Cancel buttons with loading states
+
+---
+
+### Public Pages
+
+#### 1. Browse Recipes: `src/pages/Recipes.tsx`
+
+**Route:** `/recipes`
+
+**Features:**
+- Grid of RecipeCards (approved recipes only)
+- Search by title
+- Filter by difficulty, cook time ranges
+- Pagination or load more
+- Link to individual recipe
+
+---
+
+#### 2. Recipe Detail: `src/pages/RecipeDetail.tsx`
+
+**Route:** `/recipes/:id`
+
+**Features:**
+- Hero image with recipe title
+- Info pills: Prep Time, Cook Time, Servings, Difficulty
+- Description
+- Ingredients list with:
+  - Quantity and unit
+  - Ingredient name
+  - Link to product if linked
+- Instructions (formatted)
+- Supplier card with link
+- Related recipes (same supplier or similar tags)
+
+---
+
+### New Components
+
+#### 1. `src/components/recipes/RecipeCard.tsx`
+
+**Props:** id, title, description, images, prepTime, cookTime, difficulty, supplierName, supplierId
+
+**UI:** Similar to ProductCard with cooking info badges.
+
+---
+
+#### 2. `src/components/recipes/IngredientInput.tsx`
+
+**Purpose:** Single ingredient row with name, quantity, unit, product link
+
+**Features:**
+- Text inputs for name/quantity/unit
+- Select dropdown for product linking (optional)
+- Remove button
 
 ---
 
 ## Technical Implementation Details
 
-### New Files to Create
+### Files to Create
 
 ```text
 src/
+├── hooks/
+│   └── useChat.ts                 (chat logic + realtime)
+│   └── useRecipes.ts              (recipe CRUD)
 ├── pages/
-│   ├── admin/
-│   │   ├── Users.tsx              (user management)
-│   │   ├── Suppliers.tsx          (supplier verification)
-│   │   └── Products.tsx           (product moderation)
-│   ├── supplier/
-│   │   ├── Recipes.tsx            (recipe list)
-│   │   └── RecipeEdit.tsx         (create/edit recipe)
-│   ├── Chat.tsx                   (chat list)
-│   ├── ChatRoom.tsx               (individual conversation)
-│   ├── Recipes.tsx                (browse recipes)
-│   ├── RecipeDetail.tsx           (recipe detail)
-│   └── Pricing.tsx                (pricing page)
+│   ├── Chat.tsx                   (conversation list)
+│   ├── ChatRoom.tsx               (individual chat)
+│   ├── Recipes.tsx                (public browse)
+│   ├── RecipeDetail.tsx           (public detail)
+│   └── supplier/
+│       ├── Recipes.tsx            (supplier list)
+│       └── RecipeEdit.tsx         (create/edit)
 ├── components/
-│   ├── admin/
-│   │   ├── UsersTable.tsx
-│   │   ├── SuppliersTable.tsx
-│   │   ├── ProductsTable.tsx
-│   │   └── AdminStatsCards.tsx
 │   ├── chat/
-│   │   ├── ChatList.tsx
-│   │   ├── ChatWindow.tsx
+│   │   ├── ChatListItem.tsx
+│   │   ├── MessageBubble.tsx
 │   │   └── MessageInput.tsx
 │   └── recipes/
 │       ├── RecipeCard.tsx
-│       └── RecipeForm.tsx
-├── hooks/
-│   ├── useAdminStats.ts           (admin analytics)
-│   ├── useAdminUsers.ts           (user management)
-│   ├── useAdminSuppliers.ts       (supplier moderation)
-│   ├── useAdminProducts.ts        (product moderation)
-│   ├── useChat.ts                 (real-time messaging)
-│   ├── useRecipes.ts              (recipe CRUD)
-│   └── useSubscription.ts         (subscription status)
+│       └── IngredientInput.tsx
 ```
 
-### Database Changes Required
-- Create `packages` table with seed data
-- Create `subscriptions` table with RLS policies
-- Enable Supabase Realtime on `messages` table
-- Add admin RLS policies for user management
-
-### Routes to Add
+### Files to Modify
 
 ```text
-/admin/users           -> AdminUsers
-/admin/suppliers       -> AdminSuppliers
-/admin/products        -> AdminProducts
-/chat                  -> ChatList
-/chat/:id              -> ChatRoom
-/supplier/recipes      -> SupplierRecipes
-/supplier/recipes/new  -> RecipeEdit
-/supplier/recipes/:id  -> RecipeEdit
-/recipes               -> BrowseRecipes
-/recipes/:id           -> RecipeDetail
-/pricing               -> Pricing
+src/App.tsx                        (add new routes)
+src/components/shared/DashboardLayout.tsx (add Chat nav item)
+src/pages/SupplierDetail.tsx       (add Start Chat button)
+src/pages/ProductDetail.tsx        (add Start Chat button)
+```
+
+---
+
+### Route Configuration
+
+```text
+/chat                    -> Chat.tsx (buyer + supplier)
+/chat/:id                -> ChatRoom.tsx (buyer + supplier)
+/supplier/recipes        -> supplier/Recipes.tsx (supplier only)
+/supplier/recipes/new    -> supplier/RecipeEdit.tsx (supplier only)
+/supplier/recipes/:id    -> supplier/RecipeEdit.tsx (supplier only)
+/recipes                 -> Recipes.tsx (public)
+/recipes/:id             -> RecipeDetail.tsx (public)
+```
+
+---
+
+### Database Migration Required
+
+```sql
+-- Enable realtime for instant message updates
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ```
 
 ---
 
 ## Implementation Order
 
-### Week 1: Admin Core
-1. Admin Dashboard enhancement (live stats)
-2. User Management page
-3. Supplier Verification page
-4. Product Moderation page
+To ensure a bug-free implementation, I will build in this sequence:
 
-### Week 2: Chat & Recipes
-5. Real-time Chat system
-6. Recipe Management for suppliers
-7. Public recipe browsing
+### Step 1: Database Setup
+- Enable Supabase Realtime on messages table
 
-### Week 3: Payment Foundation
-8. Database schema for packages/subscriptions
-9. Pricing page
-10. Dashboard analytics enhancements
+### Step 2: Chat Hook
+- Create `useChat.ts` with all chat logic
+- Include realtime subscription setup
+
+### Step 3: Chat Components
+- `MessageBubble.tsx`
+- `MessageInput.tsx`
+- `ChatListItem.tsx`
+
+### Step 4: Chat Pages
+- `Chat.tsx` (conversation list)
+- `ChatRoom.tsx` (chat window)
+
+### Step 5: Chat Integration
+- Update `DashboardLayout.tsx` with Chat nav
+- Update `App.tsx` with chat routes
+- Add "Start Chat" buttons to detail pages
+
+### Step 6: Recipe Hook
+- Create `useRecipes.ts` with CRUD operations
+
+### Step 7: Recipe Components
+- `RecipeCard.tsx`
+- `IngredientInput.tsx`
+
+### Step 8: Supplier Recipe Pages
+- `supplier/Recipes.tsx`
+- `supplier/RecipeEdit.tsx`
+
+### Step 9: Public Recipe Pages
+- `Recipes.tsx`
+- `RecipeDetail.tsx`
+
+### Step 10: Final Route Updates
+- Add all recipe routes to `App.tsx`
 
 ---
 
-## Estimated Scope
-- **8 new pages** to create
-- **~12 new components** to create
-- **~7 custom hooks** for data management
-- **2 new database tables** (packages, subscriptions)
-- **Realtime setup** for messages table
-- **Route updates** in App.tsx
+## Quality Assurance Checklist
+
+Each component will include:
+- Loading states with Loader2 spinner
+- Empty states with appropriate icons/messages
+- Error handling with toast notifications
+- Proper TypeScript types
+- Consistent styling with existing components
+- Mobile-responsive design
+- Proper cleanup of realtime subscriptions
 
 ---
 
-## Ready to Proceed?
+## Estimated Deliverables
 
-This plan covers all remaining Phase 3 features. We can implement these in the order listed above, starting with the Admin features.
-
+- **2 custom hooks** (useChat, useRecipes)
+- **6 new pages** (Chat, ChatRoom, Recipes public, RecipeDetail, supplier/Recipes, supplier/RecipeEdit)
+- **5 new components** (ChatListItem, MessageBubble, MessageInput, RecipeCard, IngredientInput)
+- **1 database migration** (enable realtime)
+- **~4 file modifications** (routes, navigation, detail pages)
