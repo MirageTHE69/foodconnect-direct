@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { SaveButton } from '@/components/buyer/SaveButton';
 import { useSavedItems } from '@/hooks/useSavedItems';
 import { useEnquiries } from '@/hooks/useEnquiries';
+import { useChat } from '@/hooks/useChat';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +38,7 @@ import {
   ArrowLeft,
   Store,
   Tag,
+  MessageCircle,
 } from 'lucide-react';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -77,6 +80,8 @@ interface RelatedProduct {
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, userRole } = useAuth();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,9 +89,11 @@ export default function ProductDetail() {
   const [enquirySubject, setEnquirySubject] = useState('');
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [sendingEnquiry, setSendingEnquiry] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
 
   const { isProductSaved, toggleSaveProduct, isSupplierSaved, toggleSaveSupplier } = useSavedItems();
   const { createEnquiry } = useEnquiries();
+  const { startConversation } = useChat();
 
   useEffect(() => {
     if (id) {
@@ -170,6 +177,20 @@ export default function ProductDetail() {
       setEnquiryMessage('');
     }
   };
+
+  const handleStartChat = async () => {
+    if (!product?.supplier_profiles) return;
+    
+    setStartingChat(true);
+    const { data, error } = await startConversation(product.supplier_profiles.id);
+    setStartingChat(false);
+    
+    if (!error && data) {
+      navigate(`/chat/${data.id}`);
+    }
+  };
+
+  const canChat = user && userRole === 'buyer';
 
   if (loading) {
     return (
@@ -381,6 +402,19 @@ export default function ProductDetail() {
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Contact Supplier
               </Button>
+              {canChat && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleStartChat}
+                  disabled={startingChat}
+                >
+                  {startingChat ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
               <SaveButton
                 isSaved={isProductSaved(product.id)}
                 onToggle={() => toggleSaveProduct(product.id)}

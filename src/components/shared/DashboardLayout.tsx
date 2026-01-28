@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   ChefHat,
+  BookOpen,
+
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -31,14 +33,18 @@ const supplierNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/supplier/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: 'Profile', href: '/supplier/profile', icon: <User className="h-5 w-5" /> },
   { label: 'Products', href: '/supplier/products', icon: <Package className="h-5 w-5" /> },
+  { label: 'Recipes', href: '/supplier/recipes', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'Enquiries', href: '/supplier/enquiries', icon: <MessageSquare className="h-5 w-5" /> },
+  { label: 'Messages', href: '/chat', icon: <MessageSquare className="h-5 w-5" /> },
 ];
 
 const buyerNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/buyer/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: 'Browse Products', href: '/products', icon: <Search className="h-5 w-5" /> },
   { label: 'Browse Suppliers', href: '/suppliers', icon: <Store className="h-5 w-5" /> },
+  { label: 'Browse Recipes', href: '/recipes', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'Saved Items', href: '/saved', icon: <Heart className="h-5 w-5" /> },
+  { label: 'Messages', href: '/chat', icon: <MessageSquare className="h-5 w-5" /> },
 ];
 
 const adminNavItems: NavItem[] = [
