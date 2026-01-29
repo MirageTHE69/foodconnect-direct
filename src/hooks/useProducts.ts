@@ -34,7 +34,8 @@ export function useProducts(supplierId?: string) {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [supplierId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supplierId, user?.id]);
 
   const fetchProducts = async () => {
     try {

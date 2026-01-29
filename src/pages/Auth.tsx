@@ -26,15 +26,22 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signUp, user, userRole, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/');
+    if (user && !loading && userRole) {
+      // Redirect to role-specific dashboard
+      if (userRole === 'supplier') {
+        navigate('/supplier/dashboard');
+      } else if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/buyer/dashboard');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, userRole, navigate]);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -84,7 +91,7 @@ export default function Auth() {
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
       });
-      navigate('/');
+      // Navigation will be handled by useEffect when userRole is set
     }
   };
 
@@ -111,7 +118,7 @@ export default function Auth() {
         title: 'Account Created!',
         description: 'Welcome to FoodAdda. Your account has been created successfully.',
       });
-      navigate('/');
+      // Navigation will be handled by useEffect when userRole is set
     }
   };
 

@@ -45,8 +45,17 @@ import {
 import { format } from 'date-fns';
 
 export default function SupplierProducts() {
-  const { profile } = useSupplierProfile();
-  const { products, categories, loading, deleteProduct } = useProducts(profile?.id);
+  const { profile, loading: profileLoading } = useSupplierProfile();
+  const { products, categories, loading: productsLoading, deleteProduct, refetch } = useProducts(profile?.id);
+  const loading = profileLoading || productsLoading;
+  
+  // Refetch when profile ID becomes available
+  useEffect(() => {
+    if (profile?.id) {
+      refetch();
+    }
+  }, [profile?.id, refetch]);
+  
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
