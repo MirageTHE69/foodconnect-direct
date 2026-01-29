@@ -29,10 +29,10 @@ export default function ProductEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const isNew = id === 'new';
+  const isNew = !id; // If no id param, it's a new product
   
   const { categories, getProduct, createProduct, updateProduct, saving } = useProducts();
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
