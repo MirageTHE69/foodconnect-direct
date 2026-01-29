@@ -46,10 +46,10 @@ export default function ProductEdit() {
   const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
-    if (!isNew && id) {
+    if (id) {
       loadProduct(id);
     }
-  }, [id, isNew]);
+  }, [id]);
 
   const loadProduct = async (productId: string) => {
     setLoading(true);
