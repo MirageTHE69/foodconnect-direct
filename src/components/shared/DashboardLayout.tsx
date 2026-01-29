@@ -40,6 +40,7 @@ const supplierNavItems: NavItem[] = [
 
 const buyerNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/buyer/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { label: 'Profile', href: '/buyer/profile', icon: <User className="h-5 w-5" /> },
   { label: 'Browse Products', href: '/products', icon: <Search className="h-5 w-5" /> },
   { label: 'Browse Suppliers', href: '/suppliers', icon: <Store className="h-5 w-5" /> },
   { label: 'Browse Recipes', href: '/recipes', icon: <BookOpen className="h-5 w-5" /> },

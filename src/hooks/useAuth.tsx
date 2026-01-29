@@ -5,10 +5,13 @@ import { useNavigate } from 'react-router-dom';
 
 type UserRole = 'buyer' | 'supplier' | 'admin';
 
+const ROLE_PRIORITY: UserRole[] = ['admin', 'supplier', 'buyer'];
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   userRole: UserRole | null;
+  allRoles: UserRole[];
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -21,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [allRoles, setAllRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,17 +63,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
+        .eq('user_id', userId);
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user roles:', error);
         return;
       }
       
-      setUserRole(data?.role as UserRole ?? null);
+      if (!data || data.length === 0) {
+        setUserRole(null);
+        setAllRoles([]);
+        return;
+      }
+
+      // Get all roles
+      const roles = data.map(r => r.role as UserRole);
+      setAllRoles(roles);
+
+      // Determine primary role based on priority (admin > supplier > buyer)
+      const primaryRole = ROLE_PRIORITY.find(role => roles.includes(role)) ?? null;
+      setUserRole(primaryRole);
     } catch (err) {
-      console.error('Error fetching user role:', err);
+      console.error('Error fetching user roles:', err);
     }
   };
 
@@ -142,10 +157,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setUserRole(null);
+    setAllRoles([]);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, allRoles, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -19,6 +19,7 @@ import RecipeDetail from "./pages/RecipeDetail";
 
 // Buyer Pages
 import BuyerDashboard from "./pages/buyer/Dashboard";
+import BuyerProfile from "./pages/buyer/Profile";
 import SavedItems from "./pages/buyer/SavedItems";
 
 // Supplier Pages
@@ -66,6 +67,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['buyer']}>
                   <BuyerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/buyer/profile" 
+              element={
+                <ProtectedRoute allowedRoles={['buyer']}>
+                  <BuyerProfile />
                 </ProtectedRoute>
               } 
             />

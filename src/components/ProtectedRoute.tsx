@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, allRoles, loading } = useAuth();
 
   if (loading) {
     return (
@@ -23,8 +23,29 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/auth" replace />;
   }
 
-  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
+  // Wait for roles to be fetched if user exists but roles aren't loaded yet
+  if (user && allRoles.length === 0 && !userRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Check if user has any of the allowed roles
+  if (allowedRoles && allowedRoles.length > 0) {
+    const hasAllowedRole = allRoles.some(role => allowedRoles.includes(role));
+    if (!hasAllowedRole) {
+      // Redirect based on primary role
+      if (userRole === 'admin') {
+        return <Navigate to="/admin" replace />;
+      } else if (userRole === 'supplier') {
+        return <Navigate to="/supplier/dashboard" replace />;
+      } else if (userRole === 'buyer') {
+        return <Navigate to="/buyer/dashboard" replace />;
+      }
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;
