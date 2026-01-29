@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/shared/DashboardLayout';
 import { MultiImageUpload } from '@/components/shared/MultiImageUpload';
 import { useProducts } from '@/hooks/useProducts';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ interface Specification {
 export default function ProductEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const isNew = id === 'new';
   
   const { categories, getProduct, createProduct, updateProduct, saving } = useProducts();
@@ -77,6 +79,11 @@ export default function ProductEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.name.trim()) {
+      return;
+    }
+    
     // Convert specifications array to object
     const specificationsObject: Record<string, string> = {};
     formData.specifications.forEach(spec => {
@@ -86,8 +93,8 @@ export default function ProductEdit() {
     });
     
     const productData = {
-      name: formData.name,
-      description: formData.description || null,
+      name: formData.name.trim(),
+      description: formData.description.trim() || null,
       category_id: formData.category_id || null,
       images: formData.images.length > 0 ? formData.images : null,
       tags: formData.tags.length > 0 ? formData.tags : null,
@@ -147,6 +154,23 @@ export default function ProductEdit() {
       specifications: prev.specifications.filter((_, i) => i !== index),
     }));
   };
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Redirect if not logged in
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   if (loading) {
     return (
@@ -341,7 +365,7 @@ export default function ProductEdit() {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving || !formData.name.trim()}>
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
