@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -31,13 +31,7 @@ export function useProducts(supplierId?: string) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supplierId, user?.id]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -78,9 +72,9 @@ export function useProducts(supplierId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supplierId]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('product_categories')
@@ -92,7 +86,12 @@ export function useProducts(supplierId?: string) {
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   const getProduct = async (productId: string) => {
     try {
@@ -126,7 +125,14 @@ export function useProducts(supplierId?: string) {
   };
 
   const createProduct = async (product: Omit<ProductInsert, 'supplier_id'>) => {
-    if (!user) return { error: new Error('Not authenticated') };
+    if (!user) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to create a product',
+        variant: 'destructive',
+      });
+      return { data: null, error: new Error('Not authenticated') };
+    }
 
     try {
       setSaving(true);
@@ -139,7 +145,12 @@ export function useProducts(supplierId?: string) {
         .single();
 
       if (profileError || !supplierProfile) {
-        throw new Error('Supplier profile not found');
+        toast({
+          title: 'Error',
+          description: 'Supplier profile not found. Please complete your profile first.',
+          variant: 'destructive',
+        });
+        return { data: null, error: new Error('Supplier profile not found') };
       }
 
       const { data, error } = await supabase
@@ -164,7 +175,7 @@ export function useProducts(supplierId?: string) {
       console.error('Error creating product:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create product',
+        description: 'Failed to create product. Please try again.',
         variant: 'destructive',
       });
       return { data: null, error };
