@@ -131,6 +131,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Error creating supplier profile:', supplierError);
           }
         }
+
+        // Immediately set the role after signup (don't wait for auth state change)
+        setAllRoles([role]);
+        setUserRole(role);
       }
 
       return { error: null };
