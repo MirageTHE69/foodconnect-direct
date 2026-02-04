@@ -30,18 +30,25 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Redirect authenticated users to their role-based dashboard
   useEffect(() => {
-    if (user && !loading && userRole) {
-      // Redirect to role-specific dashboard
-      if (userRole === 'supplier') {
-        navigate('/supplier/dashboard');
-      } else if (userRole === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/buyer/dashboard');
-      }
+    if (!loading && user && userRole) {
+      const redirectPath = getRedirectPath(userRole);
+      navigate(redirectPath, { replace: true });
     }
   }, [user, loading, userRole, navigate]);
+
+  const getRedirectPath = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return '/admin';
+      case 'supplier':
+        return '/supplier/dashboard';
+      case 'buyer':
+      default:
+        return '/buyer/dashboard';
+    }
+  };
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -76,9 +83,9 @@ export default function Auth() {
 
     setIsLoading(true);
     const { error } = await signIn(email, password);
-    setIsLoading(false);
 
     if (error) {
+      setIsLoading(false);
       toast({
         variant: 'destructive',
         title: 'Login Failed',
@@ -89,9 +96,9 @@ export default function Auth() {
     } else {
       toast({
         title: 'Welcome back!',
-        description: 'You have successfully logged in.',
+        description: 'Redirecting to your dashboard...',
       });
-      // Navigation will be handled by useEffect when userRole is set
+      // Keep loading state - useEffect will handle redirect when userRole is set
     }
   };
 
@@ -101,9 +108,9 @@ export default function Auth() {
 
     setIsLoading(true);
     const { error } = await signUp(email, password, fullName, role);
-    setIsLoading(false);
 
     if (error) {
+      setIsLoading(false);
       let errorMessage = error.message;
       if (error.message.includes('User already registered')) {
         errorMessage = 'This email is already registered. Please login instead.';
@@ -116,9 +123,9 @@ export default function Auth() {
     } else {
       toast({
         title: 'Account Created!',
-        description: 'Welcome to FoodAdda. Your account has been created successfully.',
+        description: 'Welcome to FoodAdda! Redirecting to your dashboard...',
       });
-      // Navigation will be handled by useEffect when userRole is set
+      // Keep loading state - useEffect will handle redirect when userRole is set
     }
   };
 

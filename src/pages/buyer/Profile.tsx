@@ -59,6 +59,27 @@ export default function BuyerProfile() {
           phone: data.phone || "",
           avatar_url: data.avatar_url || "",
         });
+      } else {
+        // Create profile if it doesn't exist
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user.id,
+            email: user.email,
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+        } else if (newProfile) {
+          setProfile(newProfile);
+          setFormData({
+            full_name: newProfile.full_name || "",
+            phone: newProfile.phone || "",
+            avatar_url: newProfile.avatar_url || "",
+          });
+        }
       }
     } catch (err) {
       console.error("Error loading profile:", err);
