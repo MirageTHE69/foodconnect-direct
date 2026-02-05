@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
+ import { Menu, X, LogOut, User, LayoutDashboard, ScanLine } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +59,10 @@ const Navbar = () => {
             <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               For Suppliers
             </a>
+             <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors font-medium flex items-center gap-1">
+               <ScanLine className="h-4 w-4" />
+               Scan Product
+             </Link>
           </div>
 
           {/* Desktop CTA */}
@@ -135,6 +139,10 @@ const Navbar = () => {
               <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors font-medium py-2">
                 For Suppliers
               </a>
+             <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors font-medium py-2 flex items-center gap-2">
+               <ScanLine className="h-4 w-4" />
+               Scan Product
+             </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
                 {user ? (
                   <>

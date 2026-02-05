@@ -1,1 +1,4 @@
-project_id = "wmzilgodzbargllbwygo"
+ project_id = "wmzilgodzbargllbwygo"
+ 
+ [functions.scan-product]
+ verify_jwt = false
