@@ -16,6 +16,7 @@ import Suppliers from "./pages/Suppliers";
 import SupplierDetail from "./pages/SupplierDetail";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
+ import ProductScanner from "./pages/ProductScanner";
 
 // Buyer Pages
 import BuyerDashboard from "./pages/buyer/Dashboard";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/suppliers/:id" element={<SupplierDetail />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
+             <Route path="/scan" element={<ProductScanner />} />
             
             {/* Buyer Routes */}
             <Route 
