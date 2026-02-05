@@ -17,6 +17,7 @@ import {
   ChefHat,
   BookOpen,
    ScanLine,
+  Mail,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -54,6 +55,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Users', href: '/admin/users', icon: <User className="h-5 w-5" /> },
   { label: 'Suppliers', href: '/admin/suppliers', icon: <Store className="h-5 w-5" /> },
   { label: 'Products', href: '/admin/products', icon: <Package className="h-5 w-5" /> },
+  { label: 'Contact Submissions', href: '/admin/contact', icon: <Mail className="h-5 w-5" /> },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
