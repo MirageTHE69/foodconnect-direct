@@ -1,103 +1,103 @@
 
-# Fix Authentication, Role-Based Access, and Profile Pages
+# Product Scanner - AI-Powered Product Recognition Feature
 
-## Issues Identified
+## Overview
 
-After investigating the codebase and database, I found the following issues:
+Create a new page where users can upload or capture a photo of a food product. The AI will analyze the image, identify the product, and then show matching products from suppliers in the system along with their contact information.
 
-### 1. Role Fetching Bug
-The `fetchUserRole` function in `useAuth.tsx` uses `.maybeSingle()` which only returns ONE role. However, users can have multiple roles (e.g., `m@gmail.com` has both `admin` and `supplier` roles). This causes inconsistent behavior where sometimes the user gets the wrong role.
+## User Flow
 
-**Current behavior:** Returns first matching role randomly
-**Expected behavior:** Should prioritize roles (admin > supplier > buyer) or return all roles
-
-### 2. Buyer Dashboard Missing DashboardLayout
-The Buyer Dashboard (`src/pages/buyer/Dashboard.tsx`) has its own header and layout instead of using the shared `DashboardLayout` component like other pages.
-
-### 3. Buyer Profile Page Missing
-There's no profile page for buyers at `/buyer/profile`. Buyers need a place to manage their account settings.
-
-### 4. Supplier Dashboard Missing DashboardLayout
-Similarly, the Supplier Dashboard also has its own layout instead of using `DashboardLayout`.
-
-### 5. Admin Account Request
-You requested admin access for `admin@gmail.com` with password `1234`. However, this email doesn't exist in the system yet. You would need to:
-- Sign up with `admin@gmail.com` and password `1234` through the auth page
-- Then I can grant admin role to that account
-
-**Note:** The user `m@gmail.com` already has admin access and can access `/admin`.
-
----
+```text
+1. User visits /scan page
+2. User takes a photo or uploads an image
+3. System sends image to AI for recognition
+4. AI returns identified product name/description
+5. System searches database for matching products
+6. Display matching products with supplier contact info
+7. User can click to view supplier or start a conversation
+```
 
 ## Implementation Plan
 
-### Step 1: Fix Role Fetching Logic
+### Step 1: Create Edge Function for AI Image Recognition
 
-**File:** `src/hooks/useAuth.tsx`
+**New File:** `supabase/functions/scan-product/index.ts`
 
-Update `fetchUserRole` to handle multiple roles with priority:
-- Fetch all roles for the user
-- Return highest priority role: admin > supplier > buyer
-- Also expose `allRoles` array for components that need to check multiple roles
+- Accept base64 image data from frontend
+- Call Lovable AI Gateway with `google/gemini-3-flash-preview` (supports image analysis)
+- Prompt AI to identify the food product in the image
+- Return product name, description, and keywords for searching
 
-```typescript
-// Change from:
-const { data } = await supabase
-  .from('user_roles')
-  .select('role')
-  .eq('user_id', userId)
-  .maybeSingle();
+### Step 2: Update Supabase Config
 
-// To:
-const { data } = await supabase
-  .from('user_roles')
-  .select('role')
-  .eq('user_id', userId);
+**File:** `supabase/config.toml`
 
-// Then determine primary role with priority
-```
+- Add the new `scan-product` edge function configuration
 
-### Step 2: Update Buyer Dashboard to Use DashboardLayout
+### Step 3: Create Product Scanner Page
 
-**File:** `src/pages/buyer/Dashboard.tsx`
+**New File:** `src/pages/ProductScanner.tsx`
 
-- Remove custom header and layout
-- Wrap content with `<DashboardLayout>`
-- Add profile link in navigation
+- Camera capture button (for mobile users)
+- Image upload option (for desktop users)  
+- Preview of uploaded/captured image
+- Loading state while AI processes
+- Results section showing:
+  - What the AI identified
+  - Matching products from database
+  - Supplier cards with contact info
 
-### Step 3: Create Buyer Profile Page
+### Step 4: Create Scanner Hook
 
-**New File:** `src/pages/buyer/Profile.tsx`
+**New File:** `src/hooks/useProductScanner.ts`
 
-- User account information (name, email)
-- Phone number field
-- Avatar upload using existing `ImageUpload` component
-- Connected to `profiles` table
-- Uses `DashboardLayout`
+- Handle image upload/capture
+- Call edge function with image data
+- Search products table for matches using AI keywords
+- Return results with supplier details
 
-### Step 4: Update Supplier Dashboard to Use DashboardLayout
-
-**File:** `src/pages/supplier/Dashboard.tsx`
-
-- Remove custom header and layout
-- Wrap content with `<DashboardLayout>`
-
-### Step 5: Add Buyer Routes and Navigation
+### Step 5: Add Route and Navigation
 
 **Files to update:**
-- `src/App.tsx` - Add `/buyer/profile` route
-- `src/components/shared/DashboardLayout.tsx` - Add Profile link for buyers
+- `src/App.tsx` - Add `/scan` route (public access)
+- `src/components/landing/Navbar.tsx` - Add "Scan Product" link
+- `src/components/shared/DashboardLayout.tsx` - Add to buyer navigation
 
-### Step 6: Update ProtectedRoute for Better Role Handling
+---
 
-**File:** `src/components/ProtectedRoute.tsx`
+## Technical Details
 
-- Handle case when `userRole` is still loading
-- Improve redirect logic for unauthorized access
+### AI Image Recognition Flow
 
-### Step 7: Create Admin Account (Database)
+The edge function will use Lovable AI's vision capabilities:
 
-After you sign up with `admin@gmail.com`, I will add the admin role via database insert.
+```text
+Request:
+- Image (base64 encoded)
+- System prompt asking to identify food products
+
+Response:
+- Product name (e.g., "Basmati Rice")
+- Product description
+- Keywords for search (e.g., ["rice", "basmati", "grain"])
+- Confidence level
+```
+
+### Database Search Strategy
+
+After AI identification, search products using:
+1. Full-text search on product name
+2. ILIKE pattern matching on description
+3. Tag matching if products have tags
+
+### Results Display
+
+Each result will show:
+- Product image and name
+- Supplier company name and logo
+- Location (city, state)
+- Button to view supplier profile
+- Button to start conversation (for logged-in buyers)
 
 ---
 
@@ -105,60 +105,60 @@ After you sign up with `admin@gmail.com`, I will add the admin role via database
 
 | File | Purpose |
 |------|---------|
-| `src/pages/buyer/Profile.tsx` | Buyer profile management page |
+| `supabase/functions/scan-product/index.ts` | Edge function for AI image analysis |
+| `src/pages/ProductScanner.tsx` | Main scanner page with camera/upload |
+| `src/hooks/useProductScanner.ts` | Hook for scanner logic |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/hooks/useAuth.tsx` | Fix role fetching to handle multiple roles with priority |
-| `src/pages/buyer/Dashboard.tsx` | Use DashboardLayout instead of custom layout |
-| `src/pages/supplier/Dashboard.tsx` | Use DashboardLayout instead of custom layout |
-| `src/components/shared/DashboardLayout.tsx` | Add Profile link for buyers in navigation |
-| `src/components/ProtectedRoute.tsx` | Improve role checking and redirect logic |
-| `src/App.tsx` | Add `/buyer/profile` route |
+| `supabase/config.toml` | Add scan-product function config |
+| `src/App.tsx` | Add /scan route |
+| `src/components/landing/Navbar.tsx` | Add Scan Product link |
+| `src/components/shared/DashboardLayout.tsx` | Add to buyer nav |
 
 ---
 
-## Technical Details
+## UI Components Used
 
-### Role Priority Logic
-```text
-Priority order (highest first):
-1. admin - Full platform access
-2. supplier - Supplier dashboard access
-3. buyer - Buyer dashboard access
-```
-
-### Navigation Updates for Buyers
-```text
-Current:
-- Dashboard
-- Browse Products
-- Browse Suppliers
-- Browse Recipes
-- Saved Items
-- Messages
-
-After:
-- Dashboard
-- Profile (NEW)
-- Browse Products
-- Browse Suppliers
-- Browse Recipes
-- Saved Items
-- Messages
-```
+The scanner page will use existing components:
+- `Card`, `CardContent`, `CardHeader` - For layout
+- `Button` - For actions (capture, upload, scan)
+- `Input` (type="file") - For image upload
+- `ProductCard` - For displaying matched products
+- `SupplierCard` - For displaying supplier info
+- Loading states with `Skeleton`
 
 ---
 
-## Admin Credentials Note
+## Edge Function Details
 
-Since `admin@gmail.com` doesn't exist yet, you have two options:
+### Request Format
+```json
+{
+  "image": "base64_encoded_image_data"
+}
+```
 
-1. **Use existing admin:** Log in with `m@gmail.com` (already has admin role)
-2. **Create new admin:** 
-   - Sign up at `/auth` with email `admin@gmail.com` and password `1234`
-   - After signup, I'll add the admin role to this account
+### Response Format
+```json
+{
+  "identified": true,
+  "product": {
+    "name": "Basmati Rice",
+    "description": "Long grain aromatic rice",
+    "keywords": ["rice", "basmati", "grain", "aromatic"]
+  },
+  "confidence": 0.92
+}
+```
 
-Would you like me to proceed with this plan?
+### AI Model Selection
+
+Using `google/gemini-3-flash-preview` because:
+- Supports image/vision input
+- Fast response times
+- Good accuracy for product identification
+- Cost-effective for this use case
+
