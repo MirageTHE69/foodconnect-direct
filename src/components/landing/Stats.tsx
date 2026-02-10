@@ -1,65 +1,44 @@
-import { TrendingUp, MapPin, Package, Handshake } from "lucide-react";
+import { Building2, BarChart3, Headphones, ShieldCheck } from "lucide-react";
 
-const stats = [
-  { 
-    icon: MapPin, 
-    value: "50+", 
-    label: "Cities Covered", 
-    description: "Across India",
-    color: "bg-primary/10 text-primary"
+const features = [
+  {
+    icon: Building2,
+    title: "Business Platform",
+    description: "Complete platform for food businesses to discover, connect, and grow together.",
   },
-  { 
-    icon: Package, 
-    value: "12", 
-    label: "Product Categories", 
-    description: "From farm to table",
-    color: "bg-secondary/10 text-secondary"
+  {
+    icon: BarChart3,
+    title: "Your Food Dashboard",
+    description: "Track your connections, manage enquiries, and monitor your food business performance.",
   },
-  { 
-    icon: Handshake, 
-    value: "10K+", 
-    label: "Connections Made", 
-    description: "And growing daily",
-    color: "bg-accent/10 text-accent"
+  {
+    icon: ShieldCheck,
+    title: "Innovative Processing",
+    description: "Verified suppliers with FSSAI compliance, quality certifications and trusted profiles.",
   },
-  { 
-    icon: TrendingUp, 
-    value: "95%", 
-    label: "Success Rate", 
-    description: "Satisfied businesses",
-    color: "bg-primary/10 text-primary"
+  {
+    icon: Headphones,
+    title: "Product Support",
+    description: "Dedicated support to help you find the right suppliers and resolve queries quickly.",
   },
 ];
 
 const Stats = () => {
   return (
-    <section className="py-16 bg-gradient-to-r from-primary via-primary to-accent relative overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
-      </div>
+    <section className="py-20 bg-card">
+      <div className="container mx-auto px-4">
+        <div className="mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">Features</h2>
+        </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
-            <div 
-              key={stat.label} 
-              className="text-center group"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm mb-4 group-hover:scale-110 transition-transform duration-300">
-                <stat.icon className="w-7 h-7 text-white" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature) => (
+            <div key={feature.title} className="group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
+                <feature.icon className="w-7 h-7 text-primary" />
               </div>
-              <p className="text-4xl md:text-5xl font-extrabold text-white mb-1">
-                {stat.value}
-              </p>
-              <p className="text-lg font-semibold text-white/90 mb-1">
-                {stat.label}
-              </p>
-              <p className="text-sm text-white/70">
-                {stat.description}
-              </p>
+              <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

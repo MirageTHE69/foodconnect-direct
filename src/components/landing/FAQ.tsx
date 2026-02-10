@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     question: "How are suppliers verified?",
-    answer: "We verify suppliers through a multi-step process that includes FSSAI license verification, GST registration check, business documentation review, and in some cases, physical verification. Verified suppliers display a green verification badge.",
+    answer: "We verify suppliers through a multi-step process that includes FSSAI license verification, GST registration check, business documentation review, and in some cases, physical verification.",
   },
   {
     question: "What categories of food products are available?",
@@ -28,15 +28,15 @@ const faqs = [
   },
   {
     question: "How do I contact a supplier?",
-    answer: "Once you find a supplier you're interested in, you can send them an enquiry directly through the platform. You can also start a chat conversation for real-time communication. No phone numbers or emails are shared until both parties agree.",
+    answer: "Once you find a supplier you're interested in, you can send them an enquiry directly through the platform or start a chat conversation for real-time communication.",
   },
   {
     question: "Which cities does FoodAdda cover?",
-    answer: "We currently have suppliers from 50+ cities across India, with strong presence in Mumbai, Delhi, Bangalore, Chennai, Hyderabad, Pune, Ahmedabad, Kolkata, and other major food hubs. We're expanding rapidly to cover more regions.",
+    answer: "We currently have suppliers from 50+ cities across India, with strong presence in Mumbai, Delhi, Bangalore, Chennai, Hyderabad, Pune, and other major food hubs.",
   },
   {
     question: "How do I become a supplier on FoodAdda?",
-    answer: "Simply sign up as a supplier, complete your business profile with required documents (FSSAI, GST), add your products, and submit for verification. Once verified, your profile goes live and buyers can discover you.",
+    answer: "Simply sign up as a supplier, complete your business profile with required documents (FSSAI, GST), add your products, and submit for verification.",
   },
 ];
 
@@ -93,27 +93,21 @@ const FAQ = () => {
   };
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-24 bg-card">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              FAQ
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-              Frequently Asked{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Questions
-              </span>
+          {/* Header */}
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Frequently Asked Questions
             </h2>
             <p className="text-muted-foreground">
-              Everything you need to know about FoodAdda. Can't find an answer? Contact us.
+              Everything you need to know about FoodAdda.
             </p>
           </div>
 
           {/* Accordion */}
-          <Accordion type="single" collapsible className="mb-10">
+          <Accordion type="single" collapsible className="mb-12">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`} className="border-border/50">
                 <AccordionTrigger className="text-left hover:text-primary hover:no-underline py-5">
@@ -126,16 +120,14 @@ const FAQ = () => {
             ))}
           </Accordion>
 
-          {/* Contact CTA */}
-          <div className="p-8 bg-muted/50 rounded-2xl border border-border/50">
+          {/* Contact Form */}
+          <div className="p-8 bg-background rounded-2xl border border-border/50">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
                 <Mail className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Contact Us</h3>
-              <p className="text-muted-foreground">
-              Still have questions? We're here to help.
-              </p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Still have questions?</h3>
+              <p className="text-muted-foreground text-sm">We're here to help.</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -179,7 +171,7 @@ const FAQ = () => {
                 <Label htmlFor="contact-message">Message</Label>
                 <Textarea
                   id="contact-message"
-                  placeholder="Tell us more about your question..."
+                  placeholder="Tell us more..."
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -187,7 +179,7 @@ const FAQ = () => {
                   maxLength={2000}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" variant="hero" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
