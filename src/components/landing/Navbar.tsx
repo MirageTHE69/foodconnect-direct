@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User, LayoutDashboard, ScanLine } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,12 +41,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">F</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">
-              Food<span className="text-primary">Adda</span>
-            </span>
+            <img src={logoImg} alt="FoodAdda Logo" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
