@@ -3,8 +3,8 @@ import Hero from "@/components/landing/Hero";
 import Stats from "@/components/landing/Stats";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Categories from "@/components/landing/Categories";
-import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
 import ForBuyers from "@/components/landing/ForBuyers";
+import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
 import ForSuppliers from "@/components/landing/ForSuppliers";
 import Testimonials from "@/components/landing/Testimonials";
 import FAQ from "@/components/landing/FAQ";
@@ -19,8 +19,8 @@ const Index = () => {
       <Stats />
       <HowItWorks />
       <Categories />
-      <FeaturedSuppliers />
       <ForBuyers />
+      <FeaturedSuppliers />
       <ForSuppliers />
       <Testimonials />
       <FAQ />
