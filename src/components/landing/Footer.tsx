@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
+import logoImg from "@/assets/logo.png";
 
 const footerLinks = {
   platform: [
@@ -37,12 +38,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">F</span>
-              </div>
-              <span className="text-xl font-bold text-secondary-foreground">
-                Food<span className="text-primary">Adda</span>
-              </span>
+              <img src={logoImg} alt="FoodAdda Logo" className="h-10 w-auto" />
             </Link>
             <p className="text-secondary-foreground/60 mb-6 max-w-sm text-sm">
               India's leading platform connecting food buyers with trusted suppliers. 
