@@ -42,6 +42,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSuppliers from "./pages/admin/Suppliers";
 import AdminProducts from "./pages/admin/Products";
 import AdminContactSubmissions from "./pages/admin/ContactSubmissions";
+import AdminImportSuppliers from "./pages/admin/ImportSuppliers";
 
 const queryClient = new QueryClient();
 
@@ -220,6 +221,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AdminContactSubmissions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/import-suppliers" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminImportSuppliers />
                 </ProtectedRoute>
               } 
             />

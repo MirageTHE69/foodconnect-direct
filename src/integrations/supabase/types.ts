@@ -461,12 +461,17 @@ export type Database = {
           id: string
           is_featured: boolean | null
           logo_url: string | null
+          market_reputation: string | null
           pincode: string | null
+          reputation_score: number | null
+          specialty: string | null
+          specialty_tags: string[] | null
           state: string | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]
           website: string | null
+          years_in_business: number | null
         }
         Insert: {
           address?: string | null
@@ -481,12 +486,17 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           logo_url?: string | null
+          market_reputation?: string | null
           pincode?: string | null
+          reputation_score?: number | null
+          specialty?: string | null
+          specialty_tags?: string[] | null
           state?: string | null
           updated_at?: string
           user_id: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
           website?: string | null
+          years_in_business?: number | null
         }
         Update: {
           address?: string | null
@@ -501,12 +511,17 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           logo_url?: string | null
+          market_reputation?: string | null
           pincode?: string | null
+          reputation_score?: number | null
+          specialty?: string | null
+          specialty_tags?: string[] | null
           state?: string | null
           updated_at?: string
           user_id?: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
           website?: string | null
+          years_in_business?: number | null
         }
         Relationships: []
       }
