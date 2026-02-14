@@ -1,60 +1,109 @@
 
 
-# Color Theme Update
+# Unified User Experience + Hero Redesign
 
-## New Color Palette
+## Overview
+Two major changes: (1) Merge buyer and supplier dashboards into one unified dashboard where all users can both post and buy products, while keeping buyer/supplier tags for identity, and (2) Replace the phone mockup in the hero section with an illustration-style design.
 
-| Role | Hex | Usage |
-|------|-----|-------|
-| Primary | #F4C400 | Main buttons, links, active states |
-| Secondary | #121212 | Secondary buttons, dark elements |
-| Background | #FFFBEA | Page background |
-| Surface | #F2F2F2 | Cards, popovers, inputs |
-| Text Primary | #1A1A1A | Headings, body text |
-| Text Secondary | #6B6B6B | Muted text, descriptions |
-| Success | #2ECC71 | Success states (replaces old secondary green) |
-| Highlight/Accent | #FFB703 | Badges, highlights, accent elements |
+## What Changes
+
+### 1. Unified Dashboard
+Currently there are separate `/buyer/dashboard` and `/supplier/dashboard` routes with different features. These will be merged into a single `/dashboard` route that gives every logged-in user access to:
+- Browse & search products and suppliers
+- Post their own products and recipes
+- Save items, send enquiries, chat
+- Manage their profile (personal + optional business profile)
+- A visible "Supplier" or "Buyer" badge/tag next to their name
+
+### 2. Auth Page
+- Keep the buyer/supplier role selection at signup (used as a tag, not a restriction)
+- Update the signup button text to say "Create Account" instead of "Sign up as Buyer/Supplier"
+- The tag will appear as a badge in the dashboard sidebar
+
+### 3. Routing Changes
+- Create a new unified `/dashboard` route that all authenticated users go to
+- Keep `/supplier/products`, `/supplier/products/new`, `/supplier/recipes`, etc. accessible to ALL authenticated users (remove role restrictions)
+- Remove the separate `/buyer/dashboard` and `/supplier/dashboard` routes (redirect them to `/dashboard`)
+- Update `ProtectedRoute` usage to allow any authenticated user for most routes
+
+### 4. Sidebar Navigation (DashboardLayout)
+Replace the role-based navigation with a single unified menu:
+- Dashboard (home)
+- My Profile
+- My Products (post/manage)
+- My Recipes (post/manage)
+- Browse Products
+- Browse Suppliers
+- Browse Recipes
+- Saved Items
+- Messages
+- Scan Product
+- Show user's tag (Buyer/Supplier badge) in the sidebar header
+
+### 5. Hero Section Redesign
+Replace the phone mockup with an illustration-style right section:
+- Abstract food industry icons arranged in a creative layout
+- Floating geometric shapes (circles, rounded squares) with food-related icons inside
+- Icons like wheat, coffee, milk, package, flame arranged in an organic pattern
+- Yellow accent shapes and dotted decorative elements
+- Keeps the left side content (headline, search bar, trust indicators) as-is
 
 ## Files to Modify
 
-### 1. `src/index.css` (Main changes)
-Update all CSS custom properties in both `:root` (light) and `.dark` sections:
-- `--primary` becomes golden yellow (#F4C400)
-- `--secondary` becomes near-black (#121212)
-- `--background` stays warm cream (#FFFBEA)
-- `--card`, `--popover` use surface gray (#F2F2F2)
-- `--foreground` uses text primary (#1A1A1A)
-- `--muted-foreground` uses text secondary (#6B6B6B)
-- `--accent` uses highlight amber (#FFB703)
-- Update all gradient variables to use new primary/accent colors
-- Update shadow colors to match new primary
-- Update sidebar variables to match new palette
-- Adjust `--primary-foreground` to dark (#1A1A1A) since primary is now a bright yellow (needs dark text on top)
-
-### 2. `src/components/ui/button.tsx`
-- Verify button text contrast -- since primary is now bright yellow, `primary-foreground` must be dark for readability
-- No structural changes needed if CSS variables are updated correctly
-
-### 3. `src/components/landing/Hero.tsx`
-- Update any hardcoded color references if present (the gradient text classes should work via CSS variables)
-
-### 4. `src/components/landing/CTA.tsx`
-- The "secondary" button variant now uses near-black (#121212) with light text -- verify it reads well
+| File | Change |
+|------|--------|
+| `src/pages/Index.tsx` | No change needed |
+| `src/components/landing/Hero.tsx` | Replace phone mockup with illustration-style design |
+| `src/pages/Dashboard.tsx` | New unified dashboard page |
+| `src/App.tsx` | Update routes: add `/dashboard`, redirect old buyer/supplier dashboard routes |
+| `src/components/shared/DashboardLayout.tsx` | Single nav menu for all users, show role badge |
+| `src/components/ProtectedRoute.tsx` | Relax role checks for most routes |
+| `src/pages/Auth.tsx` | Keep role selection but update messaging |
+| `src/hooks/useAuth.tsx` | Minor: update redirect logic |
 
 ## Technical Details
 
-HSL conversions for CSS variables:
-- Primary (#F4C400): `49 100% 48%`
-- Secondary (#121212): `0 0% 7%`
-- Background (#FFFBEA): `47 100% 96%`
-- Surface (#F2F2F2): `0 0% 95%`
-- Text Primary (#1A1A1A): `0 0% 10%`
-- Text Secondary (#6B6B6B): `0 0% 42%`
-- Success (#2ECC71): `145 63% 49%`
-- Accent (#FFB703): `43 100% 51%`
+### Route Changes
+```text
+BEFORE:
+  /buyer/dashboard    --> BuyerDashboard (buyer only)
+  /supplier/dashboard --> SupplierDashboard (supplier only)
+  /supplier/products  --> SupplierProducts (supplier only)
+  /supplier/recipes   --> SupplierRecipes (supplier only)
 
-Key contrast consideration: Since the new primary (#F4C400) is a bright yellow, all text placed on primary backgrounds must be dark (#1A1A1A) rather than white for accessibility.
+AFTER:
+  /dashboard          --> UnifiedDashboard (any authenticated user)
+  /buyer/dashboard    --> Redirect to /dashboard
+  /supplier/dashboard --> Redirect to /dashboard
+  /supplier/products  --> SupplierProducts (any authenticated user)
+  /supplier/recipes   --> SupplierRecipes (any authenticated user)
+  /supplier/products/new --> ProductEdit (any authenticated user)
+  /supplier/recipes/new  --> RecipeEdit (any authenticated user)
+```
 
-## Dark Mode
-The dark mode variables will be adjusted to complement the new palette with slightly brighter/saturated versions of primary and accent on a dark background.
+### Unified Sidebar Nav Items
+```text
+- Dashboard        /dashboard
+- Profile          /profile (merged buyer/supplier profile)
+- My Products      /supplier/products
+- My Recipes       /supplier/recipes
+- Browse Products  /products
+- Browse Suppliers /suppliers
+- Browse Recipes   /recipes
+- Saved Items      /saved
+- Messages         /chat
+- Scan Product     /scan
+```
+
+### Database Consideration
+- The `supplier_profiles` table and `user_roles` table remain as-is
+- When a "buyer"-tagged user tries to post a product, they'll need a supplier_profile created automatically (the system already creates one for supplier-tagged users at signup)
+- Add logic: if no supplier_profile exists when accessing "My Products", auto-create one using the user's name
+
+### Hero Illustration Design
+The right side will feature a grid of floating icon cards with food industry icons (Wheat, Coffee, Fish, Apple, Milk, Flame, etc.) arranged in an asymmetric, visually appealing layout with:
+- Rounded cards with subtle shadows
+- Primary/accent colored backgrounds on some cards
+- Decorative dots and geometric accents
+- Smooth hover animations
 
