@@ -24,13 +24,30 @@ export function useSupplierProfile() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('supplier_profiles')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
+      
+      // Auto-create supplier profile if none exists (allows all users to post products)
+      if (!data) {
+        const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'My';
+        const { data: newProfile, error: createError } = await supabase
+          .from('supplier_profiles')
+          .insert({ user_id: user.id, company_name: displayName + "'s Business" })
+          .select()
+          .single();
+        
+        if (createError) {
+          console.error('Error auto-creating supplier profile:', createError);
+        } else {
+          data = newProfile;
+        }
+      }
+
       setProfile(data);
     } catch (error) {
       console.error('Error fetching supplier profile:', error);

@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -16,10 +17,11 @@ import {
   X,
   ChefHat,
   BookOpen,
-   ScanLine,
+  ScanLine,
   Mail,
   Upload,
 } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -31,24 +33,17 @@ interface NavItem {
   icon: ReactNode;
 }
 
-const supplierNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/supplier/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: 'Profile', href: '/supplier/profile', icon: <User className="h-5 w-5" /> },
-  { label: 'Products', href: '/supplier/products', icon: <Package className="h-5 w-5" /> },
-  { label: 'Recipes', href: '/supplier/recipes', icon: <BookOpen className="h-5 w-5" /> },
-  { label: 'Enquiries', href: '/supplier/enquiries', icon: <MessageSquare className="h-5 w-5" /> },
-  { label: 'Messages', href: '/chat', icon: <MessageSquare className="h-5 w-5" /> },
-];
-
-const buyerNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/buyer/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: 'Profile', href: '/buyer/profile', icon: <User className="h-5 w-5" /> },
-   { label: 'Scan Product', href: '/scan', icon: <ScanLine className="h-5 w-5" /> },
+const unifiedNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+  { label: 'My Profile', href: '/profile', icon: <User className="h-5 w-5" /> },
+  { label: 'My Products', href: '/supplier/products', icon: <Package className="h-5 w-5" /> },
+  { label: 'My Recipes', href: '/supplier/recipes', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'Browse Products', href: '/products', icon: <Search className="h-5 w-5" /> },
   { label: 'Browse Suppliers', href: '/suppliers', icon: <Store className="h-5 w-5" /> },
   { label: 'Browse Recipes', href: '/recipes', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'Saved Items', href: '/saved', icon: <Heart className="h-5 w-5" /> },
   { label: 'Messages', href: '/chat', icon: <MessageSquare className="h-5 w-5" /> },
+  { label: 'Scan Product', href: '/scan', icon: <ScanLine className="h-5 w-5" /> },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -71,41 +66,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigate('/');
   };
 
-  const getNavItems = (): NavItem[] => {
-    switch (userRole) {
-      case 'supplier':
-        return supplierNavItems;
-      case 'buyer':
-        return buyerNavItems;
-      case 'admin':
-        return adminNavItems;
-      default:
-        return [];
-    }
+  const navItems = userRole === 'admin' ? adminNavItems : unifiedNavItems;
+
+  const getRoleBadge = () => {
+    if (userRole === 'admin') return { label: 'Admin', variant: 'destructive' as const };
+    if (userRole === 'supplier') return { label: 'Supplier', variant: 'default' as const };
+    return { label: 'Buyer', variant: 'secondary' as const };
   };
 
-  const navItems = getNavItems();
-
-  const getRoleLabel = () => {
-    switch (userRole) {
-      case 'supplier':
-        return 'Supplier Portal';
-      case 'buyer':
-        return 'Buyer Portal';
-      case 'admin':
-        return 'Admin Portal';
-      default:
-        return 'Portal';
-    }
-  };
+  const badge = getRoleBadge();
 
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b z-50 flex items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <ChefHat className="h-8 w-8 text-primary" />
-          <span className="font-bold text-xl">FoodAdda</span>
+          <img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto" />
         </Link>
         <Button
           variant="ghost"
@@ -128,16 +104,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Logo */}
           <div className="h-16 flex items-center gap-2 px-6 border-b">
             <Link to="/" className="flex items-center gap-2">
-              <ChefHat className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl">FoodAdda</span>
+              <img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto" />
             </Link>
           </div>
 
-          {/* Role Badge */}
+          {/* User Info + Role Badge */}
           <div className="px-6 py-4">
-            <div className="px-3 py-2 bg-primary/10 rounded-lg">
-              <p className="text-sm font-medium text-primary">{getRoleLabel()}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <div className="px-3 py-2 bg-primary/10 rounded-lg flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+              <Badge variant={badge.variant} className="shrink-0 ml-2 text-xs">
+                {badge.label}
+              </Badge>
             </div>
           </div>
 

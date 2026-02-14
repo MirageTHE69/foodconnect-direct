@@ -39,15 +39,8 @@ export default function Auth() {
   }, [user, loading, userRole, navigate]);
 
   const getRedirectPath = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return '/admin';
-      case 'supplier':
-        return '/supplier/dashboard';
-      case 'buyer':
-      default:
-        return '/buyer/dashboard';
-    }
+    if (role === 'admin') return '/admin';
+    return '/dashboard';
   };
 
   const validateForm = () => {
@@ -352,7 +345,7 @@ export default function Auth() {
                           Creating account...
                         </>
                       ) : (
-                        `Sign up as ${role === 'buyer' ? 'Buyer' : 'Supplier'}`
+                        'Create Account'
                       )}
                     </Button>
                     <p className="text-xs text-center text-muted-foreground">

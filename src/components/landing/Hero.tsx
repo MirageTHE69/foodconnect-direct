@@ -1,7 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Wheat, Coffee, Fish, Apple, Milk, Flame, Package, LeafyGreen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+
+const floatingIcons = [
+  { icon: Wheat, label: "Grains", bg: "bg-primary/15", text: "text-primary", size: "w-16 h-16", top: "top-4", left: "left-8", delay: "0s" },
+  { icon: Coffee, label: "Beverages", bg: "bg-accent/15", text: "text-accent", size: "w-20 h-20", top: "top-2", left: "left-[45%]", delay: "1s" },
+  { icon: Fish, label: "Seafood", bg: "bg-secondary/10", text: "text-secondary", size: "w-14 h-14", top: "top-[15%]", left: "right-6", delay: "2s" },
+  { icon: Apple, label: "Fruits", bg: "bg-destructive/10", text: "text-destructive", size: "w-18 h-18", top: "top-[35%]", left: "left-2", delay: "0.5s" },
+  { icon: Milk, label: "Dairy", bg: "bg-primary/20", text: "text-primary", size: "w-16 h-16", top: "top-[40%]", left: "left-[55%]", delay: "1.5s" },
+  { icon: Flame, label: "Spices", bg: "bg-accent/20", text: "text-accent", size: "w-14 h-14", top: "top-[55%]", left: "left-[25%]", delay: "2.5s" },
+  { icon: Package, label: "Packaged", bg: "bg-muted", text: "text-muted-foreground", size: "w-16 h-16", top: "top-[65%]", left: "right-12", delay: "0.8s" },
+  { icon: LeafyGreen, label: "Organic", bg: "bg-primary/10", text: "text-primary", size: "w-14 h-14", top: "top-[80%]", left: "left-[40%]", delay: "1.8s" },
+];
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -65,33 +76,38 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Visual */}
-          <div className="relative hidden lg:flex justify-center items-center">
-            {/* Phone mockup */}
-            <div className="relative w-72 h-[520px] rounded-[40px] border-[8px] border-secondary bg-card shadow-hover overflow-hidden">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-secondary rounded-b-2xl" />
-              <div className="p-4 pt-10 h-full flex flex-col">
-                <div className="text-center mb-4">
-                  <div className="w-16 h-16 rounded-2xl gradient-primary mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-2xl">F</span>
-                  </div>
-                  <p className="font-bold text-foreground text-sm">FoodAdda</p>
-                  <p className="text-xs text-muted-foreground">Your Food Business Network</p>
-                </div>
-                
-                <div className="space-y-3 flex-1">
-                  {["🌾 Grains & Cereals", "🥛 Dairy Products", "🌶️ Spices", "🍎 Fresh Produce", "🥩 Meat & Poultry"].map((item) => (
-                    <div key={item} className="flex items-center gap-3 p-3 bg-background rounded-xl border border-border/50">
-                      <span className="text-sm font-medium text-foreground">{item}</span>
-                    </div>
-                  ))}
+          {/* Right Visual - Illustration Style */}
+          <div className="relative hidden lg:flex justify-center items-center min-h-[500px]">
+            {/* Decorative background shapes */}
+            <div className="absolute w-64 h-64 rounded-full bg-primary/5 top-10 left-10" />
+            <div className="absolute w-40 h-40 rounded-full bg-accent/5 bottom-16 right-8" />
+            <div className="absolute w-20 h-20 rounded-2xl bg-primary/10 top-4 right-20 rotate-12" />
+            <div className="absolute w-12 h-12 rounded-xl bg-accent/15 bottom-24 left-4 -rotate-12" />
+
+            {/* Floating icon cards */}
+            {floatingIcons.map(({ icon: Icon, label, bg, text, size, top, left, delay }, i) => (
+              <div
+                key={i}
+                className={`absolute ${top} ${left} animate-float`}
+                style={{ animationDelay: delay, animationDuration: `${5 + i * 0.7}s` }}
+              >
+                <div className={`${size} ${bg} rounded-2xl shadow-card flex flex-col items-center justify-center gap-1 backdrop-blur-sm border border-border/30 hover:scale-110 transition-transform`}>
+                  <Icon className={`w-6 h-6 ${text}`} />
+                  <span className={`text-[10px] font-semibold ${text} opacity-70`}>{label}</span>
                 </div>
               </div>
-            </div>
+            ))}
 
-            {/* Floating yellow accent shapes */}
-            <div className="absolute -top-8 -right-4 w-24 h-24 bg-primary rounded-2xl -rotate-12 opacity-20" />
-            <div className="absolute -bottom-6 -left-8 w-16 h-16 bg-accent rounded-xl rotate-12 opacity-30" />
+            {/* Decorative dots */}
+            <div className="absolute top-[30%] right-4 flex flex-col gap-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-2">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="w-1.5 h-1.5 rounded-full bg-primary/20" />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

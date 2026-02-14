@@ -2,12 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
 
 // Public Pages
 import Products from "./pages/Products";
@@ -16,16 +17,14 @@ import Suppliers from "./pages/Suppliers";
 import SupplierDetail from "./pages/SupplierDetail";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
- import ProductScanner from "./pages/ProductScanner";
+import ProductScanner from "./pages/ProductScanner";
 
-// Buyer Pages
-import BuyerDashboard from "./pages/buyer/Dashboard";
+// Profile Pages
 import BuyerProfile from "./pages/buyer/Profile";
+import SupplierProfile from "./pages/supplier/Profile";
 import SavedItems from "./pages/buyer/SavedItems";
 
-// Supplier Pages
-import SupplierDashboard from "./pages/supplier/Dashboard";
-import SupplierProfile from "./pages/supplier/Profile";
+// Product/Recipe Management Pages
 import SupplierProducts from "./pages/supplier/Products";
 import ProductEdit from "./pages/supplier/ProductEdit";
 import SupplierEnquiries from "./pages/supplier/Enquiries";
@@ -63,175 +62,43 @@ const App = () => (
             <Route path="/suppliers/:id" element={<SupplierDetail />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
-             <Route path="/scan" element={<ProductScanner />} />
+            <Route path="/scan" element={<ProductScanner />} />
             
-            {/* Buyer Routes */}
-            <Route 
-              path="/buyer/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['buyer']}>
-                  <BuyerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/buyer/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['buyer']}>
-                  <BuyerProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/saved" 
-              element={
-                <ProtectedRoute allowedRoles={['buyer']}>
-                  <SavedItems />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Unified Dashboard */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             
-            {/* Supplier Routes */}
-            <Route 
-              path="/supplier/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <SupplierDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <SupplierProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/products" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <SupplierProducts />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/products/new" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <ProductEdit />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/products/:id" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <ProductEdit />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/enquiries" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <SupplierEnquiries />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/recipes" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <SupplierRecipes />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/recipes/new" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <RecipeEdit />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/supplier/recipes/:id" 
-              element={
-                <ProtectedRoute allowedRoles={['supplier']}>
-                  <RecipeEdit />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Legacy redirects */}
+            <Route path="/buyer/dashboard" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/supplier/dashboard" element={<Navigate to="/dashboard" replace />} />
+
+            {/* Profile - any authenticated user */}
+            <Route path="/profile" element={<ProtectedRoute><BuyerProfile /></ProtectedRoute>} />
+            <Route path="/buyer/profile" element={<Navigate to="/profile" replace />} />
+            <Route path="/supplier/profile" element={<ProtectedRoute><SupplierProfile /></ProtectedRoute>} />
+
+            {/* Product & Recipe Management - any authenticated user */}
+            <Route path="/supplier/products" element={<ProtectedRoute><SupplierProducts /></ProtectedRoute>} />
+            <Route path="/supplier/products/new" element={<ProtectedRoute><ProductEdit /></ProtectedRoute>} />
+            <Route path="/supplier/products/:id" element={<ProtectedRoute><ProductEdit /></ProtectedRoute>} />
+            <Route path="/supplier/enquiries" element={<ProtectedRoute><SupplierEnquiries /></ProtectedRoute>} />
+            <Route path="/supplier/recipes" element={<ProtectedRoute><SupplierRecipes /></ProtectedRoute>} />
+            <Route path="/supplier/recipes/new" element={<ProtectedRoute><RecipeEdit /></ProtectedRoute>} />
+            <Route path="/supplier/recipes/:id" element={<ProtectedRoute><RecipeEdit /></ProtectedRoute>} />
+
+            {/* Saved Items - any authenticated user */}
+            <Route path="/saved" element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />
             
-            {/* Chat Routes */}
-            <Route 
-              path="/chat" 
-              element={
-                <ProtectedRoute allowedRoles={['buyer', 'supplier']}>
-                  <Chat />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/chat/:id" 
-              element={
-                <ProtectedRoute allowedRoles={['buyer', 'supplier']}>
-                  <ChatRoom />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Chat Routes - any authenticated user */}
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
             
             {/* Admin Routes */}
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/users" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminUsers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/suppliers" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminSuppliers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/products" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminProducts />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/contact" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminContactSubmissions />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/import-suppliers" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminImportSuppliers />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
+            <Route path="/admin/suppliers" element={<ProtectedRoute allowedRoles={['admin']}><AdminSuppliers /></ProtectedRoute>} />
+            <Route path="/admin/products" element={<ProtectedRoute allowedRoles={['admin']}><AdminProducts /></ProtectedRoute>} />
+            <Route path="/admin/contact" element={<ProtectedRoute allowedRoles={['admin']}><AdminContactSubmissions /></ProtectedRoute>} />
+            <Route path="/admin/import-suppliers" element={<ProtectedRoute allowedRoles={['admin']}><AdminImportSuppliers /></ProtectedRoute>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -39,12 +39,8 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
       // Redirect based on primary role
       if (userRole === 'admin') {
         return <Navigate to="/admin" replace />;
-      } else if (userRole === 'supplier') {
-        return <Navigate to="/supplier/dashboard" replace />;
-      } else if (userRole === 'buyer') {
-        return <Navigate to="/buyer/dashboard" replace />;
       }
-      return <Navigate to="/" replace />;
+      return <Navigate to="/dashboard" replace />;
     }
   }
 
