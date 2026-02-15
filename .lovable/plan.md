@@ -1,109 +1,121 @@
 
 
-# Unified User Experience + Hero Redesign
+# Blog System: Pages, Admin Panel, and Pre-loaded Blog Content
 
 ## Overview
-Two major changes: (1) Merge buyer and supplier dashboards into one unified dashboard where all users can both post and buy products, while keeping buyer/supplier tags for identity, and (2) Replace the phone mockup in the hero section with an illustration-style design.
+Build a complete blog system with a database-backed `blogs` table, public blog pages, admin management panel, and pre-load 5 blog articles from the provided PDF into the database.
 
-## What Changes
+## The 5 Blogs to Seed
 
-### 1. Unified Dashboard
-Currently there are separate `/buyer/dashboard` and `/supplier/dashboard` routes with different features. These will be merged into a single `/dashboard` route that gives every logged-in user access to:
-- Browse & search products and suppliers
-- Post their own products and recipes
-- Save items, send enquiries, chat
-- Manage their profile (personal + optional business profile)
-- A visible "Supplier" or "Buyer" badge/tag next to their name
+| # | Title | Tag |
+|---|-------|-----|
+| 1 | Supply Chain Management and QA/QC Checks in the Food Processing Industry | Industry |
+| 2 | Understanding HACCP, HALAL, FDA, FSSAI, KOSHER, and ISO: Key Certifications and Audit Procedures | Guide |
+| 3 | Large-Scale Manufacturing of Milk-Based Indian Mithai: Ensuring Quality with GMP and QA/QC | Industry |
+| 4 | Culinary Practices of Indian States: A Journey Through Regional Flavors and Tropical Traditions | Guide |
+| 5 | Developing a Food Recipe for Large Scale Manufacturing | Guide |
 
-### 2. Auth Page
-- Keep the buyer/supplier role selection at signup (used as a tag, not a restriction)
-- Update the signup button text to say "Create Account" instead of "Sign up as Buyer/Supplier"
-- The tag will appear as a badge in the dashboard sidebar
+Each blog will be stored with its full content (formatted as HTML), an excerpt, tag, and published status.
 
-### 3. Routing Changes
-- Create a new unified `/dashboard` route that all authenticated users go to
-- Keep `/supplier/products`, `/supplier/products/new`, `/supplier/recipes`, etc. accessible to ALL authenticated users (remove role restrictions)
-- Remove the separate `/buyer/dashboard` and `/supplier/dashboard` routes (redirect them to `/dashboard`)
-- Update `ProtectedRoute` usage to allow any authenticated user for most routes
+## What Gets Built
 
-### 4. Sidebar Navigation (DashboardLayout)
-Replace the role-based navigation with a single unified menu:
-- Dashboard (home)
-- My Profile
-- My Products (post/manage)
-- My Recipes (post/manage)
-- Browse Products
-- Browse Suppliers
-- Browse Recipes
-- Saved Items
-- Messages
-- Scan Product
-- Show user's tag (Buyer/Supplier badge) in the sidebar header
+### 1. Database: `blogs` Table
+- id, title, slug (unique), excerpt, content (HTML), cover_image_url, tag, status (draft/published), author_id, published_at, created_at, updated_at
+- RLS: Anyone can view published blogs, admins can CRUD all
+- Seed all 5 blogs as published posts via the data insert tool
 
-### 5. Hero Section Redesign
-Replace the phone mockup with an illustration-style right section:
-- Abstract food industry icons arranged in a creative layout
-- Floating geometric shapes (circles, rounded squares) with food-related icons inside
-- Icons like wheat, coffee, milk, package, flame arranged in an organic pattern
-- Yellow accent shapes and dotted decorative elements
-- Keeps the left side content (headline, search bar, trust indicators) as-is
+### 2. Landing Page Blog Section
+Update `src/components/landing/CTA.tsx` to fetch the latest 2 published blogs from the database instead of hardcoded data. Each card links to `/blog/:slug`.
+
+### 3. Public Blog Pages
+
+**Blog Listing (`/blog`)**: Grid of blog cards with cover image, tag, title, excerpt, and date. Search bar and tag filter. No login required.
+
+**Blog Detail (`/blog/:slug`)**: Full article view with title, tag badge, published date, and rich HTML content. Back to blogs navigation. No login required.
+
+### 4. Admin Blog Management
+
+**Blog List (`/admin/blogs`)**: Table of all blogs (drafts + published) with title, tag, status, date. Create/edit/delete actions.
+
+**Blog Editor (`/admin/blogs/new` and `/admin/blogs/:id`)**: Form with title (auto-generates slug), slug field, excerpt, content textarea, tag dropdown (Industry, Guide, News, Recipe, Update), cover image upload, status toggle (draft/published). Save button.
+
+### 5. Navigation Updates
+- Add "Blogs" to admin sidebar in DashboardLayout
+- Add public routes `/blog` and `/blog/:slug`
+- Add admin routes `/admin/blogs` and `/admin/blogs/:id`
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/pages/Blog.tsx` | Public blog listing page |
+| `src/pages/BlogDetail.tsx` | Public blog detail page |
+| `src/pages/admin/Blogs.tsx` | Admin blog list and management |
+| `src/pages/admin/BlogEdit.tsx` | Admin blog create/edit form |
+| `src/hooks/useBlogs.ts` | Hook for fetching and managing blog posts |
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/pages/Index.tsx` | No change needed |
-| `src/components/landing/Hero.tsx` | Replace phone mockup with illustration-style design |
-| `src/pages/Dashboard.tsx` | New unified dashboard page |
-| `src/App.tsx` | Update routes: add `/dashboard`, redirect old buyer/supplier dashboard routes |
-| `src/components/shared/DashboardLayout.tsx` | Single nav menu for all users, show role badge |
-| `src/components/ProtectedRoute.tsx` | Relax role checks for most routes |
-| `src/pages/Auth.tsx` | Keep role selection but update messaging |
-| `src/hooks/useAuth.tsx` | Minor: update redirect logic |
+| `src/components/landing/CTA.tsx` | Fetch real blogs from database, link to `/blog/:slug` |
+| `src/components/shared/DashboardLayout.tsx` | Add "Blogs" to admin sidebar nav |
+| `src/App.tsx` | Add `/blog`, `/blog/:slug`, `/admin/blogs`, `/admin/blogs/:id` routes |
+
+## Database Changes
+
+### Migration: Create `blogs` table
+```text
+blogs table:
+  id            uuid PK
+  title         text NOT NULL
+  slug          text UNIQUE NOT NULL
+  excerpt       text
+  content       text (full HTML content)
+  cover_image_url  text
+  tag           text (e.g. "Industry", "Guide")
+  status        text DEFAULT 'draft'
+  author_id     uuid
+  published_at  timestamptz
+  created_at    timestamptz DEFAULT now()
+  updated_at    timestamptz DEFAULT now()
+
+RLS:
+  - "Anyone can view published blogs" SELECT where status = 'published'
+  - "Admins can manage all blogs" ALL using has_role(auth.uid(), 'admin')
+
+Trigger: update_updated_at on UPDATE
+```
+
+### Data Insert: Seed 5 blogs
+After creating the table, insert all 5 blog posts with:
+- Full HTML-formatted content from the PDF
+- Auto-generated slugs (e.g. "supply-chain-management-qaqc-food-processing")
+- Appropriate tags (Industry/Guide)
+- Status set to "published"
+- published_at set to current timestamp
 
 ## Technical Details
 
-### Route Changes
-```text
-BEFORE:
-  /buyer/dashboard    --> BuyerDashboard (buyer only)
-  /supplier/dashboard --> SupplierDashboard (supplier only)
-  /supplier/products  --> SupplierProducts (supplier only)
-  /supplier/recipes   --> SupplierRecipes (supplier only)
+### Slug Generation
+Auto-generate from title on the admin form. Example: "Supply Chain Management and QA/QC Checks" becomes "supply-chain-management-and-qaqc-checks"
 
-AFTER:
-  /dashboard          --> UnifiedDashboard (any authenticated user)
-  /buyer/dashboard    --> Redirect to /dashboard
-  /supplier/dashboard --> Redirect to /dashboard
-  /supplier/products  --> SupplierProducts (any authenticated user)
-  /supplier/recipes   --> SupplierRecipes (any authenticated user)
-  /supplier/products/new --> ProductEdit (any authenticated user)
-  /supplier/recipes/new  --> RecipeEdit (any authenticated user)
-```
+### Content Format
+Blog content will be stored as HTML with proper heading tags, lists, and paragraphs. The BlogDetail page will render this using `dangerouslySetInnerHTML` with appropriate styling via Tailwind's `prose` class.
 
-### Unified Sidebar Nav Items
-```text
-- Dashboard        /dashboard
-- Profile          /profile (merged buyer/supplier profile)
-- My Products      /supplier/products
-- My Recipes       /supplier/recipes
-- Browse Products  /products
-- Browse Suppliers /suppliers
-- Browse Recipes   /recipes
-- Saved Items      /saved
-- Messages         /chat
-- Scan Product     /scan
-```
+### Admin Blog Editor
+- Title input with auto-slug generation
+- Slug field (editable)
+- Excerpt textarea (short summary for cards)
+- Content textarea (large, full article in HTML/markdown)
+- Tag dropdown: Industry, Guide, News, Recipe, Update
+- Cover image upload (uses existing storage buckets)
+- Status toggle: Draft / Published
+- Save button
 
-### Database Consideration
-- The `supplier_profiles` table and `user_roles` table remain as-is
-- When a "buyer"-tagged user tries to post a product, they'll need a supplier_profile created automatically (the system already creates one for supplier-tagged users at signup)
-- Add logic: if no supplier_profile exists when accessing "My Products", auto-create one using the user's name
-
-### Hero Illustration Design
-The right side will feature a grid of floating icon cards with food industry icons (Wheat, Coffee, Fish, Apple, Milk, Flame, etc.) arranged in an asymmetric, visually appealing layout with:
-- Rounded cards with subtle shadows
-- Primary/accent colored backgrounds on some cards
-- Decorative dots and geometric accents
-- Smooth hover animations
+### Landing Page CTA Update
+- Query latest 2 published blogs ordered by published_at DESC
+- Each card shows tag badge, title, excerpt
+- Links to `/blog/{slug}`
+- Falls back to placeholder if no blogs exist
 
