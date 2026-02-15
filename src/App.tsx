@@ -42,6 +42,10 @@ import AdminSuppliers from "./pages/admin/Suppliers";
 import AdminProducts from "./pages/admin/Products";
 import AdminContactSubmissions from "./pages/admin/ContactSubmissions";
 import AdminImportSuppliers from "./pages/admin/ImportSuppliers";
+import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
+import AdminBlogs from "./pages/admin/Blogs";
+import AdminBlogEdit from "./pages/admin/BlogEdit";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +67,8 @@ const App = () => (
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipes/:id" element={<RecipeDetail />} />
             <Route path="/scan" element={<ProductScanner />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
             
             {/* Unified Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -99,6 +105,8 @@ const App = () => (
             <Route path="/admin/products" element={<ProtectedRoute allowedRoles={['admin']}><AdminProducts /></ProtectedRoute>} />
             <Route path="/admin/contact" element={<ProtectedRoute allowedRoles={['admin']}><AdminContactSubmissions /></ProtectedRoute>} />
             <Route path="/admin/import-suppliers" element={<ProtectedRoute allowedRoles={['admin']}><AdminImportSuppliers /></ProtectedRoute>} />
+            <Route path="/admin/blogs" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlogs /></ProtectedRoute>} />
+            <Route path="/admin/blogs/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlogEdit /></ProtectedRoute>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
