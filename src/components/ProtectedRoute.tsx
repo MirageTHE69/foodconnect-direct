@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -10,6 +11,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, userRole, allRoles, loading } = useAuth();
+  const { hasActiveSubscription, loading: subLoading } = useSubscription();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -36,11 +39,25 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   if (allowedRoles && allowedRoles.length > 0) {
     const hasAllowedRole = allRoles.some(role => allowedRoles.includes(role));
     if (!hasAllowedRole) {
-      // Redirect based on primary role
       if (userRole === 'admin') {
         return <Navigate to="/admin" replace />;
       }
       return <Navigate to="/dashboard" replace />;
+    }
+  }
+
+  // Subscription check - admins bypass, /subscribe page bypasses
+  if (userRole !== 'admin' && location.pathname !== '/subscribe') {
+    if (subLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
+    if (!hasActiveSubscription) {
+      return <Navigate to="/subscribe" replace />;
     }
   }
 
