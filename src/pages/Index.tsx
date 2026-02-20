@@ -7,6 +7,7 @@ import ForBuyers from "@/components/landing/ForBuyers";
 import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
 import ForSuppliers from "@/components/landing/ForSuppliers";
 import Testimonials from "@/components/landing/Testimonials";
+import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import CTA from "@/components/landing/CTA";
 import Footer from "@/components/landing/Footer";
@@ -22,6 +23,7 @@ const Index = () => {
       <ForBuyers />
       <FeaturedSuppliers />
       <ForSuppliers />
+      <Pricing />
       <Testimonials />
       <FAQ />
       <CTA />
