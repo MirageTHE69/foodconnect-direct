@@ -17,9 +17,14 @@ const footerLinks = {
   ],
   company: [
     { name: "About Us", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Blog", href: "#" },
+    { name: "Blog", href: "/blog" },
     { name: "Contact", href: "#" },
+  ],
+  legal: [
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms & Conditions", href: "/terms-and-conditions" },
+    { name: "Refund Policy", href: "/refund-policy" },
+    { name: "Disclaimer", href: "/disclaimer" },
   ],
 };
 
@@ -34,7 +39,7 @@ const Footer = () => {
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -90,9 +95,22 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
+                  <Link to={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
                     {link.name}
-                  </a>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4 text-secondary-foreground">Legal</h4>
+            <ul className="space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -105,8 +123,9 @@ const Footer = () => {
             © 2025 FoodAdda. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-secondary-foreground/40">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms of Service</Link>
+            <Link to="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link>
           </div>
         </div>
       </div>
