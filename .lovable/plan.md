@@ -1,121 +1,143 @@
 
 
-# Blog System: Pages, Admin Panel, and Pre-loaded Blog Content
+# Subscription System: Packages, Signup Flow & Testing Setup
 
 ## Overview
-Build a complete blog system with a database-backed `blogs` table, public blog pages, admin management panel, and pre-load 5 blog articles from the provided PDF into the database.
-
-## The 5 Blogs to Seed
-
-| # | Title | Tag |
-|---|-------|-----|
-| 1 | Supply Chain Management and QA/QC Checks in the Food Processing Industry | Industry |
-| 2 | Understanding HACCP, HALAL, FDA, FSSAI, KOSHER, and ISO: Key Certifications and Audit Procedures | Guide |
-| 3 | Large-Scale Manufacturing of Milk-Based Indian Mithai: Ensuring Quality with GMP and QA/QC | Industry |
-| 4 | Culinary Practices of Indian States: A Journey Through Regional Flavors and Tropical Traditions | Guide |
-| 5 | Developing a Food Recipe for Large Scale Manufacturing | Guide |
-
-Each blog will be stored with its full content (formatted as HTML), an excerpt, tag, and published status.
+Build a subscription system with a `subscription_plans` table, a `user_subscriptions` table, display pricing cards on the landing page, enforce mandatory subscription during signup, and grant all existing users (10 users) a free testing subscription.
 
 ## What Gets Built
 
-### 1. Database: `blogs` Table
-- id, title, slug (unique), excerpt, content (HTML), cover_image_url, tag, status (draft/published), author_id, published_at, created_at, updated_at
-- RLS: Anyone can view published blogs, admins can CRUD all
-- Seed all 5 blogs as published posts via the data insert tool
+### 1. Database: Two New Tables
 
-### 2. Landing Page Blog Section
-Update `src/components/landing/CTA.tsx` to fetch the latest 2 published blogs from the database instead of hardcoded data. Each card links to `/blog/:slug`.
+**`subscription_plans`** - Stores the plan definitions
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| name | text | "Starter Plan", "Annual Plan" |
+| price | integer | 500, 5999 (in INR) |
+| duration_months | integer | 2, 14 |
+| description | text | Plan details |
+| features | text[] | List of included features |
+| is_popular | boolean | Highlight badge for Annual Plan |
+| is_active | boolean | Whether plan is available |
+| created_at | timestamptz | |
 
-### 3. Public Blog Pages
+**`user_subscriptions`** - Tracks each user's subscription
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid | References auth.users |
+| plan_id | uuid | References subscription_plans |
+| status | text | 'active', 'expired', 'cancelled' |
+| starts_at | timestamptz | When subscription begins |
+| expires_at | timestamptz | When subscription ends |
+| payment_id | text | For future Cashfree integration (nullable for now) |
+| payment_status | text | 'free_trial', 'paid', 'pending' |
+| created_at | timestamptz | |
 
-**Blog Listing (`/blog`)**: Grid of blog cards with cover image, tag, title, excerpt, and date. Search bar and tag filter. No login required.
+**RLS Policies:**
+- Users can view their own subscriptions
+- Users can insert their own subscriptions (for the signup flow)
+- Admins can view and manage all subscriptions
+- Anyone can view active subscription plans (public)
 
-**Blog Detail (`/blog/:slug`)**: Full article view with title, tag badge, published date, and rich HTML content. Back to blogs navigation. No login required.
+### 2. Seed Data
+- Insert 2 plans: Starter (Rs.500/2 months), Annual (Rs.5,999/14 months)
+- Grant all 10 existing users an active "Annual Plan" subscription valid for 14 months (for testing)
 
-### 4. Admin Blog Management
+### 3. Landing Page: Pricing Section
+A new `Pricing` component displayed on the landing page between the existing sections, showing:
+- Two pricing cards side by side
+- Plan name, price, duration, feature list
+- "Popular" badge on Annual Plan
+- "Get Started" button linking to `/auth?plan={plan_id}`
+- Savings callout on Annual Plan ("2 months free!")
 
-**Blog List (`/admin/blogs`)**: Table of all blogs (drafts + published) with title, tag, status, date. Create/edit/delete actions.
+### 4. Updated Signup Flow
+Modify the Auth page to support a mandatory subscription step:
 
-**Blog Editor (`/admin/blogs/new` and `/admin/blogs/:id`)**: Form with title (auto-generates slug), slug field, excerpt, content textarea, tag dropdown (Industry, Guide, News, Recipe, Update), cover image upload, status toggle (draft/published). Save button.
+**Step 1: Choose Plan** (if not pre-selected via URL)
+- Show both plan cards
+- User must select one to proceed
 
-### 5. Navigation Updates
-- Add "Blogs" to admin sidebar in DashboardLayout
-- Add public routes `/blog` and `/blog/:slug`
-- Add admin routes `/admin/blogs` and `/admin/blogs/:id`
+**Step 2: Create Account** (existing form)
+- Role selection (Buyer/Supplier)
+- Name, email, password fields
+
+**Step 3: Confirmation** (placeholder for payment)
+- Show selected plan summary
+- For now: "Start Free Trial" button that creates the subscription with `payment_status: 'free_trial'`
+- Later: This step will integrate Cashfree payment gateway
+
+### 5. Subscription Guard
+- Create a `useSubscription` hook to check if the current user has an active subscription
+- Update `ProtectedRoute` to redirect users without an active subscription to a `/subscribe` page
+- Admin users bypass subscription checks entirely
+- The `/subscribe` page shows plan cards and lets users pick a plan (placeholder for payment)
+
+### 6. Admin Subscription View
+- Add a "Subscriptions" section to the admin sidebar
+- Simple table showing all user subscriptions with status, plan, and expiry date
 
 ## Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/pages/Blog.tsx` | Public blog listing page |
-| `src/pages/BlogDetail.tsx` | Public blog detail page |
-| `src/pages/admin/Blogs.tsx` | Admin blog list and management |
-| `src/pages/admin/BlogEdit.tsx` | Admin blog create/edit form |
-| `src/hooks/useBlogs.ts` | Hook for fetching and managing blog posts |
+| `src/hooks/useSubscription.ts` | Hook to check user's active subscription status |
+| `src/components/landing/Pricing.tsx` | Pricing cards section for landing page |
+| `src/pages/Subscribe.tsx` | Subscription selection page for users without active sub |
+| `src/pages/admin/Subscriptions.tsx` | Admin view of all subscriptions |
 
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/components/landing/CTA.tsx` | Fetch real blogs from database, link to `/blog/:slug` |
-| `src/components/shared/DashboardLayout.tsx` | Add "Blogs" to admin sidebar nav |
-| `src/App.tsx` | Add `/blog`, `/blog/:slug`, `/admin/blogs`, `/admin/blogs/:id` routes |
+| `src/pages/Index.tsx` | Add Pricing section to landing page |
+| `src/pages/Auth.tsx` | Add plan selection step to signup flow |
+| `src/hooks/useAuth.tsx` | Insert subscription record after signup |
+| `src/components/ProtectedRoute.tsx` | Add subscription check, redirect to /subscribe if no active sub |
+| `src/components/shared/DashboardLayout.tsx` | Add "Subscriptions" to admin sidebar |
+| `src/App.tsx` | Add /subscribe and /admin/subscriptions routes |
 
-## Database Changes
+## Signup Flow Diagram
 
-### Migration: Create `blogs` table
 ```text
-blogs table:
-  id            uuid PK
-  title         text NOT NULL
-  slug          text UNIQUE NOT NULL
-  excerpt       text
-  content       text (full HTML content)
-  cover_image_url  text
-  tag           text (e.g. "Industry", "Guide")
-  status        text DEFAULT 'draft'
-  author_id     uuid
-  published_at  timestamptz
-  created_at    timestamptz DEFAULT now()
-  updated_at    timestamptz DEFAULT now()
-
-RLS:
-  - "Anyone can view published blogs" SELECT where status = 'published'
-  - "Admins can manage all blogs" ALL using has_role(auth.uid(), 'admin')
-
-Trigger: update_updated_at on UPDATE
+Landing Page [Get Started] --> Auth Page
+                                  |
+                          Step 1: Select Plan
+                          (Starter or Annual)
+                                  |
+                          Step 2: Create Account
+                          (Name, Email, Password, Role)
+                                  |
+                          Step 3: Confirm Plan
+                          ("Start Free Trial" button)
+                                  |
+                      Creates user + role + subscription
+                                  |
+                          Redirect to Dashboard
 ```
 
-### Data Insert: Seed 5 blogs
-After creating the table, insert all 5 blog posts with:
-- Full HTML-formatted content from the PDF
-- Auto-generated slugs (e.g. "supply-chain-management-qaqc-food-processing")
-- Appropriate tags (Industry/Guide)
-- Status set to "published"
-- published_at set to current timestamp
+## What Needs to Happen Later for Cashfree
+
+Once this flow is built and tested, to add real payments you will need to provide:
+1. **Cashfree App ID** and **Secret Key** (from your Cashfree dashboard)
+2. The "Start Free Trial" button in Step 3 will be replaced with actual Cashfree payment initiation
+3. A backend function will be created to verify payment and activate the subscription
+4. A webhook endpoint will handle payment confirmations from Cashfree
 
 ## Technical Details
 
-### Slug Generation
-Auto-generate from title on the admin form. Example: "Supply Chain Management and QA/QC Checks" becomes "supply-chain-management-and-qaqc-checks"
+### Subscription Check Logic
+```text
+1. User logs in
+2. ProtectedRoute checks: does user have a row in user_subscriptions
+   where status = 'active' AND expires_at > now()?
+3. If YES -> allow access
+4. If NO -> redirect to /subscribe
+5. Admin role users -> always allowed (bypass check)
+```
 
-### Content Format
-Blog content will be stored as HTML with proper heading tags, lists, and paragraphs. The BlogDetail page will render this using `dangerouslySetInnerHTML` with appropriate styling via Tailwind's `prose` class.
-
-### Admin Blog Editor
-- Title input with auto-slug generation
-- Slug field (editable)
-- Excerpt textarea (short summary for cards)
-- Content textarea (large, full article in HTML/markdown)
-- Tag dropdown: Industry, Guide, News, Recipe, Update
-- Cover image upload (uses existing storage buckets)
-- Status toggle: Draft / Published
-- Save button
-
-### Landing Page CTA Update
-- Query latest 2 published blogs ordered by published_at DESC
-- Each card shows tag badge, title, excerpt
-- Links to `/blog/{slug}`
-- Falls back to placeholder if no blogs exist
+### Existing Users (Testing)
+All 10 current users will receive an Annual Plan subscription starting today, expiring in 14 months, with `payment_status: 'free_trial'`.
 
