@@ -44,6 +44,10 @@ import AdminContactSubmissions from "./pages/admin/ContactSubmissions";
 import AdminImportSuppliers from "./pages/admin/ImportSuppliers";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
+import Disclaimer from "./pages/Disclaimer";
 import AdminBlogs from "./pages/admin/Blogs";
 import AdminBlogEdit from "./pages/admin/BlogEdit";
 
@@ -69,6 +73,10 @@ const App = () => (
             <Route path="/scan" element={<ProductScanner />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
             
             {/* Unified Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
