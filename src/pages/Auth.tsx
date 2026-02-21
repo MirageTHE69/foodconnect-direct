@@ -46,13 +46,14 @@ export default function Auth() {
     }
   }, [preSelectedPlanId]);
 
-  // Redirect authenticated users
+  // Redirect authenticated users (but not during signup step 3 — user needs to activate subscription first)
   useEffect(() => {
     if (!loading && user && userRole) {
+      if (activeTab === 'signup' && signupStep === 3) return;
       const redirectPath = userRole === 'admin' ? '/admin' : '/dashboard';
       navigate(redirectPath, { replace: true });
     }
-  }, [user, loading, userRole, navigate]);
+  }, [user, loading, userRole, navigate, activeTab, signupStep]);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -86,19 +87,31 @@ export default function Auth() {
       setIsLoading(false);
       toast({ variant: 'destructive', title: 'Signup Failed', description: error.message.includes('User already registered') ? 'This email is already registered.' : error.message });
     } else {
-      // Move to confirmation step
+      // Move to confirmation step, keep isLoading false so user can click "Start Free Trial"
       setSignupStep(3);
       setIsLoading(false);
     }
   };
 
   const handleActivateSubscription = async () => {
-    if (!selectedPlanId || !user) return;
+    if (!selectedPlanId) return;
     const plan = plans.find(p => p.id === selectedPlanId);
     if (!plan) return;
 
     setIsLoading(true);
     try {
+      // Wait for user to be available (auth state may still be updating after signup)
+      let currentUser = user;
+      if (!currentUser) {
+        const { data } = await supabase.auth.getUser();
+        currentUser = data.user;
+      }
+      if (!currentUser) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Please wait a moment and try again — your account is still being set up.' });
+        setIsLoading(false);
+        return;
+      }
+
       const startsAt = new Date();
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + plan.duration_months);
@@ -106,7 +119,7 @@ export default function Auth() {
       const { error } = await supabase
         .from('user_subscriptions')
         .insert({
-          user_id: user.id,
+          user_id: currentUser.id,
           plan_id: plan.id,
           status: 'active',
           starts_at: startsAt.toISOString(),
@@ -117,7 +130,7 @@ export default function Auth() {
       if (error) throw error;
 
       toast({ title: 'Welcome to FoodAdda!', description: 'Your subscription is active. Redirecting...' });
-      navigate(userRole === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
     } finally {
