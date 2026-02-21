@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User, LayoutDashboard, ScanLine } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo-nav.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
