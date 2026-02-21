@@ -1,28 +1,40 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search, Wheat, Coffee, Fish, Apple, Milk, Flame, Package, LeafyGreen } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-const floatingIcons = [
-  { icon: Wheat, label: "Grains", bg: "bg-primary/15", text: "text-primary", size: "w-16 h-16", top: "top-4", left: "left-8", delay: "0s" },
-  { icon: Coffee, label: "Beverages", bg: "bg-accent/15", text: "text-accent", size: "w-20 h-20", top: "top-2", left: "left-[45%]", delay: "1s" },
-  { icon: Fish, label: "Seafood", bg: "bg-secondary/10", text: "text-secondary", size: "w-14 h-14", top: "top-[15%]", left: "right-6", delay: "2s" },
-  { icon: Apple, label: "Fruits", bg: "bg-destructive/10", text: "text-destructive", size: "w-18 h-18", top: "top-[35%]", left: "left-2", delay: "0.5s" },
-  { icon: Milk, label: "Dairy", bg: "bg-primary/20", text: "text-primary", size: "w-16 h-16", top: "top-[40%]", left: "left-[55%]", delay: "1.5s" },
-  { icon: Flame, label: "Spices", bg: "bg-accent/20", text: "text-accent", size: "w-14 h-14", top: "top-[55%]", left: "left-[25%]", delay: "2.5s" },
-  { icon: Package, label: "Packaged", bg: "bg-muted", text: "text-muted-foreground", size: "w-16 h-16", top: "top-[65%]", left: "right-12", delay: "0.8s" },
-  { icon: LeafyGreen, label: "Organic", bg: "bg-primary/10", text: "text-primary", size: "w-14 h-14", top: "top-[80%]", left: "left-[40%]", delay: "1.8s" },
-];
+import poster1 from "@/assets/posters/poster-1.jpg";
+import poster2 from "@/assets/posters/poster-2.jpg";
+import poster3 from "@/assets/posters/poster-3.jpg";
+
+const posters = [poster1, poster2, poster3];
 
 const Hero = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setActiveSlide(index);
+    setTimeout(() => setIsTransitioning(false), 600);
+  }, [isTransitioning]);
+
+  // Auto-rotate every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      goToSlide((activeSlide + 1) % posters.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activeSlide, goToSlide]);
 
   return (
     <section className="relative min-h-[90vh] flex items-center pt-20 bg-background overflow-hidden">
       {/* Yellow diagonal accent */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/10 skew-x-[-6deg] translate-x-20 hidden lg:block" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -36,7 +48,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-md">
-              Discover trusted suppliers, explore quality products, and connect directly. 
+              Discover trusted suppliers, explore quality products, and connect directly.
               No middlemen. No commissions.
             </p>
 
@@ -52,9 +64,9 @@ const Hero = () => {
                   className="w-full h-14 pl-12 pr-4 rounded-xl border-2 border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
-              <Button 
-                variant="hero" 
-                size="lg" 
+              <Button
+                variant="hero"
+                size="lg"
                 className="h-14"
                 onClick={() => navigate('/suppliers')}
               >
@@ -76,30 +88,64 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Visual - Illustration Style */}
+          {/* Right Visual - Phone Mockup with Auto-Rotating Posters */}
           <div className="relative hidden lg:flex justify-center items-center min-h-[500px]">
-            {/* Decorative background shapes */}
-            <div className="absolute w-64 h-64 rounded-full bg-primary/5 top-10 left-10" />
-            <div className="absolute w-40 h-40 rounded-full bg-accent/5 bottom-16 right-8" />
-            <div className="absolute w-20 h-20 rounded-2xl bg-primary/10 top-4 right-20 rotate-12" />
-            <div className="absolute w-12 h-12 rounded-xl bg-accent/15 bottom-24 left-4 -rotate-12" />
+            {/* Glow behind phone */}
+            <div className="absolute w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
 
-            {/* Floating icon cards */}
-            {floatingIcons.map(({ icon: Icon, label, bg, text, size, top, left, delay }, i) => (
-              <div
-                key={i}
-                className={`absolute ${top} ${left} animate-float`}
-                style={{ animationDelay: delay, animationDuration: `${5 + i * 0.7}s` }}
-              >
-                <div className={`${size} ${bg} rounded-2xl shadow-card flex flex-col items-center justify-center gap-1 backdrop-blur-sm border border-border/30 hover:scale-110 transition-transform`}>
-                  <Icon className={`w-6 h-6 ${text}`} />
-                  <span className={`text-[10px] font-semibold ${text} opacity-70`}>{label}</span>
+            {/* Phone Frame */}
+            <div className="relative w-[280px] h-[570px] rounded-[3rem] border-[6px] border-foreground/90 bg-foreground/95 shadow-2xl overflow-hidden">
+              {/* Notch */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-foreground/95 rounded-b-2xl z-20" />
+
+              {/* Screen Content - Poster Carousel */}
+              <div className="relative w-full h-full overflow-hidden rounded-[2.5rem]">
+                {posters.map((poster, index) => (
+                  <div
+                    key={index}
+                    className="absolute inset-0 transition-all duration-600 ease-in-out"
+                    style={{
+                      opacity: activeSlide === index ? 1 : 0,
+                      transform: activeSlide === index ? 'scale(1)' : 'scale(1.05)',
+                      transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out',
+                    }}
+                  >
+                    <img
+                      src={poster}
+                      alt={`FoodAdda promotional poster ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+
+                {/* Slide Indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {posters.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        activeSlide === index
+                          ? 'w-6 bg-primary'
+                          : 'w-1.5 bg-white/50 hover:bg-white/80'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
+
+              {/* Home Indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-white/30 z-20" />
+            </div>
+
+            {/* Decorative elements around phone */}
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-2xl bg-primary/10 rotate-12 animate-float" style={{ animationDuration: '6s' }} />
+            <div className="absolute -bottom-6 -left-6 w-16 h-16 rounded-full bg-accent/10 animate-float" style={{ animationDuration: '7s', animationDelay: '1s' }} />
+            <div className="absolute top-1/4 -left-8 w-12 h-12 rounded-xl bg-primary/15 -rotate-12 animate-float" style={{ animationDuration: '5s', animationDelay: '2s' }} />
 
             {/* Decorative dots */}
-            <div className="absolute top-[30%] right-4 flex flex-col gap-2">
+            <div className="absolute top-[30%] -right-2 flex flex-col gap-2">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="flex gap-2">
                   {[...Array(3)].map((_, j) => (
