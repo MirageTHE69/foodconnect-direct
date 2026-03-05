@@ -5,6 +5,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import Categories from "@/components/landing/Categories";
 import ForBuyers from "@/components/landing/ForBuyers";
 import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
+import GrowthSolutions from "@/components/landing/GrowthSolutions";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import Community from "@/components/landing/Community";
@@ -23,6 +24,7 @@ const Index = () => {
       <ForBuyers />
       <FeaturedSuppliers />
       <Pricing />
+      <GrowthSolutions />
       <Testimonials />
       <Community />
       <FAQ />
