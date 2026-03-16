@@ -7,7 +7,7 @@ import { Upload, X, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface MultiImageUploadProps {
-  bucket: 'avatars' | 'suppliers' | 'products' | 'recipes';
+  bucket: 'avatars' | 'suppliers' | 'products' | 'recipes' | 'registration_files';
   currentImages?: string[];
   maxImages?: number;
   onImagesChange: (urls: string[]) => void;
