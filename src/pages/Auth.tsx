@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, ShoppingBag, Store, Loader2, Eye, EyeOff, ArrowLeft, ArrowRight, Check, Star } from 'lucide-react';
 import { z } from 'zod';
+import { UserTypeSelector, type UserType } from '@/components/registration/UserTypeSelector';
+import { RegistrationForm, type RegistrationData } from '@/components/registration/RegistrationForm';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -24,8 +26,11 @@ export default function Auth() {
   const preSelectedPlanId = searchParams.get('plan');
 
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
-  const [signupStep, setSignupStep] = useState<1 | 2 | 3>(preSelectedPlanId ? 2 : 1);
+  // Steps: 1=Plan, 2=Registration Form, 3=Create Account, 4=Confirm
+  const [signupStep, setSignupStep] = useState<1 | 2 | 3 | 4>(preSelectedPlanId ? 2 : 1);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(preSelectedPlanId);
+  const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
+  const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -39,17 +44,13 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // If plan is in URL, auto switch to signup
   useEffect(() => {
-    if (preSelectedPlanId) {
-      setActiveTab('signup');
-    }
+    if (preSelectedPlanId) setActiveTab('signup');
   }, [preSelectedPlanId]);
 
-  // Redirect authenticated users (but not during signup step 3 — user needs to activate subscription first)
   useEffect(() => {
     if (!loading && user && userRole) {
-      if (activeTab === 'signup' && signupStep === 3) return;
+      if (activeTab === 'signup' && signupStep === 4) return;
       const redirectPath = userRole === 'admin' ? '/admin' : '/dashboard';
       navigate(redirectPath, { replace: true });
     }
@@ -77,6 +78,15 @@ export default function Auth() {
     }
   };
 
+  const handleRegistrationSubmit = (data: RegistrationData) => {
+    setRegistrationData(data);
+    // Pre-fill email and name from registration if available
+    if (data.email) setEmail(data.email);
+    if (data.full_name) setFullName(data.full_name);
+    else if (data.contact_person_name) setFullName(data.contact_person_name);
+    setSignupStep(3);
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -86,11 +96,68 @@ export default function Auth() {
     if (error) {
       setIsLoading(false);
       toast({ variant: 'destructive', title: 'Signup Failed', description: error.message.includes('User already registered') ? 'This email is already registered.' : error.message });
-    } else {
-      // Move to confirmation step, keep isLoading false so user can click "Start Free Trial"
-      setSignupStep(3);
-      setIsLoading(false);
+      return;
     }
+
+    // Save registration profile
+    try {
+      let currentUser = user;
+      if (!currentUser) {
+        const { data } = await supabase.auth.getUser();
+        currentUser = data.user;
+      }
+      if (currentUser && registrationData) {
+        const { error: regError } = await supabase
+          .from('registration_profiles')
+          .insert({
+            user_id: currentUser.id,
+            user_type: registrationData.user_type as any,
+            company_name: registrationData.company_name || null,
+            full_name: registrationData.full_name || null,
+            address: registrationData.address || null,
+            city: registrationData.city || null,
+            state: registrationData.state || null,
+            country: registrationData.country || null,
+            google_location: registrationData.google_location || null,
+            phone: registrationData.phone || null,
+            whatsapp: registrationData.whatsapp || null,
+            email: registrationData.email || null,
+            website: registrationData.website || null,
+            gst_number: registrationData.gst_number || null,
+            gst_verified: registrationData.gst_verified,
+            fssai_number: registrationData.fssai_number || null,
+            product_description: registrationData.product_description || null,
+            contact_person_name: registrationData.contact_person_name || null,
+            contact_designation: registrationData.contact_designation || null,
+            contact_phone: registrationData.contact_phone || null,
+            moq: registrationData.moq || null,
+            horeca_category: registrationData.horeca_category || null,
+            menu_description: registrationData.menu_description || null,
+            preferred_franchise_location: registrationData.preferred_franchise_location || null,
+            franchise_category: registrationData.franchise_category || null,
+            qualification: registrationData.qualification || null,
+            years_experience: registrationData.years_experience || null,
+            job_category: registrationData.job_category || null,
+            preferred_city: registrationData.preferred_city || null,
+            uploaded_photos: registrationData.uploaded_photos.length > 0 ? registrationData.uploaded_photos : null,
+            menu_upload_url: registrationData.menu_upload_url || null,
+            cv_url: registrationData.cv_url || null,
+            passport_photo_url: registrationData.passport_photo_url || null,
+            aadhar_front_url: registrationData.aadhar_front_url || null,
+            aadhar_back_url: registrationData.aadhar_back_url || null,
+            terms_accepted: registrationData.terms_accepted,
+          } as any);
+
+        if (regError) {
+          console.error('Registration profile error:', regError);
+        }
+      }
+    } catch (err) {
+      console.error('Error saving registration:', err);
+    }
+
+    setSignupStep(4);
+    setIsLoading(false);
   };
 
   const handleActivateSubscription = async () => {
@@ -100,7 +167,6 @@ export default function Auth() {
 
     setIsLoading(true);
     try {
-      // Wait for user to be available (auth state may still be updating after signup)
       let currentUser = user;
       if (!currentUser) {
         const { data } = await supabase.auth.getUser();
@@ -140,6 +206,12 @@ export default function Auth() {
 
   const selectedPlan = plans.find(p => p.id === selectedPlanId);
 
+  const handleBackStep = () => {
+    if (signupStep === 2) setSignupStep(1);
+    else if (signupStep === 3) setSignupStep(2);
+    else navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -148,17 +220,19 @@ export default function Auth() {
     );
   }
 
+  const stepLabels = ['Plan', 'Registration', 'Account', 'Confirm'];
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <header className="p-4">
-        <Button variant="ghost" onClick={() => signupStep > 1 && activeTab === 'signup' && signupStep < 3 ? setSignupStep((signupStep - 1) as 1 | 2) : navigate('/')} className="gap-2">
+        <Button variant="ghost" onClick={handleBackStep} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
-          {signupStep > 1 && activeTab === 'signup' && signupStep < 3 ? 'Back' : 'Back to Home'}
+          {signupStep > 1 && activeTab === 'signup' && signupStep < 4 ? 'Back' : 'Back to Home'}
         </Button>
       </header>
 
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+        <div className={`w-full ${signupStep === 2 && activeTab === 'signup' ? 'max-w-2xl' : 'max-w-md'}`}>
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -214,21 +288,19 @@ export default function Auth() {
                 {/* Step indicator */}
                 <div className="px-6 pt-4">
                   <div className="flex items-center justify-between mb-2">
-                    {[1, 2, 3].map((step) => (
+                    {[1, 2, 3, 4].map((step) => (
                       <div key={step} className="flex items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                           signupStep >= step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                         }`}>
                           {signupStep > step ? <Check className="w-4 h-4" /> : step}
                         </div>
-                        {step < 3 && <div className={`w-16 sm:w-24 h-0.5 mx-1 ${signupStep > step ? 'bg-primary' : 'bg-muted'}`} />}
+                        {step < 4 && <div className={`w-8 sm:w-16 h-0.5 mx-1 ${signupStep > step ? 'bg-primary' : 'bg-muted'}`} />}
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Plan</span>
-                    <span>Account</span>
-                    <span>Confirm</span>
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    {stepLabels.map(l => <span key={l}>{l}</span>)}
                   </div>
                 </div>
 
@@ -283,15 +355,46 @@ export default function Auth() {
                   </>
                 )}
 
-                {/* Step 2: Create Account */}
+                {/* Step 2: User Type Selection + Registration Form */}
                 {signupStep === 2 && (
+                  <>
+                    <CardHeader>
+                      <CardTitle>Join FoodAdda</CardTitle>
+                      <CardDescription>
+                        {selectedPlan && <span className="text-primary font-medium">{selectedPlan.name}</span>}
+                        {' — '}Complete your registration
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {!selectedUserType ? (
+                        <UserTypeSelector selected={selectedUserType} onSelect={setSelectedUserType} />
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">
+                              Type: <span className="font-semibold text-foreground uppercase">{selectedUserType}</span>
+                            </p>
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedUserType(null)}>
+                              Change
+                            </Button>
+                          </div>
+                          <RegistrationForm
+                            userType={selectedUserType}
+                            onSubmit={handleRegistrationSubmit}
+                            isLoading={isLoading}
+                          />
+                        </>
+                      )}
+                    </CardContent>
+                  </>
+                )}
+
+                {/* Step 3: Create Account */}
+                {signupStep === 3 && (
                   <form onSubmit={handleSignup}>
                     <CardHeader>
                       <CardTitle>Create Account</CardTitle>
-                      <CardDescription>
-                        {selectedPlan && <span className="text-primary font-medium">{selectedPlan.name}</span>}
-                        {' — '}Fill in your details
-                      </CardDescription>
+                      <CardDescription>Set up your login credentials</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-3">
@@ -347,8 +450,8 @@ export default function Auth() {
                   </form>
                 )}
 
-                {/* Step 3: Confirm Subscription */}
-                {signupStep === 3 && selectedPlan && (
+                {/* Step 4: Confirm Subscription */}
+                {signupStep === 4 && selectedPlan && (
                   <>
                     <CardHeader>
                       <CardTitle>Confirm Your Plan</CardTitle>
