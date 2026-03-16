@@ -434,6 +434,132 @@ export type Database = {
           },
         ]
       }
+      registration_profiles: {
+        Row: {
+          aadhar_back_url: string | null
+          aadhar_front_url: string | null
+          address: string | null
+          city: string | null
+          company_name: string | null
+          contact_designation: string | null
+          contact_person_name: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          cv_url: string | null
+          email: string | null
+          franchise_category: string | null
+          fssai_number: string | null
+          full_name: string | null
+          google_location: string | null
+          gst_number: string | null
+          gst_verified: boolean | null
+          horeca_category: string | null
+          id: string
+          job_category: string | null
+          menu_description: string | null
+          menu_upload_url: string | null
+          moq: string | null
+          passport_photo_url: string | null
+          phone: string | null
+          preferred_city: string | null
+          preferred_franchise_location: string | null
+          product_description: string | null
+          qualification: string | null
+          state: string | null
+          terms_accepted: boolean | null
+          updated_at: string
+          uploaded_photos: string[] | null
+          user_id: string | null
+          user_type: Database["public"]["Enums"]["user_type"]
+          website: string | null
+          whatsapp: string | null
+          years_experience: string | null
+        }
+        Insert: {
+          aadhar_back_url?: string | null
+          aadhar_front_url?: string | null
+          address?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_designation?: string | null
+          contact_person_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          cv_url?: string | null
+          email?: string | null
+          franchise_category?: string | null
+          fssai_number?: string | null
+          full_name?: string | null
+          google_location?: string | null
+          gst_number?: string | null
+          gst_verified?: boolean | null
+          horeca_category?: string | null
+          id?: string
+          job_category?: string | null
+          menu_description?: string | null
+          menu_upload_url?: string | null
+          moq?: string | null
+          passport_photo_url?: string | null
+          phone?: string | null
+          preferred_city?: string | null
+          preferred_franchise_location?: string | null
+          product_description?: string | null
+          qualification?: string | null
+          state?: string | null
+          terms_accepted?: boolean | null
+          updated_at?: string
+          uploaded_photos?: string[] | null
+          user_id?: string | null
+          user_type: Database["public"]["Enums"]["user_type"]
+          website?: string | null
+          whatsapp?: string | null
+          years_experience?: string | null
+        }
+        Update: {
+          aadhar_back_url?: string | null
+          aadhar_front_url?: string | null
+          address?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_designation?: string | null
+          contact_person_name?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          cv_url?: string | null
+          email?: string | null
+          franchise_category?: string | null
+          fssai_number?: string | null
+          full_name?: string | null
+          google_location?: string | null
+          gst_number?: string | null
+          gst_verified?: boolean | null
+          horeca_category?: string | null
+          id?: string
+          job_category?: string | null
+          menu_description?: string | null
+          menu_upload_url?: string | null
+          moq?: string | null
+          passport_photo_url?: string | null
+          phone?: string | null
+          preferred_city?: string | null
+          preferred_franchise_location?: string | null
+          product_description?: string | null
+          qualification?: string | null
+          state?: string | null
+          terms_accepted?: boolean | null
+          updated_at?: string
+          uploaded_photos?: string[] | null
+          user_id?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"]
+          website?: string | null
+          whatsapp?: string | null
+          years_experience?: string | null
+        }
+        Relationships: []
+      }
       saved_products: {
         Row: {
           created_at: string
@@ -729,6 +855,7 @@ export type Database = {
     Enums: {
       app_role: "buyer" | "supplier" | "admin"
       product_status: "pending" | "approved" | "rejected"
+      user_type: "b2b" | "b2c" | "horeca" | "franchise" | "recruitment"
       verification_status: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
@@ -859,6 +986,7 @@ export const Constants = {
     Enums: {
       app_role: ["buyer", "supplier", "admin"],
       product_status: ["pending", "approved", "rejected"],
+      user_type: ["b2b", "b2c", "horeca", "franchise", "recruitment"],
       verification_status: ["pending", "verified", "rejected"],
     },
   },
