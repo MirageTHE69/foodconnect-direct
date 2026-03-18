@@ -24,6 +24,7 @@ const Index = () => {
       <Categories />
       <ForBuyers />
       <FeaturedSuppliers />
+      <HotRequirements />
       <Pricing />
       <GrowthSolutions />
       <Testimonials />
