@@ -59,6 +59,39 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon: string
+          id: string
+          is_active: boolean
+          item_count: number
+          name: string
+          type: Database["public"]["Enums"]["category_type"]
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          item_count?: number
+          name: string
+          type?: Database["public"]["Enums"]["category_type"]
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          item_count?: number
+          name?: string
+          type?: Database["public"]["Enums"]["category_type"]
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -174,6 +207,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hot_requirements: {
+        Row: {
+          budget_range: string | null
+          category: string | null
+          contact_user_id: string | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          posted_by_admin: string | null
+          quantity: string | null
+          title: string
+        }
+        Insert: {
+          budget_range?: string | null
+          category?: string | null
+          contact_user_id?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          posted_by_admin?: string | null
+          quantity?: string | null
+          title: string
+        }
+        Update: {
+          budget_range?: string | null
+          category?: string | null
+          contact_user_id?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          posted_by_admin?: string | null
+          quantity?: string | null
+          title?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -618,6 +696,44 @@ export type Database = {
           },
         ]
       }
+      sub_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string
@@ -854,6 +970,7 @@ export type Database = {
     }
     Enums: {
       app_role: "buyer" | "supplier" | "admin"
+      category_type: "product" | "service"
       product_status: "pending" | "approved" | "rejected"
       user_type: "b2b" | "b2c" | "horeca" | "franchise" | "recruitment"
       verification_status: "pending" | "verified" | "rejected"
@@ -985,6 +1102,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["buyer", "supplier", "admin"],
+      category_type: ["product", "service"],
       product_status: ["pending", "approved", "rejected"],
       user_type: ["b2b", "b2c", "horeca", "franchise", "recruitment"],
       verification_status: ["pending", "verified", "rejected"],

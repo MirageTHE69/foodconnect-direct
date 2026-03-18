@@ -1,59 +1,143 @@
 
 
-## Plan: Dynamic Categories System + Hot Requirements Section
+# Subscription System: Packages, Signup Flow & Testing Setup
 
-### Part 1: Categories with Sub-Categories
+## Overview
+Build a subscription system with a `subscription_plans` table, a `user_subscriptions` table, display pricing cards on the landing page, enforce mandatory subscription during signup, and grant all existing users (10 users) a free testing subscription.
 
-**Database: Create `categories` and `sub_categories` tables**
+## What Gets Built
 
-`categories` table:
-- id, name, icon (lucide icon name), type (enum: 'product' | 'service'), display_order, is_active, item_count (integer, admin-managed), created_at
+### 1. Database: Two New Tables
 
-`sub_categories` table:
-- id, category_id (FK), name, description, display_order, is_active, created_at
+**`subscription_plans`** - Stores the plan definitions
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| name | text | "Starter Plan", "Annual Plan" |
+| price | integer | 500, 5999 (in INR) |
+| duration_months | integer | 2, 14 |
+| description | text | Plan details |
+| features | text[] | List of included features |
+| is_popular | boolean | Highlight badge for Annual Plan |
+| is_active | boolean | Whether plan is available |
+| created_at | timestamptz | |
 
-Seed all 15 categories from the PDF:
-- **Product categories (1-12):** Fresh Produce, Grains/Pulses/Cereals, Dairy & Alternatives, Meat/Poultry/Seafood, Beverages, Oils/Fats/Spices, Bakery/Confectionery/Snacks, Packaged & Processed Foods, Health/Organic/Specialty, Food Ingredients & Additives, Packaging & Allied, Cold Chain & Logistics
-- **Service categories (13-15):** Food Processing & Machinery, Branding/Marketing/Design, HoReCa & Institutional Supplies
+**`user_subscriptions`** - Tracks each user's subscription
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid | References auth.users |
+| plan_id | uuid | References subscription_plans |
+| status | text | 'active', 'expired', 'cancelled' |
+| starts_at | timestamptz | When subscription begins |
+| expires_at | timestamptz | When subscription ends |
+| payment_id | text | For future Cashfree integration (nullable for now) |
+| payment_status | text | 'free_trial', 'paid', 'pending' |
+| created_at | timestamptz | |
 
-Each with their sub-categories from the PDF. RLS: public read, admin write.
+**RLS Policies:**
+- Users can view their own subscriptions
+- Users can insert their own subscriptions (for the signup flow)
+- Admins can view and manage all subscriptions
+- Anyone can view active subscription plans (public)
 
-**Frontend:**
+### 2. Seed Data
+- Insert 2 plans: Starter (Rs.500/2 months), Annual (Rs.5,999/14 months)
+- Grant all 10 existing users an active "Annual Plan" subscription valid for 14 months (for testing)
 
-1. **Update `src/components/landing/Categories.tsx`** — Fetch from `categories` table, show all categories in a grid with icons and item counts. Service categories get a distinct badge/color (e.g., "Service" tag). Each card links to `/categories/:id`.
+### 3. Landing Page: Pricing Section
+A new `Pricing` component displayed on the landing page between the existing sections, showing:
+- Two pricing cards side by side
+- Plan name, price, duration, feature list
+- "Popular" badge on Annual Plan
+- "Get Started" button linking to `/auth?plan={plan_id}`
+- Savings callout on Annual Plan ("2 months free!")
 
-2. **Create `src/pages/CategoryDetail.tsx`** — New page at `/categories/:id` showing the category name, type badge, and a grid of all its sub-categories. Each sub-category displayed as a card. No auth required (public page).
+### 4. Updated Signup Flow
+Modify the Auth page to support a mandatory subscription step:
 
-3. **Add route** in `App.tsx`: `/categories/:id` → `CategoryDetail`
+**Step 1: Choose Plan** (if not pre-selected via URL)
+- Show both plan cards
+- User must select one to proceed
 
-### Part 2: Hot Requirements Section
+**Step 2: Create Account** (existing form)
+- Role selection (Buyer/Supplier)
+- Name, email, password fields
 
-**Database: Create `hot_requirements` table**
-- id, title, description, category (text), location (text), quantity (text), budget_range (text), posted_by_admin (uuid, FK profiles), contact_user_id (uuid, nullable — the buyer/hotel on whose behalf it's posted), is_active, expires_at, created_at
+**Step 3: Confirmation** (placeholder for payment)
+- Show selected plan summary
+- For now: "Start Free Trial" button that creates the subscription with `payment_status: 'free_trial'`
+- Later: This step will integrate Cashfree payment gateway
 
-RLS: Anyone can view active requirements. Admins can manage all.
+### 5. Subscription Guard
+- Create a `useSubscription` hook to check if the current user has an active subscription
+- Update `ProtectedRoute` to redirect users without an active subscription to a `/subscribe` page
+- Admin users bypass subscription checks entirely
+- The `/subscribe` page shows plan cards and lets users pick a plan (placeholder for payment)
 
-**Frontend:**
+### 6. Admin Subscription View
+- Add a "Subscriptions" section to the admin sidebar
+- Simple table showing all user subscriptions with status, plan, and expiry date
 
-1. **Create `src/components/landing/HotRequirements.tsx`** — Landing page section showing active hot requirements as cards with title, category, location, quantity. Each card has a "Respond" button.
-   - If user is not logged in → redirect to `/auth`
-   - If logged in but no subscription → redirect to `/subscribe`
-   - If logged in + subscribed → open chat with the contact user
+## Files to Create
 
-2. **Create admin page `src/pages/admin/HotRequirements.tsx`** — CRUD for hot requirements. Admin can create/edit/delete requirements, set expiry dates, assign a contact user.
+| File | Purpose |
+|------|---------|
+| `src/hooks/useSubscription.ts` | Hook to check user's active subscription status |
+| `src/components/landing/Pricing.tsx` | Pricing cards section for landing page |
+| `src/pages/Subscribe.tsx` | Subscription selection page for users without active sub |
+| `src/pages/admin/Subscriptions.tsx` | Admin view of all subscriptions |
 
-3. **Add to `Index.tsx`** — Place `HotRequirements` section after `FeaturedSuppliers` (before Pricing).
+## Files to Modify
 
-4. **Add routes** in `App.tsx`:
-   - `/categories/:id` (public)
-   - `/admin/hot-requirements` (admin protected)
+| File | Change |
+|------|--------|
+| `src/pages/Index.tsx` | Add Pricing section to landing page |
+| `src/pages/Auth.tsx` | Add plan selection step to signup flow |
+| `src/hooks/useAuth.tsx` | Insert subscription record after signup |
+| `src/components/ProtectedRoute.tsx` | Add subscription check, redirect to /subscribe if no active sub |
+| `src/components/shared/DashboardLayout.tsx` | Add "Subscriptions" to admin sidebar |
+| `src/App.tsx` | Add /subscribe and /admin/subscriptions routes |
 
-### Section Order After Changes
-Navbar → Hero → Stats → HowItWorks → **Categories** (dynamic) → ForBuyers → FeaturedSuppliers → **HotRequirements** → Pricing → GrowthSolutions → Testimonials → Community → FAQ → CTA → Footer
+## Signup Flow Diagram
 
-### Technical Notes
-- Categories use lucide icon names stored as strings, rendered dynamically
-- Service vs product distinction shown via colored badges on category cards
-- Hot requirements "Respond" button checks auth + subscription status before initiating chat
-- All data seeded via migration SQL
+```text
+Landing Page [Get Started] --> Auth Page
+                                  |
+                          Step 1: Select Plan
+                          (Starter or Annual)
+                                  |
+                          Step 2: Create Account
+                          (Name, Email, Password, Role)
+                                  |
+                          Step 3: Confirm Plan
+                          ("Start Free Trial" button)
+                                  |
+                      Creates user + role + subscription
+                                  |
+                          Redirect to Dashboard
+```
+
+## What Needs to Happen Later for Cashfree
+
+Once this flow is built and tested, to add real payments you will need to provide:
+1. **Cashfree App ID** and **Secret Key** (from your Cashfree dashboard)
+2. The "Start Free Trial" button in Step 3 will be replaced with actual Cashfree payment initiation
+3. A backend function will be created to verify payment and activate the subscription
+4. A webhook endpoint will handle payment confirmations from Cashfree
+
+## Technical Details
+
+### Subscription Check Logic
+```text
+1. User logs in
+2. ProtectedRoute checks: does user have a row in user_subscriptions
+   where status = 'active' AND expires_at > now()?
+3. If YES -> allow access
+4. If NO -> redirect to /subscribe
+5. Admin role users -> always allowed (bypass check)
+```
+
+### Existing Users (Testing)
+All 10 current users will receive an Annual Plan subscription starting today, expiring in 14 months, with `payment_status: 'free_trial'`.
 
