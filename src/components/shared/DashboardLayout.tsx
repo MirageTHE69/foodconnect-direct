@@ -22,6 +22,7 @@ import {
   Upload,
   FileText,
   CreditCard,
+  Flame,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
