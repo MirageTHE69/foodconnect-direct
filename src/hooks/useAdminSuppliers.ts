@@ -75,6 +75,7 @@ export function useAdminSuppliers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['featured-suppliers'] });
       toast.success('Supplier featured status updated');
     },
     onError: (error) => {

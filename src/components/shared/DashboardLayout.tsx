@@ -22,6 +22,7 @@ import {
   Upload,
   FileText,
   CreditCard,
+  Flame,
 } from 'lucide-react';
 import logoImg from '@/assets/logo.png';
 
@@ -57,6 +58,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Contact Submissions', href: '/admin/contact', icon: <Mail className="h-5 w-5" /> },
   { label: 'Blogs', href: '/admin/blogs', icon: <FileText className="h-5 w-5" /> },
   { label: 'Subscriptions', href: '/admin/subscriptions', icon: <CreditCard className="h-5 w-5" /> },
+  { label: 'Hot Requirements', href: '/admin/hot-requirements', icon: <Flame className="h-5 w-5" /> },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
