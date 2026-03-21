@@ -2,3 +2,6 @@
  
  [functions.scan-product]
  verify_jwt = false
+
+ [functions.website-bot]
+ verify_jwt = false

@@ -131,6 +131,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
+        <ChatBotWidget />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
