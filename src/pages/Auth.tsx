@@ -146,6 +146,12 @@ export default function Auth() {
             aadhar_front_url: registrationData.aadhar_front_url || null,
             aadhar_back_url: registrationData.aadhar_back_url || null,
             terms_accepted: registrationData.terms_accepted,
+            b2b_category: registrationData.b2b_category || null,
+            private_label: registrationData.private_label || null,
+            export_capability: registrationData.export_capability || null,
+            logistics_support: registrationData.logistics_support || null,
+            pricing_tier: registrationData.pricing_tier || null,
+            certifications_text: registrationData.certifications_text || null,
           } as any);
 
         if (regError) {
