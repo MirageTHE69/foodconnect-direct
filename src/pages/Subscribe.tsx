@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscriptionPlans } from '@/hooks/useSubscription';
+import { useSubscription, useSubscriptionPlans } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -11,11 +11,18 @@ import { Check, Star, Loader2, ArrowLeft, Utensils } from 'lucide-react';
 
 export default function Subscribe() {
   const { plans, loading: plansLoading } = useSubscriptionPlans();
+  const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!subscriptionLoading && hasActiveSubscription) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [hasActiveSubscription, subscriptionLoading, navigate]);
 
   const handleSubscribe = async () => {
     if (!selectedPlan || !user) return;
@@ -43,7 +50,7 @@ export default function Subscribe() {
       if (error) throw error;
 
       toast({ title: 'Subscription Activated!', description: `You now have access for ${plan.duration_months} months.` });
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
     } finally {

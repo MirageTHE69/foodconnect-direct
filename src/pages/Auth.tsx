@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscriptionPlans, type SubscriptionPlan } from '@/hooks/useSubscription';
+import { useSubscription, useSubscriptionPlans, type SubscriptionPlan } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
   const { signIn, signUp, user, userRole, loading } = useAuth();
+  const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   const { plans, loading: plansLoading } = useSubscriptionPlans();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -49,12 +50,11 @@ export default function Auth() {
   }, [preSelectedPlanId]);
 
   useEffect(() => {
-    if (!loading && user && userRole) {
-      if (activeTab === 'signup' && signupStep === 4) return;
+    if (!loading && !subscriptionLoading && user && userRole && hasActiveSubscription) {
       const redirectPath = userRole === 'admin' ? '/admin' : '/dashboard';
       navigate(redirectPath, { replace: true });
     }
-  }, [user, loading, userRole, navigate, activeTab, signupStep]);
+  }, [user, loading, userRole, hasActiveSubscription, subscriptionLoading, navigate]);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
