@@ -13,6 +13,7 @@ export default function Subscribe() {
   const { plans, loading: plansLoading } = useSubscriptionPlans();
   const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
