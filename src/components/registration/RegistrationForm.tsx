@@ -57,6 +57,13 @@ export interface RegistrationData {
   aadhar_front_url: string;
   aadhar_back_url: string;
   terms_accepted: boolean;
+  // B2B-specific fields
+  b2b_category: string;
+  private_label: string;
+  export_capability: string;
+  logistics_support: string;
+  pricing_tier: string;
+  certifications_text: string;
 }
 
 const initialData = (userType: UserType): RegistrationData => ({
@@ -70,6 +77,8 @@ const initialData = (userType: UserType): RegistrationData => ({
   qualification: '', years_experience: '', job_category: '', preferred_city: '',
   uploaded_photos: [], menu_upload_url: '', cv_url: '', passport_photo_url: '',
   aadhar_front_url: '', aadhar_back_url: '', terms_accepted: false,
+  b2b_category: '', private_label: '', export_capability: '', logistics_support: '',
+  pricing_tier: '', certifications_text: '',
 });
 
 interface RegistrationFormProps {
@@ -270,10 +279,61 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
             )}
 
             {isB2BorB2C && (
-              <div className="space-y-1.5">
-                <Label>Minimum Order Quantity (MOQ)</Label>
-                <Input value={data.moq} onChange={e => set('moq', e.target.value)} placeholder="e.g., 100 units" />
-              </div>
+              <>
+                <div className="space-y-1.5">
+                  <Label>Category</Label>
+                  <Input value={data.b2b_category} onChange={e => set('b2b_category', e.target.value)} placeholder="e.g., Spices, Dairy, Beverages" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Minimum Order Quantity (MOQ)</Label>
+                  <Input value={data.moq} onChange={e => set('moq', e.target.value)} placeholder="e.g., 100 units" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Certifications</Label>
+                  <Input value={data.certifications_text} onChange={e => set('certifications_text', e.target.value)} placeholder="e.g., ISO, FSSAI, HACCP" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Private Label</Label>
+                  <Select value={data.private_label} onValueChange={v => set('private_label', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Export Capability</Label>
+                  <Select value={data.export_capability} onValueChange={v => set('export_capability', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Logistics Support</Label>
+                  <Select value={data.logistics_support} onValueChange={v => set('logistics_support', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Pricing Tier</Label>
+                  <Select value={data.pricing_tier} onValueChange={v => set('pricing_tier', v)}>
+                    <SelectTrigger><SelectValue placeholder="Select tier" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Budget">Budget</SelectItem>
+                      <SelectItem value="Mid-Range">Mid-Range</SelectItem>
+                      <SelectItem value="Premium">Premium</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
 
             {isFranchise && (
