@@ -50,12 +50,11 @@ export default function Auth() {
   }, [preSelectedPlanId]);
 
   useEffect(() => {
-    if (!loading && user && userRole) {
-      if (activeTab === 'signup' && signupStep === 4) return;
+    if (!loading && !subscriptionLoading && user && userRole && hasActiveSubscription) {
       const redirectPath = userRole === 'admin' ? '/admin' : '/dashboard';
       navigate(redirectPath, { replace: true });
     }
-  }, [user, loading, userRole, navigate, activeTab, signupStep]);
+  }, [user, loading, userRole, hasActiveSubscription, subscriptionLoading, navigate]);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};

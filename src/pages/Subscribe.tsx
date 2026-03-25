@@ -18,6 +18,12 @@ export default function Subscribe() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!subscriptionLoading && hasActiveSubscription) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [hasActiveSubscription, subscriptionLoading, navigate]);
+
   const handleSubscribe = async () => {
     if (!selectedPlan || !user) return;
 
