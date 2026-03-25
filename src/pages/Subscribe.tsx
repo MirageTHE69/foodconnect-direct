@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscription, useSubscriptionPlans } from '@/hooks/useSubscription';
+import { useSubscription, useSubscriptionPlans, SubscriptionPlan } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Star, Loader2, ArrowLeft, Utensils } from 'lucide-react';
+import { Check, Star, Loader2, ArrowLeft, Utensils, PartyPopper, CalendarCheck } from 'lucide-react';
 
 export default function Subscribe() {
   const { plans, loading: plansLoading } = useSubscriptionPlans();
@@ -17,12 +18,15 @@ export default function Subscribe() {
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [activatedPlan, setActivatedPlan] = useState<SubscriptionPlan | null>(null);
+  const [expiryDate, setExpiryDate] = useState('');
 
   useEffect(() => {
-    if (!subscriptionLoading && hasActiveSubscription) {
+    if (!subscriptionLoading && hasActiveSubscription && !showSuccess) {
       navigate('/dashboard', { replace: true });
     }
-  }, [hasActiveSubscription, subscriptionLoading, navigate]);
+  }, [hasActiveSubscription, subscriptionLoading, navigate, showSuccess]);
 
   const handleSubscribe = async () => {
     if (!selectedPlan || !user) return;
@@ -49,13 +53,19 @@ export default function Subscribe() {
 
       if (error) throw error;
 
-      toast({ title: 'Subscription Activated!', description: `You now have access for ${plan.duration_months} months.` });
-      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
+      setActivatedPlan(plan);
+      setExpiryDate(expiresAt.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }));
+      setShowSuccess(true);
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoToDashboard = () => {
+    setShowSuccess(false);
+    navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
   };
 
   if (plansLoading) {
@@ -68,6 +78,48 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Success Dialog */}
+      <Dialog open={showSuccess} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md text-center" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <PartyPopper className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl">🎉 Subscription Activated!</DialogTitle>
+            <DialogDescription className="text-base mt-2">
+              Welcome to FoodAdda! Your membership is now active.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Plan</span>
+                <span className="font-semibold text-foreground">{activatedPlan?.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Duration</span>
+                <span className="font-semibold text-foreground">{activatedPlan?.duration_months} months</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Free until</span>
+                <span className="font-semibold text-primary">{expiryDate}</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 bg-muted/50 rounded-lg p-3">
+              <CalendarCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <p className="text-sm text-muted-foreground text-left">
+                You have <span className="font-semibold text-foreground">{activatedPlan?.duration_months} months free membership</span>. Payment will be required after <span className="font-semibold text-foreground">{expiryDate}</span>.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={handleGoToDashboard} size="lg" className="w-full">
+              Go to Dashboard →
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <header className="p-4">
         <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
