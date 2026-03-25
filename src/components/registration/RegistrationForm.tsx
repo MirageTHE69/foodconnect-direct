@@ -57,6 +57,13 @@ export interface RegistrationData {
   aadhar_front_url: string;
   aadhar_back_url: string;
   terms_accepted: boolean;
+  // B2B-specific fields
+  b2b_category: string;
+  private_label: string;
+  export_capability: string;
+  logistics_support: string;
+  pricing_tier: string;
+  certifications_text: string;
 }
 
 const initialData = (userType: UserType): RegistrationData => ({
