@@ -43,7 +43,7 @@ export default function Subscribe() {
       if (error) throw error;
 
       toast({ title: 'Subscription Activated!', description: `You now have access for ${plan.duration_months} months.` });
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
     } finally {
