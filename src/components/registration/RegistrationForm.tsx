@@ -77,6 +77,8 @@ const initialData = (userType: UserType): RegistrationData => ({
   qualification: '', years_experience: '', job_category: '', preferred_city: '',
   uploaded_photos: [], menu_upload_url: '', cv_url: '', passport_photo_url: '',
   aadhar_front_url: '', aadhar_back_url: '', terms_accepted: false,
+  b2b_category: '', private_label: '', export_capability: '', logistics_support: '',
+  pricing_tier: '', certifications_text: '',
 });
 
 interface RegistrationFormProps {
