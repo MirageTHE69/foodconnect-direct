@@ -40,8 +40,8 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
   const { signIn, signUp, user, userRole, loading } = useAuth();
+  const { subscription, hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   const { plans, loading: plansLoading } = useSubscriptionPlans();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
