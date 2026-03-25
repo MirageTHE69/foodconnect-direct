@@ -1,45 +1,45 @@
 
 
-## Plan: FoodAdda AI Chatbot Widget
+## Plan: Favicon Update + Signup Flow Fix + B2B Form Fields
 
-A friendly, floating chat widget (bottom-right corner) available on all pages. The bot knows about FoodAdda's products, categories, hot requirements, and platform info. It responds in a warm, conversational tone.
+### 1. Update Favicon
+Copy the uploaded logo (`user-uploads://Group_2-2.png`) to `public/favicon.png` and update `index.html` to reference it.
 
-### Components to Build
+### 2. Fix Signup Redirect Bug
+**Problem:** After completing all 4 signup steps, `handleActivateSubscription` navigates to `/dashboard`. But `ProtectedRoute` loads with `hasActiveSubscription = false` (stale data from `useSubscription`) and redirects to `/subscribe`, which loops back.
 
-**1. Edge Function: `supabase/functions/website-bot/index.ts`**
-- Receives user message + conversation history
-- Queries Supabase for context: active categories, products (up to 20), hot requirements
-- Sends to Lovable AI Gateway (`google/gemini-3-flash-preview`) with a friendly system prompt
-- System prompt instructs the bot to be warm, helpful, use emojis occasionally, and guide users to explore the platform
-- Streams response back via SSE for real-time token rendering
-- Handles 429/402 errors gracefully
+**Fix:**
+- In `Auth.tsx` line 199: Pass `{ state: { freshSubscription: true } }` with the navigate call
+- In `ProtectedRoute.tsx` line 59: Check `location.state?.freshSubscription` — if true, skip the subscription redirect
 
-**2. Chat Widget: `src/components/chat/ChatBotWidget.tsx`**
-- Floating green chat bubble (bottom-right) with a friendly bot icon
-- Click to expand chat window (350px wide desktop, full-width mobile)
-- Welcome message: "Hi there! I'm FoodAdda Bot. How can I help you today?"
-- Message list with markdown rendering (`react-markdown`)
-- Token-by-token streaming for real-time feel
-- User messages on right (green), bot messages on left (gray) — consistent with existing chat bubbles
-- Input field + send button at bottom
-- Close/minimize button
-- Conversation kept in React state (session only, no DB persistence)
+### 3. Add B2B Form Fields
+**Database migration** — Add columns to `registration_profiles`:
+- `b2b_category` (text)
+- `private_label` (text) 
+- `export_capability` (text)
+- `logistics_support` (text)
+- `pricing_tier` (text)
+- `certifications` (text)
 
-**3. Integration: Add to `src/App.tsx`**
-- Render `ChatBotWidget` globally so it appears on every page
-- No auth required — works for anonymous visitors too
+**Update `RegistrationForm.tsx`** — Add to B2B section:
+- Category (text input)
+- Certifications (text input)
+- Private Label (Yes/No select)
+- Export Capability (Yes/No select)
+- Logistics Support (Yes/No select)
+- Pricing Tier (Budget/Mid-Range/Premium select)
 
-### System Prompt Personality
-The bot will be instructed to:
-- Be friendly, warm, and conversational (like a helpful food industry friend)
-- Use casual language with occasional emojis
-- Help users find products, suppliers, categories, and hot requirements
-- Guide new users through the platform (signup, subscription, browsing)
-- Answer questions about FoodAdda's services and features
+Existing fields already cover: Company Name, Location, Contact Person, Phone/Email, MOQ.
 
-### Technical Notes
-- Model: `google/gemini-3-flash-preview` (fast, good for conversational Q&A)
-- LOVABLE_API_KEY is already configured
-- No new database tables needed
-- `react-markdown` already in dependencies for rendering bot responses
+**Update `Auth.tsx`** — Include new fields when saving to `registration_profiles`.
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `public/favicon.png` | New file (uploaded logo) |
+| `index.html` | Update favicon link |
+| `supabase/migrations/new.sql` | Add 6 columns to registration_profiles |
+| `src/components/registration/RegistrationForm.tsx` | Add B2B fields |
+| `src/pages/Auth.tsx` | Save new fields + pass freshSubscription state |
+| `src/components/ProtectedRoute.tsx` | Check freshSubscription state to bypass sub check |
 
