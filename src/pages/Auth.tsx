@@ -196,7 +196,7 @@ export default function Auth() {
       if (error) throw error;
 
       toast({ title: 'Welcome to FoodAdda!', description: 'Your subscription is active. Redirecting...' });
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
     } finally {

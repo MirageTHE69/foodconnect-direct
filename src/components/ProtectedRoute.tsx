@@ -56,7 +56,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
       );
     }
 
-    if (!hasActiveSubscription) {
+    if (!hasActiveSubscription && !location.state?.freshSubscription) {
       return <Navigate to="/subscribe" replace />;
     }
   }

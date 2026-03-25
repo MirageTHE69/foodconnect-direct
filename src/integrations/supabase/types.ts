@@ -517,6 +517,8 @@ export type Database = {
           aadhar_back_url: string | null
           aadhar_front_url: string | null
           address: string | null
+          b2b_category: string | null
+          certifications_text: string | null
           city: string | null
           company_name: string | null
           contact_designation: string | null
@@ -526,6 +528,7 @@ export type Database = {
           created_at: string
           cv_url: string | null
           email: string | null
+          export_capability: string | null
           franchise_category: string | null
           fssai_number: string | null
           full_name: string | null
@@ -535,6 +538,7 @@ export type Database = {
           horeca_category: string | null
           id: string
           job_category: string | null
+          logistics_support: string | null
           menu_description: string | null
           menu_upload_url: string | null
           moq: string | null
@@ -542,6 +546,8 @@ export type Database = {
           phone: string | null
           preferred_city: string | null
           preferred_franchise_location: string | null
+          pricing_tier: string | null
+          private_label: string | null
           product_description: string | null
           qualification: string | null
           state: string | null
@@ -558,6 +564,8 @@ export type Database = {
           aadhar_back_url?: string | null
           aadhar_front_url?: string | null
           address?: string | null
+          b2b_category?: string | null
+          certifications_text?: string | null
           city?: string | null
           company_name?: string | null
           contact_designation?: string | null
@@ -567,6 +575,7 @@ export type Database = {
           created_at?: string
           cv_url?: string | null
           email?: string | null
+          export_capability?: string | null
           franchise_category?: string | null
           fssai_number?: string | null
           full_name?: string | null
@@ -576,6 +585,7 @@ export type Database = {
           horeca_category?: string | null
           id?: string
           job_category?: string | null
+          logistics_support?: string | null
           menu_description?: string | null
           menu_upload_url?: string | null
           moq?: string | null
@@ -583,6 +593,8 @@ export type Database = {
           phone?: string | null
           preferred_city?: string | null
           preferred_franchise_location?: string | null
+          pricing_tier?: string | null
+          private_label?: string | null
           product_description?: string | null
           qualification?: string | null
           state?: string | null
@@ -599,6 +611,8 @@ export type Database = {
           aadhar_back_url?: string | null
           aadhar_front_url?: string | null
           address?: string | null
+          b2b_category?: string | null
+          certifications_text?: string | null
           city?: string | null
           company_name?: string | null
           contact_designation?: string | null
@@ -608,6 +622,7 @@ export type Database = {
           created_at?: string
           cv_url?: string | null
           email?: string | null
+          export_capability?: string | null
           franchise_category?: string | null
           fssai_number?: string | null
           full_name?: string | null
@@ -617,6 +632,7 @@ export type Database = {
           horeca_category?: string | null
           id?: string
           job_category?: string | null
+          logistics_support?: string | null
           menu_description?: string | null
           menu_upload_url?: string | null
           moq?: string | null
@@ -624,6 +640,8 @@ export type Database = {
           phone?: string | null
           preferred_city?: string | null
           preferred_franchise_location?: string | null
+          pricing_tier?: string | null
+          private_label?: string | null
           product_description?: string | null
           qualification?: string | null
           state?: string | null
