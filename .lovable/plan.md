@@ -1,45 +1,35 @@
 
 
-## Plan: Favicon Update + Signup Flow Fix + B2B Form Fields
+## Plan: Replace All Logos + Add 2 Categories + Remove Lovable Branding
 
-### 1. Update Favicon
-Copy the uploaded logo (`user-uploads://Group_2-2.png`) to `public/favicon.png` and update `index.html` to reference it.
+### 1. Replace All Logo Assets
 
-### 2. Fix Signup Redirect Bug
-**Problem:** After completing all 4 signup steps, `handleActivateSubscription` navigates to `/dashboard`. But `ProtectedRoute` loads with `hasActiveSubscription = false` (stale data from `useSubscription`) and redirects to `/subscribe`, which loops back.
+**Uploaded images:**
+- `user-uploads://output-onlinepngtools_2.png` — "FOOD ADDA" text logo (for navbar, favicon)
+- `user-uploads://Group_2-3.png` — Icon-only logo (for footer)
 
-**Fix:**
-- In `Auth.tsx` line 199: Pass `{ state: { freshSubscription: true } }` with the navigate call
-- In `ProtectedRoute.tsx` line 59: Check `location.state?.freshSubscription` — if true, skip the subscription redirect
+**Actions:**
+- Copy first image to `src/assets/logo-nav.png` (replaces navbar logo) AND `public/favicon.png` (replaces favicon)
+- Copy second image to `src/assets/logo-footer.png` (replaces footer logo)
+- Update `index.html`: remove Lovable opengraph/twitter image URLs, replace with `/favicon.png` or remove them
 
-### 3. Add B2B Form Fields
-**Database migration** — Add columns to `registration_profiles`:
-- `b2b_category` (text)
-- `private_label` (text) 
-- `export_capability` (text)
-- `logistics_support` (text)
-- `pricing_tier` (text)
-- `certifications` (text)
+### 2. Remove Lovable Branding from OG/Twitter Meta Tags
 
-**Update `RegistrationForm.tsx`** — Add to B2B section:
-- Category (text input)
-- Certifications (text input)
-- Private Label (Yes/No select)
-- Export Capability (Yes/No select)
-- Logistics Support (Yes/No select)
-- Pricing Tier (Budget/Mid-Range/Premium select)
+In `index.html`, replace the `og:image` and `twitter:image` URLs (currently pointing to `lovable.dev`) with `/favicon.png` so search results and social shares show the FoodAdda logo instead of Lovable branding.
 
-Existing fields already cover: Company Name, Location, Contact Person, Phone/Email, MOQ.
+### 3. Add 2 New Categories via Database Migration
 
-**Update `Auth.tsx`** — Include new fields when saving to `registration_profiles`.
+Insert into `categories` table:
+- **Private Label** — type: `service`, icon: `Palette`, display_order after existing categories
+- **Consultants, Contractors & Solution Providers** — type: `service`, icon: `Cog`, display_order after Private Label
 
 ### Files Changed
+
 | File | Change |
 |------|--------|
-| `public/favicon.png` | New file (uploaded logo) |
-| `index.html` | Update favicon link |
-| `supabase/migrations/new.sql` | Add 6 columns to registration_profiles |
-| `src/components/registration/RegistrationForm.tsx` | Add B2B fields |
-| `src/pages/Auth.tsx` | Save new fields + pass freshSubscription state |
-| `src/components/ProtectedRoute.tsx` | Check freshSubscription state to bypass sub check |
+| `src/assets/logo-nav.png` | Replaced with uploaded text logo |
+| `src/assets/logo-footer.png` | Replaced with uploaded icon logo |
+| `public/favicon.png` | Replaced with uploaded text logo |
+| `index.html` | Update og:image and twitter:image to `/favicon.png` |
+| `supabase/migrations/new.sql` | Insert 2 new categories |
 
