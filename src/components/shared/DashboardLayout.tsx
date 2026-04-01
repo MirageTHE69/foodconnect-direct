@@ -24,7 +24,7 @@ import {
   CreditCard,
   Flame,
 } from 'lucide-react';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/logo-nav.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
