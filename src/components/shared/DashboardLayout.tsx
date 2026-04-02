@@ -110,7 +110,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Logo */}
           <div className="h-16 flex items-center gap-2 px-6 border-b">
             <Link to="/" className="flex items-center gap-2">
-              <img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto" />
+<img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto rounded-lg" />
             </Link>
           </div>
 
