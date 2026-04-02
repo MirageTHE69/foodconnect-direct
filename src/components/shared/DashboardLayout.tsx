@@ -87,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b z-50 flex items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto" />
+          <img src={logoImg} alt="FoodAdda Logo" className="h-8 w-auto rounded-lg" />
         </Link>
         <Button
           variant="ghost"
