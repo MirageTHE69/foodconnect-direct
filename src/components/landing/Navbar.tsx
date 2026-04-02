@@ -41,7 +41,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="FoodAdda Logo" className="h-10 w-auto rounded-lg" />
+            <img src={logoImg} alt="FoodAdda Logo" className="h-14 w-auto rounded-lg" />
           </Link>
 
           {/* Desktop Navigation */}
