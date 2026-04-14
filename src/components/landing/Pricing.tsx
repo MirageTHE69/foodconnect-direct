@@ -38,7 +38,7 @@ export default function Pricing() {
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className={`grid gap-8 max-w-4xl mx-auto ${plans.length === 1 ? 'max-w-lg' : 'md:grid-cols-2'}`}>
           {plans.map((plan) => (
             <Card
               key={plan.id}
@@ -66,7 +66,7 @@ export default function Pricing() {
                 </div>
                 {plan.is_popular && (
                   <p className="text-sm font-semibold text-primary mt-2">
-                    🎉 Includes 2 months FREE!
+                    🎉 Includes 1 month FREE!
                   </p>
                 )}
               </CardHeader>
