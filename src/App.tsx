@@ -84,6 +84,7 @@ const App = () => (
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
+            <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
             
             {/* Subscribe page - for users without active subscription */}
             <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />
