@@ -1,35 +1,68 @@
 
 
-## Plan: Replace All Logos + Add 2 Categories + Remove Lovable Branding
+## Plan: Vendor Directory Linked to Sub-Categories
 
-### 1. Replace All Logo Assets
+### Overview
+Create a vendor directory system where clicking a category shows sub-categories, and clicking a sub-category shows its vendors. Import Fresh Produce vendor data from the PDF.
 
-**Uploaded images:**
-- `user-uploads://output-onlinepngtools_2.png` — "FOOD ADDA" text logo (for navbar, favicon)
-- `user-uploads://Group_2-3.png` — Icon-only logo (for footer)
+### 1. Create `directory_vendors` Table (Migration)
 
-**Actions:**
-- Copy first image to `src/assets/logo-nav.png` (replaces navbar logo) AND `public/favicon.png` (replaces favicon)
-- Copy second image to `src/assets/logo-footer.png` (replaces footer logo)
-- Update `index.html`: remove Lovable opengraph/twitter image URLs, replace with `/favicon.png` or remove them
+New table to store vendor contact info linked to sub-categories:
 
-### 2. Remove Lovable Branding from OG/Twitter Meta Tags
+```sql
+CREATE TABLE public.directory_vendors (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sub_category_id UUID NOT NULL REFERENCES public.sub_categories(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  address TEXT,
+  email TEXT,
+  phone TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-In `index.html`, replace the `og:image` and `twitter:image` URLs (currently pointing to `lovable.dev`) with `/favicon.png` so search results and social shares show the FoodAdda logo instead of Lovable branding.
+ALTER TABLE public.directory_vendors ENABLE ROW LEVEL SECURITY;
 
-### 3. Add 2 New Categories via Database Migration
+-- Anyone can view
+CREATE POLICY "Anyone can view vendors" ON public.directory_vendors
+  FOR SELECT USING (true);
 
-Insert into `categories` table:
-- **Private Label** — type: `service`, icon: `Palette`, display_order after existing categories
-- **Consultants, Contractors & Solution Providers** — type: `service`, icon: `Cog`, display_order after Private Label
+-- Admins can manage
+CREATE POLICY "Admins can manage vendors" ON public.directory_vendors
+  FOR ALL USING (has_role(auth.uid(), 'admin'::app_role));
+```
+
+### 2. Import Fresh Produce Vendors (Insert)
+
+Insert ~20 vendors from the PDF into the correct sub-categories:
+- **Domestic** sub-category: Prime Fresh Limited, Dhanlaxmi International, Greeble Agro Export, Elevex Ventures, Pisum Food Services
+- **Imported** sub-category: Prime Fresh Limited, Dhanlaxmi International, Greeble Agro Export, Elevex Ventures, Aworld Export, Grow India Import Export
+- **Seasonal & Exotic**: Fresh Fruit Alliances, Magnus Farm Fresh, Frrutto Fresh India, ESSAR EXPORTS
+- **Vegetables** (mapped to existing sub-categories): Namdhari Exports, Green Earth Products, Bharat Fresh, ElWorld Agro, Geewin Exim, etc.
+- **Root Vegetables**: Mehrotra Consumer Products
+
+### 3. Create SubCategoryDetail Page
+
+New page at `/categories/:categoryId/sub/:subId` that:
+- Shows the sub-category name with breadcrumb navigation (All Categories → Category → Sub-category)
+- Fetches vendors from `directory_vendors` where `sub_category_id` matches
+- Displays vendor cards in a grid with name, address, email, phone
+- Shows "No vendors listed yet" if empty
+
+### 4. Update CategoryDetail Page
+
+Make sub-category cards clickable links to `/categories/${id}/sub/${sub.id}` instead of being non-navigable cards.
+
+### 5. Add Route in App.tsx
+
+Add: `<Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />`
 
 ### Files Changed
 
 | File | Change |
 |------|--------|
-| `src/assets/logo-nav.png` | Replaced with uploaded text logo |
-| `src/assets/logo-footer.png` | Replaced with uploaded icon logo |
-| `public/favicon.png` | Replaced with uploaded text logo |
-| `index.html` | Update og:image and twitter:image to `/favicon.png` |
-| `supabase/migrations/new.sql` | Insert 2 new categories |
+| `supabase/migrations/new.sql` | Create `directory_vendors` table |
+| Database insert | Import ~20 vendors from PDF |
+| `src/pages/SubCategoryDetail.tsx` | New page showing vendors for a sub-category |
+| `src/pages/CategoryDetail.tsx` | Make sub-category cards link to sub-category detail |
+| `src/App.tsx` | Add new route |
 
