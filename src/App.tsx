@@ -54,6 +54,7 @@ import AdminBlogEdit from "./pages/admin/BlogEdit";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Subscribe from "./pages/Subscribe";
 import CategoryDetail from "./pages/CategoryDetail";
+import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
 
 const queryClient = new QueryClient();
