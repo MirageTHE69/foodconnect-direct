@@ -54,6 +54,7 @@ import AdminBlogEdit from "./pages/admin/BlogEdit";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Subscribe from "./pages/Subscribe";
 import CategoryDetail from "./pages/CategoryDetail";
+import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
+            <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
             
             {/* Subscribe page - for users without active subscription */}
             <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />

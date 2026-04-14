@@ -134,22 +134,23 @@ const CategoryDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {subCategories.map((sub) => (
-              <Card
-                key={sub.id}
-                className="group hover:shadow-hover transition-all duration-300 cursor-pointer border-border hover:border-primary/30"
-              >
-                <CardContent className="p-5 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {sub.name}
-                    </h3>
-                    {sub.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{sub.description}</p>
-                    )}
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                </CardContent>
-              </Card>
+              <Link key={sub.id} to={`/categories/${id}/sub/${sub.id}`}>
+                <Card
+                  className="group hover:shadow-hover transition-all duration-300 cursor-pointer border-border hover:border-primary/30"
+                >
+                  <CardContent className="p-5 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {sub.name}
+                      </h3>
+                      {sub.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{sub.description}</p>
+                      )}
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
