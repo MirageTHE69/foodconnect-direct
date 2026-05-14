@@ -56,6 +56,11 @@ import Subscribe from "./pages/Subscribe";
 import CategoryDetail from "./pages/CategoryDetail";
 import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
+import Jobs from "./pages/Jobs";
+import JobDetail from "./pages/JobDetail";
+import AdminJobs from "./pages/admin/Jobs";
+import AdminJobEdit from "./pages/admin/JobEdit";
+import AdminJobApplications from "./pages/admin/JobApplications";
 
 const queryClient = new QueryClient();
 
