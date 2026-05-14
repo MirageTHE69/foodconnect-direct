@@ -90,6 +90,8 @@ const App = () => (
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
             <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
             
             {/* Subscribe page - for users without active subscription */}
             <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />
