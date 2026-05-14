@@ -23,6 +23,7 @@ import {
   FileText,
   CreditCard,
   Flame,
+  Briefcase,
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nav.png';
 
