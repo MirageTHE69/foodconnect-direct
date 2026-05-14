@@ -60,6 +60,7 @@ const adminNavItems: NavItem[] = [
   { label: 'Blogs', href: '/admin/blogs', icon: <FileText className="h-5 w-5" /> },
   { label: 'Subscriptions', href: '/admin/subscriptions', icon: <CreditCard className="h-5 w-5" /> },
   { label: 'Hot Requirements', href: '/admin/hot-requirements', icon: <Flame className="h-5 w-5" /> },
+  { label: 'Jobs', href: '/admin/jobs', icon: <Briefcase className="h-5 w-5" /> },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
