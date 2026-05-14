@@ -291,6 +291,144 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          cover_note: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          job_id: string
+          phone: string
+          resume_url: string | null
+          status: string
+        }
+        Insert: {
+          cover_note?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          job_id: string
+          phone: string
+          resume_url?: string | null
+          status?: string
+        }
+        Update: {
+          cover_note?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          job_id?: string
+          phone?: string
+          resume_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          parent_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name: string
+          parent_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "job_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          category_id: string | null
+          company: string
+          created_at: string
+          description: string | null
+          experience_required: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          job_type: string
+          location: string | null
+          requirements: string | null
+          responsibilities: string | null
+          salary_range: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          company: string
+          created_at?: string
+          description?: string | null
+          experience_required?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          job_type?: string
+          location?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          company?: string
+          created_at?: string
+          description?: string | null
+          experience_required?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          job_type?: string
+          location?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "job_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string

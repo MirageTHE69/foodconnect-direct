@@ -56,6 +56,11 @@ import Subscribe from "./pages/Subscribe";
 import CategoryDetail from "./pages/CategoryDetail";
 import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
+import Jobs from "./pages/Jobs";
+import JobDetail from "./pages/JobDetail";
+import AdminJobs from "./pages/admin/Jobs";
+import AdminJobEdit from "./pages/admin/JobEdit";
+import AdminJobApplications from "./pages/admin/JobApplications";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +90,8 @@ const App = () => (
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
             <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
             
             {/* Subscribe page - for users without active subscription */}
             <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />
@@ -128,6 +135,10 @@ const App = () => (
             <Route path="/admin/blogs/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlogEdit /></ProtectedRoute>} />
             <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptions /></ProtectedRoute>} />
             <Route path="/admin/hot-requirements" element={<ProtectedRoute allowedRoles={['admin']}><AdminHotRequirements /></ProtectedRoute>} />
+            <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobs /></ProtectedRoute>} />
+            <Route path="/admin/jobs/new" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
+            <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
+            <Route path="/admin/jobs/:id/applications" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobApplications /></ProtectedRoute>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

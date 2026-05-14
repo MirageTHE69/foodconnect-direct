@@ -55,6 +55,9 @@ const Navbar = () => {
             <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               For Suppliers
             </a>
+            <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+              Jobs
+            </Link>
             <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium flex items-center gap-1">
               <ScanLine className="h-4 w-4" />
               Scan Product
@@ -135,6 +138,9 @@ const Navbar = () => {
               <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
                 For Suppliers
               </a>
+              <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+                Jobs
+              </Link>
               <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2 flex items-center gap-2">
                 <ScanLine className="h-4 w-4" />
                 Scan Product
