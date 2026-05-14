@@ -135,6 +135,10 @@ const App = () => (
             <Route path="/admin/blogs/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminBlogEdit /></ProtectedRoute>} />
             <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptions /></ProtectedRoute>} />
             <Route path="/admin/hot-requirements" element={<ProtectedRoute allowedRoles={['admin']}><AdminHotRequirements /></ProtectedRoute>} />
+            <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobs /></ProtectedRoute>} />
+            <Route path="/admin/jobs/new" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
+            <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
+            <Route path="/admin/jobs/:id/applications" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobApplications /></ProtectedRoute>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
