@@ -34,7 +34,7 @@ const Footer = () => {
       { name: "Categories", anchor: "#categories" },
     ],
     company: [
-      { name: "About Us", anchor: "#about" },
+      { name: "About Us", anchor: "#how-it-works" },
       { name: "Blog", to: "/blog" },
       { name: "Contact", anchor: "#contact" },
     ],
