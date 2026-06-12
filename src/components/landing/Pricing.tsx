@@ -64,7 +64,7 @@ export default function Pricing() {
                   <span className="text-4xl font-extrabold text-foreground">₹{plan.price.toLocaleString('en-IN')}</span>
                   <span className="text-muted-foreground ml-2">/ {plan.duration_months} months</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 italic">*Including 18% GST</p>
+                <p className="text-xs text-muted-foreground mt-1 italic">Inclusive of all taxes</p>
                 {plan.is_popular && (
                   <p className="text-sm font-semibold text-primary mt-2">
                     🎉 Includes 1 month FREE!
