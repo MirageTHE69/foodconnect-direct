@@ -6,7 +6,7 @@ const ForBuyers = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="for-buyers" className="py-24 bg-secondary text-secondary-foreground relative overflow-hidden">
+    <section id="for-buyers" className="py-24 bg-secondary text-secondary-foreground relative overflow-hidden scroll-mt-20">
       {/* Yellow diagonal accent */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 skew-x-[-8deg] translate-x-32" />
       
