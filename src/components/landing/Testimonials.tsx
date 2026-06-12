@@ -6,12 +6,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useRef } from "react";
 
 const INSTAGRAM_POSTS = [
-  "https://www.instagram.com/p/EXAMPLE1/",
-  "https://www.instagram.com/p/EXAMPLE2/",
-  "https://www.instagram.com/p/EXAMPLE3/",
-  "https://www.instagram.com/p/EXAMPLE4/",
-  "https://www.instagram.com/p/EXAMPLE5/",
-  "https://www.instagram.com/p/EXAMPLE6/",
+  "https://www.instagram.com/p/DY36sykDbjE/",
+  "https://www.instagram.com/p/DYwKOapDUv4/",
+  "https://www.instagram.com/p/DXTQpJsiA-s/",
+  "https://www.instagram.com/p/DXyP-NhkebE/",
+  "https://www.instagram.com/p/DX6HS_gAPCS/",
+  "https://www.instagram.com/p/DYB0eivCD1a/",
 ];
 
 const Testimonials = () => {

@@ -1,41 +1,77 @@
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import logoFooter from "@/assets/logo-footer.png";
 
-const footerLinks = {
-  platform: [
-    { name: "How It Works", href: "#how-it-works" },
-    { name: "For Buyers", href: "#for-buyers" },
-    { name: "For Suppliers", href: "#for-suppliers" },
-    { name: "Pricing", href: "#" },
-  ],
-  services: [
-    { name: "Suppliers", href: "/suppliers" },
-    { name: "Products", href: "/products" },
-    { name: "Recipes", href: "/recipes" },
-    { name: "Categories", href: "#categories" },
-  ],
-  company: [
-    { name: "About Us", href: "#" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "#" },
-  ],
-  legal: [
-    { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms & Conditions", href: "/terms-and-conditions" },
-    { name: "Refund Policy", href: "/refund-policy" },
-    { name: "Disclaimer", href: "/disclaimer" },
-  ],
-};
-
-const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-];
-
 const Footer = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const goToAnchor = (anchor: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/" + anchor);
+      setTimeout(() => {
+        const el = document.querySelector(anchor);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else {
+      document.querySelector(anchor)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const footerLinks = {
+    platform: [
+      { name: "How It Works", anchor: "#how-it-works" },
+      { name: "For Buyers", anchor: "#for-buyers" },
+      { name: "For Suppliers", anchor: "#for-suppliers" },
+      { name: "Pricing", anchor: "#pricing" },
+    ],
+    services: [
+      { name: "Suppliers", to: "/suppliers" },
+      { name: "Products", to: "/products" },
+      { name: "Recipes", to: "/recipes" },
+      { name: "Jobs", to: "/jobs" },
+      { name: "Categories", anchor: "#categories" },
+    ],
+    company: [
+      { name: "About Us", anchor: "#about" },
+      { name: "Blog", to: "/blog" },
+      { name: "Contact", anchor: "#contact" },
+    ],
+    legal: [
+      { name: "Privacy Policy", to: "/privacy-policy" },
+      { name: "Terms & Conditions", to: "/terms-and-conditions" },
+      { name: "Refund Policy", to: "/refund-policy" },
+      { name: "Disclaimer", to: "/disclaimer" },
+    ],
+  };
+
+  const socialLinks = [
+    { icon: Facebook, href: "#", label: "Facebook" },
+    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Instagram, href: "https://www.instagram.com/about_foodadda/", label: "Instagram" },
+    { icon: Linkedin, href: "#", label: "LinkedIn" },
+  ];
+
+  const renderLink = (link: any) => {
+    if (link.to) {
+      return (
+        <Link to={link.to} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
+          {link.name}
+        </Link>
+      );
+    }
+    return (
+      <a
+        href={link.anchor}
+        onClick={goToAnchor(link.anchor)}
+        className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm"
+      >
+        {link.name}
+      </a>
+    );
+  };
+
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -46,7 +82,7 @@ const Footer = () => {
               <img src={logoFooter} alt="FoodAdda Logo" className="h-10 w-auto" />
             </Link>
             <p className="text-secondary-foreground/60 mb-6 max-w-sm text-sm">
-              India's leading platform connecting food buyers with trusted suppliers. 
+              India's leading platform connecting food buyers with trusted suppliers.
               Building stronger food industry relationships.
             </p>
             <div className="flex items-center gap-3">
@@ -54,6 +90,8 @@ const Footer = () => {
                 <a
                   key={social.label}
                   href={social.href}
+                  target={social.href.startsWith("http") ? "_blank" : undefined}
+                  rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   aria-label={social.label}
                   className="w-9 h-9 rounded-full bg-secondary-foreground/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 >
@@ -63,58 +101,21 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <h4 className="font-semibold mb-4 text-secondary-foreground">Platform</h4>
-            <ul className="space-y-3">
-              {footerLinks.platform.map((link) => (
-                <li key={link.name}>
-                  <a href={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4 text-secondary-foreground">Services</h4>
-            <ul className="space-y-3">
-              {footerLinks.services.map((link) => (
-                <li key={link.name}>
-                  <a href={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4 text-secondary-foreground">Company</h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4 text-secondary-foreground">Legal</h4>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-secondary-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {[
+            { title: "Platform", items: footerLinks.platform },
+            { title: "Services", items: footerLinks.services },
+            { title: "Company", items: footerLinks.company },
+            { title: "Legal", items: footerLinks.legal },
+          ].map((col) => (
+            <div key={col.title}>
+              <h4 className="font-semibold mb-4 text-secondary-foreground">{col.title}</h4>
+              <ul className="space-y-3">
+                {col.items.map((link) => (
+                  <li key={link.name}>{renderLink(link)}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* Bottom */}
