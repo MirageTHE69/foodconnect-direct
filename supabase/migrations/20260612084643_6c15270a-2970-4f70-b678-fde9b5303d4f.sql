@@ -1,0 +1,1 @@
+UPDATE public.subscription_plans SET price = 5900 WHERE price = 5999;
