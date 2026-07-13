@@ -81,7 +81,7 @@ const TermsAndConditions = () => {
             <p><strong>11.2 Amendments:</strong> The Platform may update these Terms from time to time, and Users will be notified of significant changes.</p>
             <p><strong>11.3 Indemnity:</strong> Users agree to indemnify FoodAdda.in against any claims, damages, or liabilities arising from their usage of the Platform.</p>
 
-            <p>For any queries, please contact us at <strong>info@foodadda.in</strong></p>
+            <p>For any queries, please contact us at <strong>consult.ajaysant@gmail.com</strong> or call <strong>9328137674</strong></p>
             <p><em>By using FoodAdda.in, you agree to these Terms and Conditions. Happy sourcing!</em></p>
           </div>
         </div>
