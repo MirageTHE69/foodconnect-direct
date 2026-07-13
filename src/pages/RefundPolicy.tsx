@@ -48,7 +48,7 @@ const RefundPolicy = () => {
             <p><strong>3.2</strong> Access to premium features will remain available until the end of the current billing cycle after cancellation.</p>
 
             <h2>4. Contact Us</h2>
-            <p>For any queries regarding this Refund Policy, please reach out to us at <strong>info@foodadda.in</strong> or call <strong>9327228611</strong>.</p>
+            <p>For any queries regarding this Refund Policy, please reach out to us at <strong>consult.ajaysant@gmail.com</strong> or call <strong>9328137674</strong>.</p>
 
             <h2>5. Jurisdiction</h2>
             <p>Any disputes, grievances, or legal matters arising from this Refund Policy shall be subjected to the jurisdiction of Vadodara, Gujarat.</p>
