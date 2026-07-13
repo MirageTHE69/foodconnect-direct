@@ -39,7 +39,7 @@ const RefundPolicy = () => {
             </ul>
             <h3>2.2 Unauthorized Transactions:</h3>
             <ul>
-              <li>If a user suspects an unauthorized transaction, they must report it immediately to our support team at info@foodadda.in.</li>
+              <li>If a user suspects an unauthorized transaction, they must report it immediately to our support team at consult.ajaysant@gmail.com.</li>
               <li>Refunds for unauthorized payments are subject to investigation.</li>
             </ul>
 
