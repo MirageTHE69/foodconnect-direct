@@ -90,7 +90,7 @@ const Blog = () => {
                 className="bg-card rounded-2xl p-6 border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all group"
               >
                 {blog.cover_image_url && (
-                  <img src={blog.cover_image_url} alt={blog.title} className="w-full h-40 object-cover rounded-xl mb-4" />
+                  <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-40 object-cover rounded-xl mb-4" />
                 )}
                 {blog.tag && (
                   <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-0">

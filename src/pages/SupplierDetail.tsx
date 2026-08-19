@@ -196,6 +196,7 @@ export default function SupplierDetail() {
             <img
               src={supplier.cover_image_url}
               alt=""
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           )}
@@ -212,6 +213,7 @@ export default function SupplierDetail() {
                   <img
                     src={supplier.logo_url}
                     alt={supplier.company_name}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -280,7 +282,7 @@ export default function SupplierDetail() {
                         Chat
                       </Button>
                     )}
-                    <Button onClick={() => setEnquiryDialogOpen(true)}>
+                    <Button onClick={() => (user ? setEnquiryDialogOpen(true) : navigate('/auth'))}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Contact Supplier
                     </Button>
@@ -384,7 +386,7 @@ export default function SupplierDetail() {
                   )}
                   <Button
                     className="w-full"
-                    onClick={() => setEnquiryDialogOpen(true)}
+                    onClick={() => (user ? setEnquiryDialogOpen(true) : navigate('/auth'))}
                   >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Send Enquiry

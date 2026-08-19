@@ -178,6 +178,7 @@ export default function SupplierRecipes() {
                             <img
                               src={recipe.images[0]}
                               alt={recipe.title}
+                              loading="lazy"
                               className="w-12 h-12 rounded object-cover"
                             />
                           ) : (

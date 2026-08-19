@@ -265,6 +265,7 @@ export default function ProductDetail() {
                         <img
                           src={image}
                           alt={`${product.name} - Image ${index + 1}`}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -295,6 +296,7 @@ export default function ProductDetail() {
                     <img
                       src={image}
                       alt=""
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -359,6 +361,7 @@ export default function ProductDetail() {
                         <img
                           src={supplier.logo_url}
                           alt={supplier.company_name}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (

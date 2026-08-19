@@ -4,6 +4,7 @@ import Stats from "@/components/landing/Stats";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Categories from "@/components/landing/Categories";
 import ForBuyers from "@/components/landing/ForBuyers";
+import ForSuppliers from "@/components/landing/ForSuppliers";
 import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
 import GrowthSolutions from "@/components/landing/GrowthSolutions";
 import Testimonials from "@/components/landing/Testimonials";
@@ -23,6 +24,7 @@ const Index = () => {
       <HowItWorks />
       <Categories />
       <ForBuyers />
+      <ForSuppliers />
       <FeaturedSuppliers />
       <HotRequirements />
       <Pricing />

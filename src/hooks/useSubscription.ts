@@ -4,9 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface SubscriptionPlan {
   id: string;
+  code: string;
+  plan_type: 'free' | 'category_credit' | 'universal_tier';
+  business_category: string | null;
   name: string;
-  price: number;
-  duration_months: number;
+  price_monthly: number;
+  price_annual: number;
+  credits_per_month: number | null;
   description: string | null;
   features: string[];
   is_popular: boolean;
@@ -99,7 +103,7 @@ export function useSubscriptionPlans() {
         .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
-        .order('price', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error('Error fetching plans:', error);

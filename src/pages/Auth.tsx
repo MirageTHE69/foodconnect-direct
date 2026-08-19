@@ -162,12 +162,20 @@ export default function Auth() {
       console.error('Error saving registration:', err);
     }
 
-    setSignupStep(4);
     setIsLoading(false);
+    if (!selectedPlanId) {
+      toast({ title: 'Account created!', description: 'You can explore FoodAdda now, or upgrade anytime from your dashboard.' });
+      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
+      return;
+    }
+    setSignupStep(4);
   };
 
   const handleActivateSubscription = async () => {
-    if (!selectedPlanId) return;
+    if (!selectedPlanId) {
+      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
+      return;
+    }
     const plan = plans.find(p => p.id === selectedPlanId);
     if (!plan) return;
 
@@ -184,27 +192,26 @@ export default function Auth() {
         return;
       }
 
-      const startsAt = new Date();
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + plan.duration_months);
+      // Free plans (e.g. Small Homemade Food) don't need a subscription row at all.
+      if (plan.plan_type === 'free') {
+        navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
+        return;
+      }
 
       const { error } = await supabase
         .from('user_subscriptions')
         .insert({
           user_id: currentUser.id,
           plan_id: plan.id,
-          status: 'active',
-          starts_at: startsAt.toISOString(),
-          expires_at: expiresAt.toISOString(),
-          payment_status: 'free_trial',
+          billing_cycle: 'monthly',
         });
 
       if (error) throw error;
 
-      toast({ title: 'Welcome to FoodAdda!', description: 'Your subscription is active. Redirecting...' });
+      toast({ title: 'Request submitted', description: 'Your plan request is pending admin approval. You can continue exploring FoodAdda in the meantime.' });
       navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
     } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to activate subscription.' });
+      toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to submit subscription request.' });
     } finally {
       setIsLoading(false);
     }
@@ -321,41 +328,53 @@ export default function Auth() {
                       {plansLoading ? (
                         <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
                       ) : (
-                        plans.map((plan) => (
-                          <div
-                            key={plan.id}
-                            onClick={() => setSelectedPlanId(plan.id)}
-                            className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              selectedPlanId === plan.id
-                                ? 'border-primary bg-primary/5 shadow-soft'
-                                : 'border-border hover:border-primary/30'
-                            }`}
-                          >
-                            {plan.is_popular && (
-                              <Badge className="absolute -top-2.5 right-3 gradient-primary text-primary-foreground text-[10px] gap-1">
-                                <Star className="w-2.5 h-2.5 fill-current" /> POPULAR
-                              </Badge>
-                            )}
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-bold text-foreground">{plan.name}</h4>
-                                <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
+                        plans.map((plan) => {
+                          const isFree = plan.plan_type === 'free' || plan.price_monthly === 0;
+                          return (
+                            <div
+                              key={plan.id}
+                              onClick={() => setSelectedPlanId(plan.id)}
+                              className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                selectedPlanId === plan.id
+                                  ? 'border-primary bg-primary/5 shadow-soft'
+                                  : 'border-border hover:border-primary/30'
+                              }`}
+                            >
+                              {plan.is_popular && (
+                                <Badge className="absolute -top-2.5 right-3 gradient-primary text-primary-foreground text-[10px] gap-1">
+                                  <Star className="w-2.5 h-2.5 fill-current" /> POPULAR
+                                </Badge>
+                              )}
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-bold text-foreground">{plan.name}</h4>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
+                                </div>
+                                <div className="text-right">
+                                  {isFree ? (
+                                    <span className="text-xl font-extrabold text-foreground">Free</span>
+                                  ) : (
+                                    <>
+                                      <span className="text-xl font-extrabold text-foreground">₹{plan.price_monthly.toLocaleString('en-IN')}</span>
+                                      <p className="text-xs text-muted-foreground">/ month</p>
+                                    </>
+                                  )}
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <span className="text-xl font-extrabold text-foreground">₹{plan.price.toLocaleString('en-IN')}</span>
-                                <p className="text-xs text-muted-foreground">/ {plan.duration_months} mo</p>
-                              </div>
+                              {!isFree && (
+                                <p className="text-[11px] font-semibold text-primary mt-2">🎉 1 month free — 2 months access</p>
+                              )}
                             </div>
-                            {plan.is_popular && (
-                              <p className="text-xs font-semibold text-primary mt-2">🎉 2 months FREE!</p>
-                            )}
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex-col gap-2">
                       <Button className="w-full" disabled={!selectedPlanId} onClick={() => setSignupStep(2)}>
                         Continue <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                      <Button variant="ghost" className="w-full" onClick={() => { setSelectedPlanId(null); setSignupStep(2); }}>
+                        Skip — Continue Free
                       </Button>
                     </CardFooter>
                   </>
@@ -468,10 +487,15 @@ export default function Auth() {
                         <div className="flex justify-between items-center">
                           <div>
                             <h4 className="font-bold text-foreground">{selectedPlan.name}</h4>
-                            <p className="text-sm text-muted-foreground">{selectedPlan.duration_months} months access</p>
+                            <p className="text-sm text-muted-foreground">Monthly billing</p>
                           </div>
-                          <span className="text-2xl font-extrabold text-foreground">₹{selectedPlan.price.toLocaleString('en-IN')}</span>
+                          <span className="text-2xl font-extrabold text-foreground">
+                            {selectedPlan.plan_type === 'free' ? 'Free' : `₹${selectedPlan.price_monthly.toLocaleString('en-IN')}`}
+                          </span>
                         </div>
+                        {selectedPlan.plan_type !== 'free' && (
+                          <p className="text-sm font-semibold text-primary mt-2">🎉 1 month free — 2 months access</p>
+                        )}
                         <ul className="mt-4 space-y-2">
                           {selectedPlan.features.map((f, i) => (
                             <li key={i} className="flex items-center gap-2 text-sm text-foreground">
@@ -483,13 +507,15 @@ export default function Auth() {
                       </div>
                       <div className="p-3 rounded-lg bg-muted text-center">
                         <p className="text-xs text-muted-foreground">
-                          💳 Payment gateway coming soon. Currently activating as <strong>Free Trial</strong>.
+                          {selectedPlan.plan_type === 'free'
+                            ? 'This is a free plan — no payment needed.'
+                            : '💳 An admin will confirm your payment and activate this plan shortly.'}
                         </p>
                       </div>
                     </CardContent>
                     <CardFooter>
                       <Button className="w-full" size="lg" onClick={handleActivateSubscription} disabled={isLoading}>
-                        {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Activating...</> : 'Start Free Trial'}
+                        {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : selectedPlan.plan_type === 'free' ? 'Continue' : 'Request This Plan'}
                       </Button>
                     </CardFooter>
                   </>

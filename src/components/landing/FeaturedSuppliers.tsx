@@ -52,10 +52,10 @@ const FeaturedSuppliers = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-            Innovative Products
+            Featured Suppliers
           </h2>
           <Button variant="outline" size="sm" onClick={() => navigate('/suppliers')}>
-            View all
+            View All Suppliers
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
@@ -79,7 +79,7 @@ const FeaturedSuppliers = () => {
                   {/* Image area */}
                   <div className="h-48 bg-muted flex items-center justify-center">
                     {supplier.logo_url ? (
-                      <img src={supplier.logo_url} alt={supplier.company_name} className="w-full h-full object-cover" />
+                      <img src={supplier.logo_url} alt={supplier.company_name} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-5xl">🏪</span>
                     )}

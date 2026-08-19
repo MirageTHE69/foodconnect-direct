@@ -46,7 +46,7 @@ Platform info:
 - FoodAdda connects food suppliers with buyers, restaurants, hotels, cafés, and catering businesses
 - Users can browse products, suppliers, recipes, and categories
 - New users need to sign up, choose a subscription plan, and complete registration
-- There are two plans: Starter (₹500/2 months) and Annual (₹5,999/14 months)
+- Suppliers pick a Business Category (Founders, Women Enterprise, North East Startups, Micro & First-Time Startups, or Small Homemade Food) for category-priced credit plans, or upgrade to a Universal Tier (B2B & B2C, Business Growth, Business Pro) for flat-fee full access. Annual billing gives 1 month free on every paid plan.
 - The platform has a WhatsApp community for HORECA & Hotels
 
 Current categories on the platform:

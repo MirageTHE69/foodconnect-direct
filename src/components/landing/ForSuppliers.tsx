@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubscriptionPlans } from "@/hooks/useSubscription";
 
 const features = [
   "Unlimited product listings",
@@ -13,6 +14,15 @@ const features = [
 
 const ForSuppliers = () => {
   const navigate = useNavigate();
+  const { plans } = useSubscriptionPlans();
+  const paidPlans = plans.filter((p) => p.plan_type !== "free" && p.price_monthly > 0);
+  const startingPrice = paidPlans.length > 0 ? Math.min(...paidPlans.map((p) => p.price_monthly)) : null;
+
+  const goToPricing = () => {
+    const el = document.querySelector("#pricing");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    else navigate("/#pricing");
+  };
 
   return (
     <section id="for-suppliers" className="py-24 bg-card">
@@ -34,7 +44,7 @@ const ForSuppliers = () => {
               share recipes, and connect with buyers.
             </p>
             <Button variant="hero" size="lg" onClick={() => navigate('/auth')}>
-              Get Started
+              Get Started as a Supplier
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
@@ -44,12 +54,19 @@ const ForSuppliers = () => {
             <div className="bg-background rounded-3xl p-8 border border-border/50 shadow-hover max-w-sm mx-auto">
               <p className="text-sm text-muted-foreground mb-1">Pricing</p>
               <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-5xl font-extrabold text-foreground">₹5999</span>
-                <span className="text-muted-foreground line-through">₹9999</span>
+                {startingPrice !== null ? (
+                  <>
+                    <span className="text-sm text-muted-foreground">from</span>
+                    <span className="text-5xl font-extrabold text-foreground">₹{startingPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-muted-foreground">/mo</span>
+                  </>
+                ) : (
+                  <span className="text-2xl font-bold text-foreground">See plans below</span>
+                )}
               </div>
 
-              <Button variant="hero" className="w-full mb-8" size="lg" onClick={() => navigate('/auth')}>
-                Subscribe
+              <Button variant="hero" className="w-full mb-8" size="lg" onClick={goToPricing}>
+                View Plans
               </Button>
 
               <div className="space-y-4">

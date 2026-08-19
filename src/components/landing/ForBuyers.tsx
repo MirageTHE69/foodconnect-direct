@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { PostRequirementDialog } from "@/components/shared/PostRequirementDialog";
 
 const ForBuyers = () => {
-  const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <section id="for-buyers" className="py-24 bg-secondary text-secondary-foreground relative overflow-hidden scroll-mt-20">
@@ -20,14 +21,15 @@ const ForBuyers = () => {
               Tell us what you need and we'll connect you with the best food suppliers, 
               manufacturers, and brands across India. Direct connections, zero commissions.
             </p>
-            <Button 
-              variant="hero" 
-              size="lg" 
-              onClick={() => navigate('/auth')}
+            <Button
+              variant="hero"
+              size="lg"
+              onClick={() => setDialogOpen(true)}
             >
               Post Requirement
               <ArrowRight className="w-5 h-5" />
             </Button>
+            <PostRequirementDialog open={dialogOpen} onOpenChange={setDialogOpen} />
           </div>
 
           {/* Right side visual placeholder */}

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -930,55 +930,88 @@ export type Database = {
       }
       subscription_plans: {
         Row: {
+          business_category:
+            | Database["public"]["Enums"]["business_category"]
+            | null
+          code: string
           created_at: string
+          credits_per_month: number | null
           description: string | null
-          duration_months: number
           features: string[] | null
+          gst_percent: number
           id: string
           is_active: boolean | null
           is_popular: boolean | null
           name: string
-          price: number
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          price_annual: number
+          price_monthly: number
+          sort_order: number | null
         }
         Insert: {
+          business_category?:
+            | Database["public"]["Enums"]["business_category"]
+            | null
+          code: string
           created_at?: string
+          credits_per_month?: number | null
           description?: string | null
-          duration_months: number
           features?: string[] | null
+          gst_percent?: number
           id?: string
           is_active?: boolean | null
           is_popular?: boolean | null
           name: string
-          price: number
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          price_annual?: number
+          price_monthly?: number
+          sort_order?: number | null
         }
         Update: {
+          business_category?:
+            | Database["public"]["Enums"]["business_category"]
+            | null
+          code?: string
           created_at?: string
+          credits_per_month?: number | null
           description?: string | null
-          duration_months?: number
           features?: string[] | null
+          gst_percent?: number
           id?: string
           is_active?: boolean | null
           is_popular?: boolean | null
           name?: string
-          price?: number
+          plan_type?: Database["public"]["Enums"]["plan_type"]
+          price_annual?: number
+          price_monthly?: number
+          sort_order?: number | null
         }
         Relationships: []
       }
       supplier_profiles: {
         Row: {
           address: string | null
+          business_category:
+            | Database["public"]["Enums"]["business_category"]
+            | null
           business_description: string | null
           certifications: string[] | null
           city: string | null
           company_name: string
+          contact_person_name: string | null
           cover_image_url: string | null
           created_at: string
+          email: string | null
+          export_capability: string | null
           fssai_number: string | null
           gst_number: string | null
           id: string
           is_featured: boolean | null
           logo_url: string | null
+          manufacturing_capability: string | null
           market_reputation: string | null
+          moq: string | null
+          phone: string | null
           pincode: string | null
           reputation_score: number | null
           specialty: string | null
@@ -992,18 +1025,27 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          business_category?:
+            | Database["public"]["Enums"]["business_category"]
+            | null
           business_description?: string | null
           certifications?: string[] | null
           city?: string | null
           company_name: string
+          contact_person_name?: string | null
           cover_image_url?: string | null
           created_at?: string
+          email?: string | null
+          export_capability?: string | null
           fssai_number?: string | null
           gst_number?: string | null
           id?: string
           is_featured?: boolean | null
           logo_url?: string | null
+          manufacturing_capability?: string | null
           market_reputation?: string | null
+          moq?: string | null
+          phone?: string | null
           pincode?: string | null
           reputation_score?: number | null
           specialty?: string | null
@@ -1017,18 +1059,27 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          business_category?:
+            | Database["public"]["Enums"]["business_category"]
+            | null
           business_description?: string | null
           certifications?: string[] | null
           city?: string | null
           company_name?: string
+          contact_person_name?: string | null
           cover_image_url?: string | null
           created_at?: string
+          email?: string | null
+          export_capability?: string | null
           fssai_number?: string | null
           gst_number?: string | null
           id?: string
           is_featured?: boolean | null
           logo_url?: string | null
+          manufacturing_capability?: string | null
           market_reputation?: string | null
+          moq?: string | null
+          phone?: string | null
           pincode?: string | null
           reputation_score?: number | null
           specialty?: string | null
@@ -1041,6 +1092,48 @@ export type Database = {
           years_in_business?: number | null
         }
         Relationships: []
+      }
+      supplier_unlocks: {
+        Row: {
+          billing_period_start: string
+          buyer_user_id: string
+          id: string
+          subscription_id: string | null
+          supplier_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          billing_period_start: string
+          buyer_user_id: string
+          id?: string
+          subscription_id?: string | null
+          supplier_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          billing_period_start?: string
+          buyer_user_id?: string
+          id?: string
+          subscription_id?: string | null
+          supplier_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_unlocks_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_unlocks_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonials: {
         Row: {
@@ -1107,35 +1200,50 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          activated_at: string | null
+          activated_by: string | null
+          admin_notes: string | null
+          amount_paid: number | null
+          billing_cycle: string
           created_at: string
-          expires_at: string
+          expires_at: string | null
           id: string
-          payment_id: string | null
+          payment_reference: string | null
           payment_status: string
           plan_id: string
-          starts_at: string
+          starts_at: string | null
           status: string
           user_id: string
         }
         Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          admin_notes?: string | null
+          amount_paid?: number | null
+          billing_cycle?: string
           created_at?: string
-          expires_at: string
+          expires_at?: string | null
           id?: string
-          payment_id?: string | null
+          payment_reference?: string | null
           payment_status?: string
           plan_id: string
-          starts_at?: string
+          starts_at?: string | null
           status?: string
           user_id: string
         }
         Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          admin_notes?: string | null
+          amount_paid?: number | null
+          billing_cycle?: string
           created_at?: string
-          expires_at?: string
+          expires_at?: string | null
           id?: string
-          payment_id?: string | null
+          payment_reference?: string | null
           payment_status?: string
           plan_id?: string
-          starts_at?: string
+          starts_at?: string | null
           status?: string
           user_id?: string
         }
@@ -1161,10 +1269,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      unlock_supplier: {
+        Args: { _supplier_id: string }
+        Returns: {
+          credits_remaining: number
+          reason: string
+          unlocked: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "buyer" | "supplier" | "admin"
+      business_category:
+        | "founders"
+        | "women_enterprise"
+        | "north_east_startups"
+        | "micro_first_time"
+        | "small_homemade_food"
       category_type: "product" | "service"
+      plan_type: "free" | "category_credit" | "universal_tier"
       product_status: "pending" | "approved" | "rejected"
       user_type: "b2b" | "b2c" | "horeca" | "franchise" | "recruitment"
       verification_status: "pending" | "verified" | "rejected"
@@ -1296,7 +1419,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["buyer", "supplier", "admin"],
+      business_category: [
+        "founders",
+        "women_enterprise",
+        "north_east_startups",
+        "micro_first_time",
+        "small_homemade_food",
+      ],
       category_type: ["product", "service"],
+      plan_type: ["free", "category_credit", "universal_tier"],
       product_status: ["pending", "approved", "rejected"],
       user_type: ["b2b", "b2c", "horeca", "franchise", "recruitment"],
       verification_status: ["pending", "verified", "rejected"],

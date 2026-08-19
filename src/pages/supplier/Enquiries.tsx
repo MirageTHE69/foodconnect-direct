@@ -155,6 +155,7 @@ export default function SupplierEnquiries() {
                                 <img
                                   src={enquiry.products.images[0]}
                                   alt=""
+                                  loading="lazy"
                                   className="w-8 h-8 rounded object-cover"
                                 />
                               )}

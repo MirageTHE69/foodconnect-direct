@@ -145,9 +145,10 @@ export default function AdminProducts() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {product.images && product.images.length > 0 ? (
-                            <img 
-                              src={product.images[0]} 
-                              alt={product.name} 
+                            <img
+                              src={product.images[0]}
+                              alt={product.name}
+                              loading="lazy"
                               className="h-10 w-10 rounded object-cover"
                             />
                           ) : (
@@ -222,10 +223,11 @@ export default function AdminProducts() {
                 {selectedProduct.images && selectedProduct.images.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
                     {selectedProduct.images.slice(0, 4).map((img, i) => (
-                      <img 
+                      <img
                         key={i}
-                        src={img} 
-                        alt={`${selectedProduct.name} ${i + 1}`} 
+                        src={img}
+                        alt={`${selectedProduct.name} ${i + 1}`}
+                        loading="lazy"
                         className="rounded-lg object-cover aspect-square"
                       />
                     ))}

@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (contains Supabase keys)
+.env
+
+# Database backup/export (contains real user PII - accounts, emails, phone numbers)
+foodconnect-direct_260818.backup*
+
+# Supabase CLI local state
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

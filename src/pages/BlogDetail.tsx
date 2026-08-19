@@ -59,7 +59,7 @@ const BlogDetail = () => {
         </div>
 
         {blog.cover_image_url && (
-          <img src={blog.cover_image_url} alt={blog.title} className="w-full h-64 md:h-80 object-cover rounded-2xl mb-8" />
+          <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-64 md:h-80 object-cover rounded-2xl mb-8" />
         )}
 
         <article

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscription } from '@/hooks/useSubscription';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -9,10 +8,12 @@ interface ProtectedRouteProps {
   allowedRoles?: ('buyer' | 'supplier' | 'admin')[];
 }
 
+// Route-level gating is auth + role only. Subscription tier (Free Registered
+// vs Paid Business) no longer blocks access to the app at the route level —
+// Free Registered is a real, usable tier under the new subscription model.
+// Feature-level gating happens inside individual pages instead.
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, userRole, allRoles, loading } = useAuth();
-  const { hasActiveSubscription, loading: subLoading } = useSubscription();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -43,21 +44,6 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         return <Navigate to="/admin" replace />;
       }
       return <Navigate to="/dashboard" replace />;
-    }
-  }
-
-  // Subscription check - admins bypass, /subscribe page bypasses
-  if (userRole !== 'admin' && location.pathname !== '/subscribe') {
-    if (subLoading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      );
-    }
-
-    if (!hasActiveSubscription && !location.state?.freshSubscription) {
-      return <Navigate to="/subscribe" replace />;
     }
   }
 

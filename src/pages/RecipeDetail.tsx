@@ -243,6 +243,7 @@ export default function RecipeDetail() {
                   <img
                     src={recipe.images[selectedImage]}
                     alt={recipe.title}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -263,7 +264,7 @@ export default function RecipeDetail() {
                           : 'border-transparent hover:border-muted-foreground/50'
                       }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" loading="lazy" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -377,6 +378,7 @@ export default function RecipeDetail() {
                         <img
                           src={supplier.logo_url}
                           alt={supplier.company_name}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (

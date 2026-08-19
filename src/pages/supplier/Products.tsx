@@ -200,6 +200,7 @@ export default function SupplierProducts() {
                             <img
                               src={product.images[0]}
                               alt={product.name}
+                              loading="lazy"
                               className="w-12 h-12 rounded object-cover"
                             />
                           ) : (

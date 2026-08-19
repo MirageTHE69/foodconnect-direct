@@ -1,6 +1,13 @@
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Instagram, MapPin, Phone, Mail } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logoFooter from "@/assets/logo-footer.png";
+
+const COMPANY_INFO = {
+  address: "337, 3rd Floor, Infinity Arcade, Pratap Nagar Bridge, Pratap Nagar, Vadodara - 390004",
+  phone: "+91 93272 28611",
+  phoneHref: "+919327228611",
+  email: "info@foodadda.in",
+};
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -34,7 +41,6 @@ const Footer = () => {
       { name: "Categories", anchor: "#categories" },
     ],
     company: [
-      { name: "About Us", anchor: "#how-it-works" },
       { name: "Blog", to: "/blog" },
       { name: "Contact", anchor: "#contact" },
     ],
@@ -47,10 +53,7 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
     { icon: Instagram, href: "https://www.instagram.com/about_foodadda/", label: "Instagram" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
   ];
 
   const renderLink = (link: any) => {
@@ -85,6 +88,20 @@ const Footer = () => {
               India's leading platform connecting food buyers with trusted suppliers.
               Building stronger food industry relationships.
             </p>
+            <div className="space-y-2 mb-6 text-sm text-secondary-foreground/60">
+              <p className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{COMPANY_INFO.address}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone className="w-4 h-4 shrink-0" />
+                <a href={`tel:${COMPANY_INFO.phoneHref}`} className="hover:text-primary transition-colors">{COMPANY_INFO.phone}</a>
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail className="w-4 h-4 shrink-0" />
+                <a href={`mailto:${COMPANY_INFO.email}`} className="hover:text-primary transition-colors">{COMPANY_INFO.email}</a>
+              </p>
+            </div>
             <div className="flex items-center gap-3">
               {socialLinks.map((social) => (
                 <a
@@ -119,15 +136,10 @@ const Footer = () => {
         </div>
 
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-secondary-foreground/10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-secondary-foreground/10 text-center">
           <p className="text-sm text-secondary-foreground/40">
-            © 2025 FoodAdda. All rights reserved.
+            © {new Date().getFullYear()} FoodAdda. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-secondary-foreground/40">
-            <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms of Service</Link>
-            <Link to="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link>
-          </div>
         </div>
       </div>
     </footer>

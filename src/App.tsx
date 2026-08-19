@@ -61,6 +61,7 @@ import JobDetail from "./pages/JobDetail";
 import AdminJobs from "./pages/admin/Jobs";
 import AdminJobEdit from "./pages/admin/JobEdit";
 import AdminJobApplications from "./pages/admin/JobApplications";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
 
@@ -75,12 +76,13 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-            <Route path="/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
-            <Route path="/suppliers" element={<ProtectedRoute><Suppliers /></ProtectedRoute>} />
-            <Route path="/suppliers/:id" element={<ProtectedRoute><SupplierDetail /></ProtectedRoute>} />
-            <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
-            <Route path="/recipes/:id" element={<ProtectedRoute><RecipeDetail /></ProtectedRoute>} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            <Route path="/recipes" element={<Recipes />} />
+            <Route path="/recipes/:id" element={<RecipeDetail />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/scan" element={<ProductScanner />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />

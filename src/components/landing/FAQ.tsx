@@ -38,7 +38,33 @@ const faqs = [
     question: "How do I become a supplier on FoodAdda?",
     answer: "Simply sign up as a supplier, complete your business profile with required documents (FSSAI, GST), add your products, and submit for verification.",
   },
+  {
+    question: "How does FoodAdda's subscription model work?",
+    answer: "Suppliers choose a Business Category (Founders, Women Enterprise, North East Startups, Micro & First-Time Startups, or Small Homemade Food) at signup — each has its own category-credit plan and pricing. You can also upgrade to a Universal Tier (B2B & B2C, Business Growth, or Business Pro) for flat-fee, category-independent full access.",
+  },
+  {
+    question: 'What does a "credit" unlock?',
+    answer: "On a category-credit plan, 1 credit unlocks 1 supplier's full company details (contact info, full catalogue, certifications) for the month. Credits reset monthly and don't roll over. Universal Tier plans have no credit limit — full access to every supplier.",
+  },
+  {
+    question: "Is annual billing cheaper than monthly?",
+    answer: "Yes — every paid plan offers annual billing at 12× the monthly price for 13 months of access, so you effectively get 1 month free compared to paying monthly all year.",
+  },
+  {
+    question: "Can I upgrade from a category plan to a Universal Tier later?",
+    answer: "Yes, anytime from your dashboard's Upgrade Plan page. A Universal Tier overrides your category's credit limit with full, unlimited access regardless of your business category.",
+  },
+  {
+    question: "How long does it take for my plan to be activated?",
+    answer: "After you submit a plan request, an admin reviews and confirms payment, typically within one business day. You can keep using FoodAdda on your current access level while your request is pending.",
+  },
+  {
+    question: "How does buyer-supplier chat work?",
+    answer: "Once you've sent an enquiry or started a conversation with a supplier, you can message them directly and in real time from the Chat section of your dashboard.",
+  },
 ];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const FAQ = () => {
   const { toast } = useToast();
@@ -49,16 +75,35 @@ const FAQ = () => {
     subject: "",
     message: "",
   });
+  // Honeypot: real visitors never see or fill this field; bots that
+  // auto-fill every input will, so we silently drop the submission.
+  const [website, setWebsite] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+
+    if (website.trim()) {
+      // Looks like a bot — pretend success without writing anything.
+      toast({ title: "Message sent!", description: "We'll get back to you as soon as possible." });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setWebsite("");
+      return;
+    }
+
+    if (formData.name.trim().length < 2) {
+      toast({ title: "Invalid name", description: "Please enter your full name.", variant: "destructive" });
+      return;
+    }
+    if (!EMAIL_REGEX.test(formData.email.trim())) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+    if (formData.subject.trim().length < 3) {
+      toast({ title: "Invalid subject", description: "Please enter a short subject line.", variant: "destructive" });
+      return;
+    }
+    if (formData.message.trim().length < 10) {
+      toast({ title: "Invalid message", description: "Please enter at least 10 characters.", variant: "destructive" });
       return;
     }
 
@@ -80,6 +125,7 @@ const FAQ = () => {
         description: "We'll get back to you as soon as possible.",
       });
       setFormData({ name: "", email: "", subject: "", message: "" });
+      setWebsite("");
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast({
@@ -131,6 +177,18 @@ const FAQ = () => {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Honeypot field — hidden from real users, catches bots */}
+              <div className="absolute -left-[9999px] w-px h-px overflow-hidden" aria-hidden="true">
+                <Label htmlFor="contact-website">Website</Label>
+                <Input
+                  id="contact-website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="contact-name">Name</Label>

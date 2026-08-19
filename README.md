@@ -1,8 +1,27 @@
-# Welcome to your Lovable project
+# FoodConnect Direct
 
-## Project info
+Built in [Lovable](https://lovable.dev), backed by [Supabase](https://supabase.com). This repo can be developed locally with your own IDE; changes pushed here also sync back to Lovable.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Local setup
+
+Prerequisites: Node.js 20+ and npm.
+
+```sh
+# 1. Install dependencies
+npm install
+
+# 2. Set up environment variables
+cp .env.example .env
+# then fill in .env with your Supabase project's URL and anon/publishable key
+# (Supabase dashboard > Project Settings > API)
+
+# 3. Start the dev server
+npm run dev
+```
+
+The app talks directly to your live Supabase project for auth, the database, and edge functions (`scan-product`, `website-bot`) — there's no local database to set up. The edge functions are deployed and managed in the Supabase project, not run locally; they depend on a `LOVABLE_API_KEY` secret configured in the Supabase project's edge function settings.
+
+Other scripts: `npm run build`, `npm run lint`, `npm run test`, `npm run preview`.
 
 ## How can I edit this code?
 
@@ -10,31 +29,11 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+Visit the Lovable project dashboard and start prompting — changes made via Lovable are committed automatically to this repo.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Follow the local setup steps above. Pushed changes will also be reflected in Lovable.
 
 **Edit a file directly in GitHub**
 
