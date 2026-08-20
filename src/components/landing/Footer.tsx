@@ -1,6 +1,5 @@
 import { Instagram, MapPin, Phone, Mail } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logoFooter from "@/assets/logo-footer.png";
 
 const COMPANY_INFO = {
   address: "337, 3rd Floor, Infinity Arcade, Pratap Nagar Bridge, Pratap Nagar, Vadodara - 390004",
@@ -82,7 +81,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src={logoFooter} alt="FoodAdda Logo" className="h-10 w-auto" />
+              <span className="text-2xl font-bold text-secondary-foreground">
+                Food<span className="text-primary">Adda</span>
+              </span>
             </Link>
             <p className="text-secondary-foreground/60 mb-6 max-w-sm text-sm">
               India's leading platform connecting food buyers with trusted suppliers.
