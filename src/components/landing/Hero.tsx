@@ -73,7 +73,7 @@ const Hero = () => {
   }, [activeSlide, goToSlide]);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center pt-20 bg-background overflow-hidden">
+    <section id="hero" className="relative min-h-[90vh] flex items-center pt-20 bg-background overflow-hidden">
       {/* Yellow diagonal accent */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/10 skew-x-[-6deg] translate-x-20 hidden lg:block" />
 

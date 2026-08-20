@@ -1,7 +1,10 @@
 import { MessageCircle, Users, Utensils, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 
 const Community = () => {
+  const goToAnchor = useAnchorNav();
+
   return (
     <section className="py-24 bg-card">
       <div className="container mx-auto px-4">
@@ -37,11 +40,7 @@ const Community = () => {
         </div>
 
         <div className="text-center">
-          <a
-            href="https://chat.whatsapp.com/YOUR_GROUP_INVITE_LINK"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="#hero" onClick={goToAnchor("#hero")}>
             <Button
               size="lg"
               className="bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-hover hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 rounded-xl h-14 px-8 text-base font-semibold"

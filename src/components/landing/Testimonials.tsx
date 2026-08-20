@@ -6,12 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect, useRef } from "react";
 
 const INSTAGRAM_POSTS = [
-  "https://www.instagram.com/p/DY36sykDbjE/",
-  "https://www.instagram.com/p/DYwKOapDUv4/",
-  "https://www.instagram.com/p/DXTQpJsiA-s/",
-  "https://www.instagram.com/p/DXyP-NhkebE/",
-  "https://www.instagram.com/p/DX6HS_gAPCS/",
-  "https://www.instagram.com/p/DYB0eivCD1a/",
+  "https://www.instagram.com/p/DcPtLFSAdh5/",
+  "https://www.instagram.com/reel/DcNekItx4bo/",
+  "https://www.instagram.com/p/DcK3x2jjI5d/",
+  "https://www.instagram.com/p/DcFZa-FDCGs/",
+  "https://www.instagram.com/p/DcCvP-0ARUD/",
+  "https://www.instagram.com/p/DcAP1s_iogK/",
+  "https://www.instagram.com/reel/Db-EkNcxwYb/",
 ];
 
 const Testimonials = () => {
@@ -155,7 +156,7 @@ const Testimonials = () => {
                 <iframe
                   src={`${postUrl}embed`}
                   className="w-[320px] h-[420px] border-0"
-                  allowTransparency
+                  allowtransparency="true"
                   scrolling="no"
                   loading="lazy"
                   title={`Instagram post ${i + 1}`}
