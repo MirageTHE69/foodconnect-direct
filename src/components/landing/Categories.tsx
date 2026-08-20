@@ -16,6 +16,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 interface Category {
   id: string;
+  slug: string;
   name: string;
   icon: string;
   type: string;
@@ -81,7 +82,7 @@ const Categories = () => {
 
             return (
               <Link
-                to={`/categories/${category.id}`}
+                to={`/categories/${category.slug}`}
                 key={category.id}
                 className="group flex flex-col items-center text-center"
               >

@@ -6,7 +6,8 @@ import { ProductCard } from '@/components/shared/ProductCard';
 import { useSavedItems } from '@/hooks/useSavedItems';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search as SearchIcon, Loader2, ArrowLeft, Store, Package } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search as SearchIcon, Loader2, ArrowLeft, Store, Package, Tag, ChevronRight } from 'lucide-react';
 
 interface SupplierResult {
   id: string;
@@ -25,12 +26,19 @@ interface ProductResult {
   images: string[] | null;
 }
 
+interface CategoryResult {
+  id: string;
+  slug: string;
+  name: string;
+}
+
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [inputValue, setInputValue] = useState(query);
   const [suppliers, setSuppliers] = useState<SupplierResult[]>([]);
   const [products, setProducts] = useState<ProductResult[]>([]);
+  const [categories, setCategories] = useState<CategoryResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   const { isSupplierSaved, toggleSaveSupplier, isProductSaved, toggleSaveProduct } = useSavedItems();
@@ -40,6 +48,7 @@ export default function Search() {
     if (!query.trim()) {
       setSuppliers([]);
       setProducts([]);
+      setCategories([]);
       return;
     }
     runSearch(query);
@@ -48,7 +57,7 @@ export default function Search() {
   const runSearch = async (term: string) => {
     setLoading(true);
     try {
-      const [suppliersRes, productsRes] = await Promise.all([
+      const [suppliersRes, productsRes, categoriesRes] = await Promise.all([
         supabase
           .from('supplier_profiles')
           .select('id, company_name, business_description, logo_url, city, state, verification_status')
@@ -60,9 +69,16 @@ export default function Search() {
           .ilike('name', `%${term}%`)
           .eq('status', 'approved')
           .limit(24),
+        supabase
+          .from('categories')
+          .select('id, slug, name')
+          .ilike('name', `%${term}%`)
+          .eq('is_active', true)
+          .limit(12),
       ]);
       setSuppliers(suppliersRes.data || []);
       setProducts(productsRes.data || []);
+      setCategories(categoriesRes.data || []);
     } finally {
       setLoading(false);
     }
@@ -102,10 +118,30 @@ export default function Search() {
           <div className="flex justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : suppliers.length === 0 && products.length === 0 ? (
+        ) : suppliers.length === 0 && products.length === 0 && categories.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">No results for "{query}". Try a different search term.</p>
         ) : (
           <div className="space-y-12">
+            {categories.length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Tag className="h-5 w-5 text-primary" /> Categories ({categories.length})
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {categories.map((c) => (
+                    <Link key={c.id} to={`/categories/${c.slug}`}>
+                      <Card className="hover:shadow-hover hover:border-primary/30 transition-all duration-300">
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <span className="font-medium text-sm text-foreground">{c.name}</span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {suppliers.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">

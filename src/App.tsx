@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ChatBotWidget } from "@/components/chat/ChatBotWidget";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -71,6 +72,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <Routes>
             {/* Public Routes */}

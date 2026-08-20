@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search, Store, Package } from "lucide-react";
+import { ArrowRight, Search, Store, Package, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,8 +10,9 @@ import poster3 from "@/assets/posters/poster-3.jpg";
 const posters = [poster1, poster3];
 
 interface Suggestion {
-  type: "supplier" | "product";
+  type: "supplier" | "product" | "category";
   id: string;
+  slug?: string;
   label: string;
 }
 
@@ -32,11 +33,13 @@ const Hero = () => {
       return;
     }
     debounceRef.current = setTimeout(async () => {
-      const [suppliersRes, productsRes] = await Promise.all([
+      const [suppliersRes, productsRes, categoriesRes] = await Promise.all([
         supabase.from("supplier_profiles").select("id, company_name").ilike("company_name", `%${term}%`).limit(3),
         supabase.from("products").select("id, name").ilike("name", `%${term}%`).eq("status", "approved").limit(3),
+        supabase.from("categories").select("id, slug, name").ilike("name", `%${term}%`).eq("is_active", true).limit(3),
       ]);
       const results: Suggestion[] = [
+        ...(categoriesRes.data || []).map((c) => ({ type: "category" as const, id: c.id, slug: c.slug, label: c.name })),
         ...(suppliersRes.data || []).map((s) => ({ type: "supplier" as const, id: s.id, label: s.company_name })),
         ...(productsRes.data || []).map((p) => ({ type: "product" as const, id: p.id, label: p.name })),
       ];
@@ -114,11 +117,17 @@ const Hero = () => {
                       <button
                         key={`${s.type}-${s.id}`}
                         type="button"
-                        onClick={() => navigate(s.type === "supplier" ? `/suppliers/${s.id}` : `/products/${s.id}`)}
+                        onClick={() => navigate(
+                          s.type === "supplier" ? `/suppliers/${s.id}`
+                          : s.type === "category" ? `/categories/${s.slug}`
+                          : `/products/${s.id}`
+                        )}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-muted transition-colors"
                       >
                         {s.type === "supplier" ? (
                           <Store className="w-4 h-4 text-muted-foreground shrink-0" />
+                        ) : s.type === "category" ? (
+                          <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                         ) : (
                           <Package className="w-4 h-4 text-muted-foreground shrink-0" />
                         )}

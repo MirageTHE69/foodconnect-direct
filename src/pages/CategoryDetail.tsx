@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { isUuid } from "@/lib/utils";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -20,6 +21,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 interface Category {
   id: string;
+  slug: string;
   name: string;
   icon: string;
   type: string;
@@ -28,6 +30,7 @@ interface Category {
 
 interface SubCategory {
   id: string;
+  slug: string;
   name: string;
   description: string | null;
   display_order: number;
@@ -42,12 +45,19 @@ const CategoryDetail = () => {
   useEffect(() => {
     if (!id) return;
     const fetch = async () => {
-      const [catRes, subRes] = await Promise.all([
-        supabase.from("categories").select("*").eq("id", id).single(),
-        supabase.from("sub_categories").select("*").eq("category_id", id).order("display_order"),
-      ]);
-      if (catRes.data) setCategory(catRes.data as Category);
-      if (subRes.data) setSubCategories(subRes.data as SubCategory[]);
+      const catQuery = isUuid(id)
+        ? supabase.from("categories").select("*").eq("id", id).single()
+        : supabase.from("categories").select("*").eq("slug", id).single();
+      const { data: catData } = await catQuery;
+      if (catData) {
+        setCategory(catData as Category);
+        const { data: subData } = await supabase
+          .from("sub_categories")
+          .select("*")
+          .eq("category_id", catData.id)
+          .order("display_order");
+        if (subData) setSubCategories(subData as SubCategory[]);
+      }
       setLoading(false);
     };
     fetch();
@@ -134,7 +144,7 @@ const CategoryDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {subCategories.map((sub) => (
-              <Link key={sub.id} to={`/categories/${id}/sub/${sub.id}`}>
+              <Link key={sub.id} to={`/categories/${category.slug}/sub/${sub.slug}`}>
                 <Card
                   className="group hover:shadow-hover transition-all duration-300 cursor-pointer border-border hover:border-primary/30"
                 >

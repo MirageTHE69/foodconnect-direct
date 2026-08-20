@@ -4,7 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import logoImg from '@/assets/logo.png';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -12,40 +13,36 @@ const BlogDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-32 pb-24 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
       </div>
     );
   }
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Blog not found.</p>
-        <Link to="/blog"><Button variant="outline">Back to Blogs</Button></Link>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-32 pb-24 flex flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground">Blog not found.</p>
+          <Link to="/blog"><Button variant="hero">Back to Blogs</Button></Link>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="FoodAdda" className="h-8 w-auto" />
-          </Link>
-          <Link to="/blog">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-1" /> All Blogs
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="container mx-auto px-4 py-12 max-w-3xl">
+      <main className="container mx-auto px-4 pt-28 pb-16 md:pt-32 max-w-3xl">
         <div className="mb-6">
           {blog.tag && (
-            <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-0">
+            <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-primary/20">
               {blog.tag}
             </Badge>
           )}
@@ -59,7 +56,7 @@ const BlogDetail = () => {
         </div>
 
         {blog.cover_image_url && (
-          <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-64 md:h-80 object-cover rounded-2xl mb-8" />
+          <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-64 md:h-80 object-cover rounded-2xl mb-8 shadow-card" />
         )}
 
         <article
@@ -69,12 +66,14 @@ const BlogDetail = () => {
 
         <div className="mt-12 pt-8 border-t">
           <Link to="/blog">
-            <Button variant="outline">
+            <Button variant="hero">
               <ArrowLeft className="h-4 w-4 mr-1" /> Back to All Blogs
             </Button>
           </Link>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

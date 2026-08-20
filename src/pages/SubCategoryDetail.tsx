@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator, BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { supabase } from "@/integrations/supabase/client";
+import { isUuid } from "@/lib/utils";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -25,19 +26,35 @@ const SubCategoryDetail = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [subName, setSubName] = useState("");
   const [catName, setCatName] = useState("");
+  const [catSlug, setCatSlug] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!categoryId || !subId) return;
     const load = async () => {
-      const [vendorRes, subRes, catRes] = await Promise.all([
-        supabase.from("directory_vendors").select("*").eq("sub_category_id", subId),
-        supabase.from("sub_categories").select("name").eq("id", subId).single(),
-        supabase.from("categories").select("name").eq("id", categoryId).single(),
-      ]);
-      if (vendorRes.data) setVendors(vendorRes.data as Vendor[]);
-      if (subRes.data) setSubName(subRes.data.name);
-      if (catRes.data) setCatName(catRes.data.name);
+      const catQuery = isUuid(categoryId)
+        ? supabase.from("categories").select("id, name, slug").eq("id", categoryId).single()
+        : supabase.from("categories").select("id, name, slug").eq("slug", categoryId).single();
+      const { data: catData } = await catQuery;
+      if (!catData) {
+        setLoading(false);
+        return;
+      }
+      setCatName(catData.name);
+      setCatSlug(catData.slug);
+
+      const subQuery = isUuid(subId)
+        ? supabase.from("sub_categories").select("id, name").eq("id", subId).eq("category_id", catData.id).single()
+        : supabase.from("sub_categories").select("id, name").eq("slug", subId).eq("category_id", catData.id).single();
+      const { data: subData } = await subQuery;
+      if (subData) {
+        setSubName(subData.name);
+        const { data: vendorData } = await supabase
+          .from("directory_vendors")
+          .select("*")
+          .eq("sub_category_id", subData.id);
+        if (vendorData) setVendors(vendorData as Vendor[]);
+      }
       setLoading(false);
     };
     load();
@@ -78,7 +95,7 @@ const SubCategoryDetail = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/categories/${categoryId}`}>{catName}</Link>
+                  <Link to={`/categories/${catSlug}`}>{catName}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -100,7 +117,7 @@ const SubCategoryDetail = () => {
               <Store className="w-12 h-12 mx-auto mb-4 opacity-40" />
               <p className="text-lg">No vendors listed yet.</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to={`/categories/${categoryId}`}>
+                <Link to={`/categories/${catSlug}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" /> Back to {catName}
                 </Link>
               </Button>

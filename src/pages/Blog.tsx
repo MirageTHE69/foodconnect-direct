@@ -4,9 +4,10 @@ import { useBlogs } from '@/hooks/useBlogs';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowLeft, Calendar } from 'lucide-react';
+import { Search, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import logoImg from '@/assets/logo.png';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 
 const Blog = () => {
   const [search, setSearch] = useState('');
@@ -23,28 +24,22 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoImg} alt="FoodAdda" className="h-8 w-auto" />
-          </Link>
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Home
-            </Button>
-          </Link>
+      <Navbar />
+
+      <section className="pt-28 pb-16 md:pt-32 md:pb-24 bg-card">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            Food<span className="bg-primary text-primary-foreground px-2 inline-block -skew-x-2">Adda</span> Blog
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl">
+            Stay updated with the latest food industry insights, guides, and platform updates.
+          </p>
         </div>
-      </header>
+      </section>
 
       <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Blog</h1>
-        <p className="text-muted-foreground mb-8 max-w-2xl">
-          Stay updated with the latest food industry insights, guides, and platform updates.
-        </p>
-
         {/* Search & Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-10">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -87,26 +82,28 @@ const Blog = () => {
               <Link
                 key={blog.id}
                 to={`/blog/${blog.slug}`}
-                className="bg-card rounded-2xl p-6 border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all group"
+                className="bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 shadow-card hover:shadow-hover transition-all duration-300 group"
               >
                 {blog.cover_image_url && (
-                  <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-40 object-cover rounded-xl mb-4" />
+                  <img src={blog.cover_image_url} alt={blog.title} loading="lazy" className="w-full h-40 object-cover" />
                 )}
-                {blog.tag && (
-                  <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-0">
-                    {blog.tag}
-                  </Badge>
-                )}
-                <h2 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                  {blog.title}
-                </h2>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{blog.excerpt}</p>
-                {blog.published_at && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    {format(new Date(blog.published_at), 'MMM d, yyyy')}
-                  </div>
-                )}
+                <div className="p-6">
+                  {blog.tag && (
+                    <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-primary/20">
+                      {blog.tag}
+                    </Badge>
+                  )}
+                  <h2 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    {blog.title}
+                  </h2>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{blog.excerpt}</p>
+                  {blog.published_at && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(blog.published_at), 'MMM d, yyyy')}
+                    </div>
+                  )}
+                </div>
               </Link>
             ))}
           </div>
@@ -116,6 +113,8 @@ const Blog = () => {
           <p className="text-center text-muted-foreground py-12">No blogs found.</p>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 };

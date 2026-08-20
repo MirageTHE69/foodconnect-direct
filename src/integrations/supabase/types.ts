@@ -68,6 +68,7 @@ export type Database = {
           is_active: boolean
           item_count: number
           name: string
+          slug: string
           type: Database["public"]["Enums"]["category_type"]
         }
         Insert: {
@@ -78,6 +79,7 @@ export type Database = {
           is_active?: boolean
           item_count?: number
           name: string
+          slug: string
           type?: Database["public"]["Enums"]["category_type"]
         }
         Update: {
@@ -88,6 +90,7 @@ export type Database = {
           is_active?: boolean
           item_count?: number
           name?: string
+          slug?: string
           type?: Database["public"]["Enums"]["category_type"]
         }
         Relationships: []
@@ -899,6 +902,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          slug: string
         }
         Insert: {
           category_id: string
@@ -908,6 +912,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          slug: string
         }
         Update: {
           category_id?: string
@@ -917,6 +922,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          slug?: string
         }
         Relationships: [
           {

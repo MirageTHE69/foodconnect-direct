@@ -68,10 +68,13 @@
  
        return result;
      } catch (err) {
-       const message = err instanceof Error ? err.message : 'Failed to scan image';
+       const rawMessage = err instanceof Error ? err.message : 'Failed to scan image';
+      const message = rawMessage.toLowerCase().includes('ai service not configured')
+        ? 'AI-powered scanning is coming soon — check back shortly.'
+        : rawMessage;
        setError(message);
        toast({
-         title: 'Scan Failed',
+         title: 'Scan Unavailable',
          description: message,
          variant: 'destructive',
        });
