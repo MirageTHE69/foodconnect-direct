@@ -4,6 +4,7 @@ import logoImg from "@/assets/logo-nav.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, userRole, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const goToAnchor = useAnchorNav();
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,13 +48,13 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+            <a href="#how-it-works" onClick={goToAnchor("#how-it-works")} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               How It Works
             </a>
-            <a href="#categories" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+            <a href="#categories" onClick={goToAnchor("#categories")} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               Categories
             </a>
-            <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+            <a href="#for-suppliers" onClick={goToAnchor("#for-suppliers")} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               For Suppliers
             </a>
             <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
@@ -129,13 +131,25 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border/50">
             <div className="flex flex-col gap-4">
-              <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+              <a
+                href="#how-it-works"
+                onClick={(e) => { setIsMenuOpen(false); goToAnchor("#how-it-works")(e); }}
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2"
+              >
                 How It Works
               </a>
-              <a href="#categories" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+              <a
+                href="#categories"
+                onClick={(e) => { setIsMenuOpen(false); goToAnchor("#categories")(e); }}
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2"
+              >
                 Categories
               </a>
-              <a href="#for-suppliers" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+              <a
+                href="#for-suppliers"
+                onClick={(e) => { setIsMenuOpen(false); goToAnchor("#for-suppliers")(e); }}
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2"
+              >
                 For Suppliers
               </a>
               <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">

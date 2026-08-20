@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { isUuid } from "@/lib/utils";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -38,6 +39,7 @@ interface SubCategory {
 
 const CategoryDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const goToAnchor = useAnchorNav();
   const [category, setCategory] = useState<Category | null>(null);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +90,7 @@ const CategoryDetail = () => {
         <div className="container mx-auto px-4 py-24 text-center">
           <h1 className="text-2xl font-bold text-foreground">Category not found</h1>
           <Button asChild className="mt-4" variant="hero">
-            <Link to="/#categories">Back to Categories</Link>
+            <a href="#categories" onClick={goToAnchor("#categories")}>Back to Categories</a>
           </Button>
         </div>
       </div>
@@ -105,13 +107,14 @@ const CategoryDetail = () => {
       {/* Hero */}
       <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
-          <Link
-            to="/#categories"
+          <a
+            href="#categories"
+            onClick={goToAnchor("#categories")}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             All Categories
-          </Link>
+          </a>
 
           <div className="flex items-center gap-4">
             <div

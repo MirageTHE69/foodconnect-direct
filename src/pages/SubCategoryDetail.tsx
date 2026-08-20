@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { isUuid } from "@/lib/utils";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -23,6 +24,7 @@ interface Vendor {
 
 const SubCategoryDetail = () => {
   const { categoryId, subId } = useParams<{ categoryId: string; subId: string }>();
+  const goToAnchor = useAnchorNav();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [subName, setSubName] = useState("");
   const [catName, setCatName] = useState("");
@@ -89,7 +91,7 @@ const SubCategoryDetail = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/#categories">All Categories</Link>
+                  <a href="#categories" onClick={goToAnchor("#categories")}>All Categories</a>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

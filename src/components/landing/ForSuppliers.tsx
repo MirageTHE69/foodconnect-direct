@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSubscriptionPlans } from "@/hooks/useSubscription";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 
 const features = [
   "Unlimited product listings",
@@ -14,15 +15,10 @@ const features = [
 
 const ForSuppliers = () => {
   const navigate = useNavigate();
+  const goToAnchor = useAnchorNav();
   const { plans } = useSubscriptionPlans();
   const paidPlans = plans.filter((p) => p.plan_type !== "free" && p.price_monthly > 0);
   const startingPrice = paidPlans.length > 0 ? Math.min(...paidPlans.map((p) => p.price_monthly)) : null;
-
-  const goToPricing = () => {
-    const el = document.querySelector("#pricing");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-    else navigate("/#pricing");
-  };
 
   return (
     <section id="for-suppliers" className="py-24 bg-card">
@@ -65,7 +61,7 @@ const ForSuppliers = () => {
                 )}
               </div>
 
-              <Button variant="hero" className="w-full mb-8" size="lg" onClick={goToPricing}>
+              <Button variant="hero" className="w-full mb-8" size="lg" onClick={goToAnchor("#pricing")}>
                 View Plans
               </Button>
 

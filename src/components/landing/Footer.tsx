@@ -1,5 +1,6 @@
 import { Instagram, MapPin, Phone, Mail } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useAnchorNav } from "@/hooks/useAnchorNav";
 
 const COMPANY_INFO = {
   address: "337, 3rd Floor, Infinity Arcade, Pratap Nagar Bridge, Pratap Nagar, Vadodara - 390004",
@@ -9,21 +10,7 @@ const COMPANY_INFO = {
 };
 
 const Footer = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const goToAnchor = (anchor: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (location.pathname !== "/") {
-      navigate("/" + anchor);
-      setTimeout(() => {
-        const el = document.querySelector(anchor);
-        el?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    } else {
-      document.querySelector(anchor)?.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const goToAnchor = useAnchorNav();
 
   const footerLinks = {
     platform: [
