@@ -22,7 +22,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Search, Filter, Package } from 'lucide-react';
-import { DashboardLayout } from '@/components/shared/DashboardLayout';
+import { PublicPageLayout } from '@/components/shared/PublicPageLayout';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ProductCategory = Tables<'product_categories'>;
@@ -151,7 +151,7 @@ export default function BrowseProducts() {
   };
 
   return (
-    <DashboardLayout>
+    <PublicPageLayout>
       {/* Page Title */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -258,6 +258,6 @@ export default function BrowseProducts() {
           </Pagination>
         </div>
       )}
-    </DashboardLayout>
+    </PublicPageLayout>
   );
 }

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChefHat, Search, Loader2 } from 'lucide-react';
-import { DashboardLayout } from '@/components/shared/DashboardLayout';
+import { PublicPageLayout } from '@/components/shared/PublicPageLayout';
 
 interface Recipe {
   id: string;
@@ -66,7 +66,7 @@ export default function Recipes() {
   });
 
   return (
-    <DashboardLayout>
+    <PublicPageLayout>
       {/* Page Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Recipes</h1>
@@ -128,6 +128,6 @@ export default function Recipes() {
           ))}
         </div>
       )}
-    </DashboardLayout>
+    </PublicPageLayout>
   );
 }
