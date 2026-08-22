@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { startCashfreeCheckout } from '@/hooks/useCashfreeCheckout';
 import { Utensils, ShoppingBag, Store, Loader2, Eye, EyeOff, ArrowLeft, ArrowRight, Check, Star } from 'lucide-react';
 import { z } from 'zod';
 import { UserTypeSelector, type UserType } from '@/components/registration/UserTypeSelector';
@@ -192,23 +193,17 @@ export default function Auth() {
         return;
       }
 
-      // Free plans (e.g. Small Homemade Food) don't need a subscription row at all.
-      if (plan.plan_type === 'free') {
+      // Free plans (e.g. Small Homemade Food), or any plan/cycle combo priced
+      // at 0, don't need a subscription row at all.
+      if (plan.plan_type === 'free' || plan.price_monthly === 0) {
         navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
         return;
       }
 
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: currentUser.id,
-          plan_id: plan.id,
-          billing_cycle: 'monthly',
-        });
+      const { result } = await startCashfreeCheckout(plan.id, 'monthly');
+      if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
 
-      if (error) throw error;
-
-      toast({ title: 'Request submitted', description: 'Your plan request is pending admin approval. You can continue exploring FoodAdda in the meantime.' });
+      toast({ title: 'Payment successful', description: 'Your plan is now active.' });
       navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to submit subscription request.' });
@@ -509,13 +504,13 @@ export default function Auth() {
                         <p className="text-xs text-muted-foreground">
                           {selectedPlan.plan_type === 'free'
                             ? 'This is a free plan — no payment needed.'
-                            : '💳 An admin will confirm your payment and activate this plan shortly.'}
+                            : '💳 Pay securely with Cashfree — your plan activates instantly after payment.'}
                         </p>
                       </div>
                     </CardContent>
                     <CardFooter>
                       <Button className="w-full" size="lg" onClick={handleActivateSubscription} disabled={isLoading}>
-                        {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</> : selectedPlan.plan_type === 'free' ? 'Continue' : 'Request This Plan'}
+                        {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{selectedPlan.plan_type === 'free' ? 'Submitting...' : 'Redirecting to payment...'}</> : selectedPlan.plan_type === 'free' ? 'Continue' : 'Proceed to Payment'}
                       </Button>
                     </CardFooter>
                   </>

@@ -13,6 +13,7 @@ interface AuthContextType {
   userRole: UserRole | null;
   allRoles: UserRole[];
   loading: boolean;
+  rolesLoading: boolean;
   signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -26,6 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [allRoles, setAllRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
+  // Tracks whether the user_roles fetch is in flight, distinct from
+  // allRoles.length === 0 (which is ALSO true once a genuinely-roleless
+  // account's fetch completes). Without this, ProtectedRoute couldn't tell
+  // "still loading" apart from "loaded and empty" and would spin forever.
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -33,14 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Defer role fetching with setTimeout to avoid deadlock
         if (session?.user) {
+          setRolesLoading(true);
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
         } else {
           setUserRole(null);
+          setAllRoles([]);
+          setRolesLoading(false);
         }
       }
     );
@@ -51,6 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
+      } else {
+        setRolesLoading(false);
       }
       setLoading(false);
     });
@@ -69,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Error fetching user roles:', error);
         return;
       }
-      
+
       if (!data || data.length === 0) {
         setUserRole(null);
         setAllRoles([]);
@@ -85,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserRole(primaryRole);
     } catch (err) {
       console.error('Error fetching user roles:', err);
+    } finally {
+      setRolesLoading(false);
     }
   };
 
@@ -135,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Immediately set the role after signup (don't wait for auth state change)
         setAllRoles([role]);
         setUserRole(role);
+        setRolesLoading(false);
       }
 
       return { error: null };
@@ -165,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, userRole, allRoles, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, userRole, allRoles, loading, rolesLoading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

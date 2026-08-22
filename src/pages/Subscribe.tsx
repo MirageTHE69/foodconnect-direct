@@ -8,6 +8,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { startCashfreeCheckout } from '@/hooks/useCashfreeCheckout';
+import { useSubscriptionActivationWatcher } from '@/hooks/useSubscriptionActivationWatcher';
 import { Check, Star, Loader2, ArrowLeft, Utensils, PartyPopper, CalendarCheck } from 'lucide-react';
 
 export default function Subscribe() {
@@ -21,8 +23,18 @@ export default function Subscribe() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activatedPlan, setActivatedPlan] = useState<SubscriptionPlan | null>(null);
+  const [isPaidActivation, setIsPaidActivation] = useState(false);
   const [pendingSubscription, setPendingSubscription] = useState<{ plan?: SubscriptionPlan } | null>(null);
   const [checkingPending, setCheckingPending] = useState(true);
+  const [showProcessing, setShowProcessing] = useState(false);
+  const [pendingActivationId, setPendingActivationId] = useState<string | null>(null);
+
+  useSubscriptionActivationWatcher(pendingActivationId, () => {
+    setShowProcessing(false);
+    setPendingActivationId(null);
+    setIsPaidActivation(true);
+    setShowSuccess(true);
+  });
 
   useEffect(() => {
     if (!subscriptionLoading && hasActiveSubscription && !showSuccess) {
@@ -52,26 +64,45 @@ export default function Subscribe() {
     const plan = plans.find(p => p.id === selectedPlan);
     if (!plan) return;
 
+    const price = billingCycle === 'annual' ? plan.price_annual : plan.price_monthly;
+    const isFree = plan.plan_type === 'free' || price === 0;
+
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: user.id,
-          plan_id: plan.id,
-          billing_cycle: billingCycle,
-        });
+      if (isFree) {
+        const { error } = await supabase
+          .from('user_subscriptions')
+          .insert({
+            user_id: user.id,
+            plan_id: plan.id,
+            billing_cycle: billingCycle,
+          });
 
-      if (error) throw error;
+        if (error) throw error;
+
+        setActivatedPlan(plan);
+        setIsPaidActivation(false);
+        setShowSuccess(true);
+        return;
+      }
+
+      const { result, subscriptionId } = await startCashfreeCheckout(plan.id, billingCycle);
+      if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
 
       setActivatedPlan(plan);
-      setShowSuccess(true);
+      setPendingActivationId(subscriptionId);
+      setShowProcessing(true);
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to submit subscription request.' });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const selectedPlanObj = plans.find(p => p.id === selectedPlan);
+  const selectedPlanIsFree = !selectedPlanObj
+    || selectedPlanObj.plan_type === 'free'
+    || (billingCycle === 'annual' ? selectedPlanObj.price_annual : selectedPlanObj.price_monthly) === 0;
 
   const handleGoToDashboard = () => {
     setShowSuccess(false);
@@ -112,6 +143,29 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Processing Dialog (Cashfree payment completed client-side, waiting on webhook activation) */}
+      <Dialog open={showProcessing} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md text-center" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="items-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+            <DialogTitle className="text-2xl">Confirming your payment…</DialogTitle>
+            <DialogDescription className="text-base mt-2">
+              This usually takes just a few seconds.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button
+              variant="ghost"
+              onClick={() => { setShowProcessing(false); navigate('/dashboard', { replace: true }); }}
+            >
+              Go to Dashboard →
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md text-center" onPointerDownOutside={(e) => e.preventDefault()}>
@@ -119,9 +173,11 @@ export default function Subscribe() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
               <PartyPopper className="w-8 h-8 text-primary" />
             </div>
-            <DialogTitle className="text-2xl">Request Submitted!</DialogTitle>
+            <DialogTitle className="text-2xl">{isPaidActivation ? 'Payment Successful!' : 'Request Submitted!'}</DialogTitle>
             <DialogDescription className="text-base mt-2">
-              Your plan request has been sent for admin approval.
+              {isPaidActivation
+                ? 'Your plan is now active.'
+                : 'Your plan request has been sent for admin approval.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -138,8 +194,9 @@ export default function Subscribe() {
             <div className="flex items-start gap-2 bg-muted/50 rounded-lg p-3">
               <CalendarCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <p className="text-sm text-muted-foreground text-left">
-                An admin will confirm your payment and activate this plan shortly. You can keep using FoodAdda on
-                your current access level in the meantime.
+                {isPaidActivation
+                  ? 'You now have full access to everything included in this plan.'
+                  : 'An admin will confirm your payment and activate this plan shortly. You can keep using FoodAdda on your current access level in the meantime.'}
               </p>
             </div>
           </div>
@@ -270,14 +327,18 @@ export default function Subscribe() {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
+                {selectedPlanIsFree ? 'Submitting...' : 'Redirecting to payment...'}
               </>
-            ) : (
+            ) : selectedPlanIsFree ? (
               'Request This Plan'
+            ) : (
+              'Proceed to Payment'
             )}
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            An admin will confirm payment and activate your plan. No card details needed yet.
+            {selectedPlanIsFree
+              ? 'An admin will confirm payment and activate your plan. No card details needed yet.'
+              : 'Pay securely with Cashfree — your plan activates instantly after payment.'}
           </p>
         </div>
       </div>

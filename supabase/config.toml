@@ -5,3 +5,9 @@
 
  [functions.website-bot]
  verify_jwt = false
+
+ [functions.create-payment-order]
+ verify_jwt = true
+
+ [functions.cashfree-webhook]
+ verify_jwt = false

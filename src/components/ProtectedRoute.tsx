@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
 // Free Registered is a real, usable tier under the new subscription model.
 // Feature-level gating happens inside individual pages instead.
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, userRole, allRoles, loading } = useAuth();
+  const { user, userRole, allRoles, loading, rolesLoading } = useAuth();
 
   if (loading) {
     return (
@@ -27,8 +27,10 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/auth" replace />;
   }
 
-  // Wait for roles to be fetched if user exists but roles aren't loaded yet
-  if (user && allRoles.length === 0 && !userRole) {
+  // Wait for the roles fetch to actually be in flight -- allRoles.length === 0
+  // alone can't distinguish "still loading" from "loaded and genuinely empty",
+  // which used to leave roleless accounts stuck on this spinner forever.
+  if (rolesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
