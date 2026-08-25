@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search, Store, Package, Tag } from "lucide-react";
+import { ArrowRight, Search, Store, Package, Tag, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,19 +9,29 @@ import poster3 from "@/assets/posters/poster-3.jpg";
 
 const posters = [poster1, poster3];
 
+type SuggestionType = "category" | "sub_category" | "supplier" | "vendor" | "product";
+
 interface Suggestion {
-  type: "supplier" | "product" | "category";
+  type: SuggestionType;
   id: string;
-  slug?: string;
   label: string;
+  to: string;
 }
+
+const SUGGESTION_GROUPS: { label: string; types: SuggestionType[] }[] = [
+  { label: "Categories", types: ["category", "sub_category"] },
+  { label: "Suppliers", types: ["supplier", "vendor"] },
+  { label: "Products", types: ["product"] },
+];
 
 const Hero = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searching, setSearching] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const requestIdRef = useRef(0);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -30,21 +40,50 @@ const Hero = () => {
     const term = searchQuery.trim();
     if (term.length < 2) {
       setSuggestions([]);
+      setSearching(false);
       return;
     }
+    setSearching(true);
     debounceRef.current = setTimeout(async () => {
-      const [suppliersRes, productsRes, categoriesRes] = await Promise.all([
-        supabase.from("supplier_profiles").select("id, company_name").ilike("company_name", `%${term}%`).limit(3),
-        supabase.from("products").select("id, name").ilike("name", `%${term}%`).eq("status", "approved").limit(3),
-        supabase.from("categories").select("id, slug, name").ilike("name", `%${term}%`).eq("is_active", true).limit(3),
+      const requestId = ++requestIdRef.current;
+      const like = `%${term}%`;
+      const [categoriesRes, subCategoriesRes, suppliersRes, vendorsRes, productsRes] = await Promise.all([
+        supabase.from("categories").select("id, slug, name").ilike("name", like).eq("is_active", true).limit(4),
+        supabase.from("sub_categories").select("id, slug, name, categories(slug)").ilike("name", like).eq("is_active", true).limit(4),
+        supabase.from("supplier_profiles").select("id, company_name").ilike("company_name", like).limit(4),
+        supabase.from("directory_vendors").select("id, name, sub_categories(slug, categories(slug))").ilike("name", like).limit(4),
+        supabase.from("products").select("id, name").ilike("name", like).eq("status", "approved").limit(4),
       ]);
+
+      // Ignore stale responses from an earlier, slower keystroke.
+      if (requestId !== requestIdRef.current) return;
+
       const results: Suggestion[] = [
-        ...(categoriesRes.data || []).map((c) => ({ type: "category" as const, id: c.id, slug: c.slug, label: c.name })),
-        ...(suppliersRes.data || []).map((s) => ({ type: "supplier" as const, id: s.id, label: s.company_name })),
-        ...(productsRes.data || []).map((p) => ({ type: "product" as const, id: p.id, label: p.name })),
+        ...(categoriesRes.data || []).map((c) => ({
+          type: "category" as const, id: c.id, label: c.name, to: `/categories/${c.slug}`,
+        })),
+        ...(subCategoriesRes.data || [])
+          .filter((s) => s.categories?.slug)
+          .map((s) => ({
+            type: "sub_category" as const, id: s.id, label: s.name,
+            to: `/categories/${s.categories!.slug}/sub/${s.slug}`,
+          })),
+        ...(suppliersRes.data || []).map((s) => ({
+          type: "supplier" as const, id: s.id, label: s.company_name, to: `/suppliers/${s.id}`,
+        })),
+        ...(vendorsRes.data || [])
+          .filter((v) => v.sub_categories?.categories?.slug)
+          .map((v) => ({
+            type: "vendor" as const, id: v.id, label: v.name,
+            to: `/categories/${v.sub_categories!.categories!.slug}/sub/${v.sub_categories!.slug}`,
+          })),
+        ...(productsRes.data || []).map((p) => ({
+          type: "product" as const, id: p.id, label: p.name, to: `/products/${p.id}`,
+        })),
       ];
       setSuggestions(results);
-    }, 300);
+      setSearching(false);
+    }, 200);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [searchQuery]);
 
@@ -111,29 +150,42 @@ const Hero = () => {
                   className="w-full h-14 pl-12 pr-4 rounded-xl border-2 border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                 />
 
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden z-20">
-                    {suggestions.map((s) => (
-                      <button
-                        key={`${s.type}-${s.id}`}
-                        type="button"
-                        onClick={() => navigate(
-                          s.type === "supplier" ? `/suppliers/${s.id}`
-                          : s.type === "category" ? `/categories/${s.slug}`
-                          : `/products/${s.id}`
-                        )}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-muted transition-colors"
-                      >
-                        {s.type === "supplier" ? (
-                          <Store className="w-4 h-4 text-muted-foreground shrink-0" />
-                        ) : s.type === "category" ? (
-                          <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
-                        ) : (
-                          <Package className="w-4 h-4 text-muted-foreground shrink-0" />
-                        )}
-                        <span className="truncate">{s.label}</span>
-                      </button>
-                    ))}
+                {showSuggestions && (searching || suggestions.length > 0) && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-lg z-20 max-h-96 overflow-y-auto">
+                    {searching && suggestions.length === 0 ? (
+                      <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Searching...
+                      </div>
+                    ) : (
+                      SUGGESTION_GROUPS.map(({ label, types }) => {
+                        const items = suggestions.filter((s) => types.includes(s.type));
+                        if (items.length === 0) return null;
+                        return (
+                          <div key={label}>
+                            <div className="px-4 pt-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                              {label}
+                            </div>
+                            {items.map((s) => (
+                              <button
+                                key={`${s.type}-${s.id}`}
+                                type="button"
+                                onClick={() => { setShowSuggestions(false); navigate(s.to); }}
+                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-muted transition-colors"
+                              >
+                                {s.type === "supplier" || s.type === "vendor" ? (
+                                  <Store className="w-4 h-4 text-muted-foreground shrink-0" />
+                                ) : s.type === "category" || s.type === "sub_category" ? (
+                                  <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
+                                ) : (
+                                  <Package className="w-4 h-4 text-muted-foreground shrink-0" />
+                                )}
+                                <span className="truncate">{s.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 )}
               </div>

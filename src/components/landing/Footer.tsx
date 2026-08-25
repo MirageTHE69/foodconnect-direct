@@ -4,8 +4,8 @@ import { useAnchorNav } from "@/hooks/useAnchorNav";
 
 const COMPANY_INFO = {
   address: "337, 3rd Floor, Infinity Arcade, Pratap Nagar Bridge, Pratap Nagar, Vadodara - 390004",
-  phone: "+91 93272 28611",
-  phoneHref: "+919327228611",
+  phone: "+91 93281 37674",
+  phoneHref: "+919328137674",
   email: "info@foodadda.in",
 };
 
@@ -39,7 +39,7 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Instagram, href: "https://www.instagram.com/about_foodadda/", label: "Instagram" },
+    { icon: Instagram, href: "https://www.instagram.com/foodadda_hub/", label: "Instagram" },
   ];
 
   const renderLink = (link: any) => {

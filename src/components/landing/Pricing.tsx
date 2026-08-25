@@ -104,7 +104,7 @@ export default function Pricing() {
 
         <CardFooter className="pt-4 pb-8">
           <Button
-            className={plan.is_popular ? 'w-full' : 'w-full text-foreground border-foreground/30 hover:bg-foreground hover:text-background'}
+            className={plan.is_popular ? 'w-full' : 'w-full text-foreground border-foreground/30 hover:bg-primary hover:text-foreground hover:border-primary'}
             variant={plan.is_popular ? 'default' : 'outline'}
             size="lg"
             onClick={() => navigate(`/auth?planCode=${plan.code}`)}
@@ -156,7 +156,7 @@ export default function Pricing() {
                     key={cat}
                     variant={selectedCategory === cat ? 'default' : 'outline'}
                     size="sm"
-                    className={selectedCategory === cat ? '' : 'text-foreground border-foreground/30 hover:bg-foreground hover:text-background'}
+                    className={selectedCategory === cat ? '' : 'text-foreground border-foreground/30 hover:bg-primary hover:text-foreground hover:border-primary'}
                     onClick={() => setActiveCategory(cat)}
                   >
                     {CATEGORY_LABELS[cat] ?? cat}
