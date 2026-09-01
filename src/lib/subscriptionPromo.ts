@@ -1,5 +1,5 @@
 // Mirrored in supabase/functions/_shared/subscriptionPromo.ts for the
-// Cashfree webhook (Deno edge functions can't import from this src/ tree) --
+// Razorpay webhook (Deno edge functions can't import from this src/ tree) --
 // keep both in sync if this changes.
 // Current launch promo: every paid plan includes 1 month free, on BOTH
 // monthly and annual billing (not just annual). Annual pricing already has

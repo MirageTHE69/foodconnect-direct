@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { startCashfreeCheckout } from '@/hooks/useCashfreeCheckout';
+import { startRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
 import { Utensils, ShoppingBag, Store, Loader2, Eye, EyeOff, ArrowLeft, ArrowRight, Check, Star } from 'lucide-react';
 import { z } from 'zod';
 import { UserTypeSelector, type UserType } from '@/components/registration/UserTypeSelector';
@@ -200,7 +200,7 @@ export default function Auth() {
         return;
       }
 
-      const { result } = await startCashfreeCheckout(plan.id, 'monthly');
+      const { result } = await startRazorpayCheckout(plan.id, 'monthly');
       if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
 
       toast({ title: 'Payment successful', description: 'Your plan is now active.' });
@@ -504,7 +504,7 @@ export default function Auth() {
                         <p className="text-xs text-muted-foreground">
                           {selectedPlan.plan_type === 'free'
                             ? 'This is a free plan — no payment needed.'
-                            : '💳 Pay securely with Cashfree — your plan activates instantly after payment.'}
+                            : '💳 Pay securely with Razorpay — your plan activates instantly after payment.'}
                         </p>
                       </div>
                     </CardContent>

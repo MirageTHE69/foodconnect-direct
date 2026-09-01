@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { startCashfreeCheckout } from '@/hooks/useCashfreeCheckout';
+import { startRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
 import { useSubscriptionActivationWatcher } from '@/hooks/useSubscriptionActivationWatcher';
 import { Check, Star, Loader2, ArrowLeft, Utensils, PartyPopper, CalendarCheck } from 'lucide-react';
 
@@ -86,7 +86,7 @@ export default function Subscribe() {
         return;
       }
 
-      const { result, subscriptionId } = await startCashfreeCheckout(plan.id, billingCycle);
+      const { result, subscriptionId } = await startRazorpayCheckout(plan.id, billingCycle);
       if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
 
       setActivatedPlan(plan);
@@ -143,7 +143,7 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Processing Dialog (Cashfree payment completed client-side, waiting on webhook activation) */}
+      {/* Processing Dialog (Razorpay payment completed client-side, waiting on webhook activation) */}
       <Dialog open={showProcessing} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md text-center" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader className="items-center">
@@ -338,7 +338,7 @@ export default function Subscribe() {
           <p className="text-xs text-muted-foreground mt-3">
             {selectedPlanIsFree
               ? 'An admin will confirm payment and activate your plan. No card details needed yet.'
-              : 'Pay securely with Cashfree — your plan activates instantly after payment.'}
+              : 'Pay securely with Razorpay — your plan activates instantly after payment.'}
           </p>
         </div>
       </div>

@@ -125,7 +125,9 @@ export default function Pricing() {
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
             Simple Pricing
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Choose Your Plan</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Subscribe to your one-stop platform<br className="hidden sm:block" /> for all food industry needs
+          </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Get full access to FoodAdda's marketplace. Connect with suppliers, manage enquiries, and grow your
             business.

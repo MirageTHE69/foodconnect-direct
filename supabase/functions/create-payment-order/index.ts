@@ -22,13 +22,11 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const CASHFREE_APP_ID = Deno.env.get('CASHFREE_APP_ID');
-    const CASHFREE_SECRET_KEY = Deno.env.get('CASHFREE_SECRET_KEY');
-    const CASHFREE_ENV = Deno.env.get('CASHFREE_ENV') || 'sandbox';
-    const SITE_URL = Deno.env.get('SITE_URL') || 'https://foodadda.in';
+    const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
+    const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
 
-    if (!CASHFREE_APP_ID || !CASHFREE_SECRET_KEY) {
-      console.error('Cashfree credentials not configured');
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay credentials not configured');
       return json({ error: 'Payment gateway not configured' }, 500);
     }
 
@@ -69,23 +67,13 @@ serve(async (req) => {
       return json({ error: 'This plan does not require payment' }, 400);
     }
 
-    const { data: profile } = await admin
-      .from('profiles')
-      .select('phone, full_name')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!profile?.phone) {
-      return json({ error: 'Add a phone number to your profile before subscribing' }, 400);
-    }
-
     const { data: subRow, error: insertError } = await admin
       .from('user_subscriptions')
       .insert({
         user_id: user.id,
         plan_id: plan.id,
         billing_cycle,
-        payment_provider: 'cashfree',
+        payment_provider: 'razorpay',
       })
       .select('id')
       .single();
@@ -95,53 +83,59 @@ serve(async (req) => {
       return json({ error: 'Failed to start subscription' }, 500);
     }
 
-    const orderId = `sub_${subRow.id}`;
-    const cashfreeHost = CASHFREE_ENV === 'production' ? 'https://api.cashfree.com' : 'https://sandbox.cashfree.com';
+    const receipt = `sub_${subRow.id}`;
+    const authToken = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
 
-    const cfResponse = await fetch(`${cashfreeHost}/pg/orders`, {
+    const rpResponse = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
-        'x-client-id': CASHFREE_APP_ID,
-        'x-client-secret': CASHFREE_SECRET_KEY,
-        'x-api-version': '2023-08-01',
+        Authorization: `Basic ${authToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        order_id: orderId,
-        order_amount: amount,
-        order_currency: 'INR',
-        customer_details: {
-          customer_id: user.id,
-          customer_email: user.email,
-          customer_phone: profile.phone,
+        amount: Math.round(amount * 100), // paise
+        currency: 'INR',
+        receipt,
+        notes: {
+          subscription_id: subRow.id,
+          plan_code: plan.code,
+          billing_cycle,
         },
-        order_meta: {
-          notify_url: `${SUPABASE_URL}/functions/v1/cashfree-webhook`,
-          return_url: `${SITE_URL}/dashboard?subscription=processing&order_id={order_id}`,
-        },
-        order_note: `FoodAdda subscription ${plan.code} (${billing_cycle})`,
       }),
     });
 
-    if (!cfResponse.ok) {
-      const errorText = await cfResponse.text();
-      console.error('Cashfree order creation failed:', cfResponse.status, errorText);
+    if (!rpResponse.ok) {
+      const errorText = await rpResponse.text();
+      console.error('Razorpay order creation failed:', rpResponse.status, errorText);
       // Clean up the pending row so the user isn't stuck behind a dead order.
       await admin.from('user_subscriptions').delete().eq('id', subRow.id);
       return json({ error: 'Failed to create payment order' }, 502);
     }
 
-    const cfOrder = await cfResponse.json();
+    const rpOrder = await rpResponse.json();
 
     await admin
       .from('user_subscriptions')
-      .update({ cf_order_id: orderId })
+      .update({ gateway_order_id: rpOrder.id })
       .eq('id', subRow.id);
 
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
     return json({
-      payment_session_id: cfOrder.payment_session_id,
-      order_id: orderId,
+      order_id: rpOrder.id,
+      amount: rpOrder.amount,
+      currency: rpOrder.currency,
+      key_id: RAZORPAY_KEY_ID,
       subscription_id: subRow.id,
+      prefill: {
+        name: profile?.full_name ?? undefined,
+        email: user.email ?? undefined,
+        contact: profile?.phone ?? undefined,
+      },
     });
   } catch (error) {
     console.error('create-payment-order error:', error);

@@ -9,5 +9,5 @@
  [functions.create-payment-order]
  verify_jwt = true
 
- [functions.cashfree-webhook]
+ [functions.razorpay-webhook]
  verify_jwt = false

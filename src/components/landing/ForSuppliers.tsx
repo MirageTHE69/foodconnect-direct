@@ -18,7 +18,7 @@ const ForSuppliers = () => {
   const goToAnchor = useAnchorNav();
   const { plans } = useSubscriptionPlans();
   const paidPlans = plans.filter((p) => p.plan_type !== "free" && p.price_monthly > 0);
-  const startingPrice = paidPlans.length > 0 ? Math.min(...paidPlans.map((p) => p.price_monthly)) : null;
+  const highestPrice = paidPlans.length > 0 ? Math.max(...paidPlans.map((p) => p.price_monthly)) : null;
 
   return (
     <section id="for-suppliers" className="py-24 bg-card">
@@ -50,10 +50,10 @@ const ForSuppliers = () => {
             <div className="bg-background rounded-3xl p-8 border border-border/50 shadow-hover max-w-sm mx-auto">
               <p className="text-sm text-muted-foreground mb-1">Pricing</p>
               <div className="flex items-baseline gap-2 mb-6">
-                {startingPrice !== null ? (
+                {highestPrice !== null ? (
                   <>
-                    <span className="text-sm text-muted-foreground">from</span>
-                    <span className="text-5xl font-extrabold text-foreground">₹{startingPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-sm text-muted-foreground">up to</span>
+                    <span className="text-5xl font-extrabold text-foreground">₹{highestPrice.toLocaleString('en-IN')}</span>
                     <span className="text-muted-foreground">/mo</span>
                   </>
                 ) : (

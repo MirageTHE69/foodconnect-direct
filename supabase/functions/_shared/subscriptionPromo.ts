@@ -2,7 +2,7 @@
 // import from the Vite/browser src tree, so this is a deliberate duplicate.
 // If you change the promo logic in src/lib/subscriptionPromo.ts, update this
 // file too (and vice versa) -- the manual admin-approval flow and the
-// Cashfree webhook activation must compute identical access windows.
+// Razorpay webhook activation must compute identical access windows.
 export const MONTHLY_BONUS_MONTHS = 1;
 export const ANNUAL_ACCESS_MONTHS = 13;
 
