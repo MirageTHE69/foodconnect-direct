@@ -9,7 +9,6 @@ import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
 import GrowthSolutions from "@/components/landing/GrowthSolutions";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
-import Community from "@/components/landing/Community";
 import HotRequirements from "@/components/landing/HotRequirements";
 import FAQ from "@/components/landing/FAQ";
 import CTA from "@/components/landing/CTA";
@@ -30,7 +29,6 @@ const Index = () => {
       <Pricing />
       <GrowthSolutions />
       <Testimonials />
-      <Community />
       <FAQ />
       <CTA />
       <Footer />
