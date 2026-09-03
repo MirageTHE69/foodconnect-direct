@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,7 @@ const adminNavItems: NavItem[] = [
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, userRole, signOut } = useAuth();
+  const { planName, hasActiveSubscription } = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -117,7 +119,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* User Info + Role Badge */}
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 space-y-2">
             <div className="px-3 py-2 bg-primary/10 rounded-lg flex items-center justify-between">
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
@@ -126,6 +128,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 {badge.label}
               </Badge>
             </div>
+            {userRole !== 'admin' && (
+              <Link
+                to="/profile"
+                className="block px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors truncate"
+              >
+                Plan: <span className="font-medium text-foreground">{hasActiveSubscription && planName ? planName : 'Free / Guest'}</span>
+              </Link>
+            )}
           </div>
 
           {/* Navigation */}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +27,7 @@ const initialForm = { title: '', description: '', category: '', location: '', qu
 
 export function PostRequirementDialog({ open, onOpenChange }: PostRequirementDialogProps) {
   const { user } = useAuth();
+  const { can } = usePermissions();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState(initialForm);
@@ -35,6 +37,15 @@ export function PostRequirementDialog({ open, onOpenChange }: PostRequirementDia
     if (next && !user) {
       onOpenChange(false);
       navigate('/auth');
+      return;
+    }
+    if (next && can('post_sourcing_requirement') === 'none') {
+      onOpenChange(false);
+      toast({
+        title: 'Upgrade required',
+        description: 'Posting a sourcing requirement needs an active subscription plan.',
+      });
+      navigate('/subscribe');
       return;
     }
     onOpenChange(next);

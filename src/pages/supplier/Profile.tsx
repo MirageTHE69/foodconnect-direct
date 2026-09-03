@@ -9,7 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Loader2, CheckCircle, Clock, XCircle, Save } from 'lucide-react';
+import { getTierLabel, type Tier } from '@/lib/permissions';
+import { PlanStatusCard } from '@/components/shared/PlanStatusCard';
+
+const BUSINESS_CATEGORIES: { value: Tier; label: string }[] =
+  (['founders', 'women_enterprise', 'north_east_startups', 'micro_first_time', 'small_homemade_food'] as Tier[])
+    .map((t) => ({ value: t, label: getTierLabel(t) }));
 
 const CERTIFICATIONS = [
   'FSSAI Certified',
@@ -47,6 +60,13 @@ export default function SupplierProfile() {
     fssai_number: '',
     website: '',
     certifications: [] as string[],
+    business_category: '' as Tier | '',
+    contact_person_name: '',
+    phone: '',
+    email: '',
+    moq: '',
+    export_capability: '',
+    manufacturing_capability: '',
   });
 
   useEffect(() => {
@@ -64,13 +84,23 @@ export default function SupplierProfile() {
         fssai_number: profile.fssai_number || '',
         website: profile.website || '',
         certifications: profile.certifications || [],
+        business_category: (profile.business_category as Tier) || '',
+        contact_person_name: profile.contact_person_name || '',
+        phone: profile.phone || '',
+        email: profile.email || '',
+        moq: profile.moq || '',
+        export_capability: profile.export_capability || '',
+        manufacturing_capability: profile.manufacturing_capability || '',
       });
     }
   }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile(formData);
+    await updateProfile({
+      ...formData,
+      business_category: formData.business_category || null,
+    });
   };
 
   const handleCertificationToggle = (cert: string) => {
@@ -127,6 +157,8 @@ export default function SupplierProfile() {
           {getVerificationBadge()}
         </div>
 
+        <PlanStatusCard />
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Images */}
           <Card>
@@ -181,6 +213,25 @@ export default function SupplierProfile() {
                     required
                     className="mt-1"
                   />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="business_category">Business Category</Label>
+                  <Select
+                    value={formData.business_category}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, business_category: v as Tier }))}
+                  >
+                    <SelectTrigger id="business_category" className="mt-1">
+                      <SelectValue placeholder="Select your business category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BUSINESS_CATEGORIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Determines which category-credit subscription plans apply to you.
+                  </p>
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="business_description">Business Description</Label>
@@ -279,6 +330,83 @@ export default function SupplierProfile() {
                     onChange={(e) => setFormData(prev => ({ ...prev, pincode: e.target.value }))}
                     placeholder="6 digit pincode"
                     maxLength={6}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact & Sourcing Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact & Sourcing Details</CardTitle>
+              <CardDescription>
+                Shown to buyers based on their subscription tier (contact info is credit-gated for most plans)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="contact_person_name">Contact Person</Label>
+                  <Input
+                    id="contact_person_name"
+                    value={formData.contact_person_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, contact_person_name: e.target.value }))}
+                    placeholder="Mr/Ms Name"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contact_phone">Phone Number</Label>
+                  <Input
+                    id="contact_phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+91 XXXXX XXXXX"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="contact_email">Email</Label>
+                  <Input
+                    id="contact_email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="business@example.com"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="moq">MOQ (Minimum Order Quantity)</Label>
+                  <Input
+                    id="moq"
+                    value={formData.moq}
+                    onChange={(e) => setFormData(prev => ({ ...prev, moq: e.target.value }))}
+                    placeholder="e.g. 100 units"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="manufacturing_capability">Manufacturing Capability</Label>
+                  <Input
+                    id="manufacturing_capability"
+                    value={formData.manufacturing_capability}
+                    onChange={(e) => setFormData(prev => ({ ...prev, manufacturing_capability: e.target.value }))}
+                    placeholder="e.g. 10,000 units/month"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="export_capability">Export Capabilities</Label>
+                  <Textarea
+                    id="export_capability"
+                    value={formData.export_capability}
+                    onChange={(e) => setFormData(prev => ({ ...prev, export_capability: e.target.value }))}
+                    rows={2}
+                    placeholder="Countries you export to, certifications for export, etc."
                     className="mt-1"
                   />
                 </div>

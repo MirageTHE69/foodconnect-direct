@@ -60,7 +60,7 @@ export function useSubscription() {
     try {
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select('*')
+        .select('*, plan:subscription_plans(*)')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .gte('expires_at', new Date().toISOString())

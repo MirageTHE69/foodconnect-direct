@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { PlanStatusCard } from "@/components/shared/PlanStatusCard";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -145,6 +146,8 @@ export default function BuyerProfile() {
           <h2 className="text-2xl font-bold mb-2">My Profile</h2>
           <p className="text-muted-foreground">Manage your account settings</p>
         </div>
+
+        <PlanStatusCard />
 
         <Card>
           <CardHeader>

@@ -3,10 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { SaveButton } from '@/components/buyer/SaveButton';
+import { GatedDetail } from '@/components/shared/GatedDetail';
 import { useSavedItems } from '@/hooks/useSavedItems';
 import { useEnquiries } from '@/hooks/useEnquiries';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useSupplierUnlock } from '@/hooks/useSupplierUnlock';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,6 +37,12 @@ import {
   Award,
   Store,
   MessageCircle,
+  User,
+  Phone,
+  Mail,
+  Factory,
+  Boxes,
+  Ship,
 } from 'lucide-react';
 
 interface SupplierDetail {
@@ -47,6 +56,12 @@ interface SupplierDetail {
   website: string | null;
   certifications: string[] | null;
   verification_status: 'pending' | 'verified' | 'rejected';
+  contact_person_name: string | null;
+  phone: string | null;
+  email: string | null;
+  moq: string | null;
+  export_capability: string | null;
+  manufacturing_capability: string | null;
 }
 
 interface ProductItem {
@@ -73,6 +88,8 @@ export default function SupplierDetail() {
   const { isSupplierSaved, toggleSaveSupplier, isProductSaved, toggleSaveProduct } = useSavedItems();
   const { createEnquiry } = useEnquiries();
   const { startConversation } = useChat();
+  const { can, tierLabel } = usePermissions();
+  const { unlocked, unlocking, unlock } = useSupplierUnlock(id ?? null);
 
   useEffect(() => {
     if (id) {
@@ -113,6 +130,22 @@ export default function SupplierDetail() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleContactClick = async () => {
+    if (!user) { navigate('/auth'); return; }
+    const access = can('send_enquiry');
+    if (access === 'none') { navigate('/subscribe'); return; }
+    if (access === 'limited' && !unlocked) { await unlock(); return; }
+    setEnquiryDialogOpen(true);
+  };
+
+  const contactButtonLabel = () => {
+    if (!user) return 'Contact Supplier';
+    const access = can('send_enquiry');
+    if (access === 'none') return 'Upgrade to Contact';
+    if (access === 'limited' && !unlocked) return unlocking ? 'Unlocking...' : 'Unlock to Contact';
+    return 'Contact Supplier';
   };
 
   const handleSendEnquiry = async () => {
@@ -166,6 +199,12 @@ export default function SupplierDetail() {
 
   const location = [supplier.city, supplier.state].filter(Boolean).join(', ');
   const isVerified = supplier.verification_status === 'verified';
+
+  const catalogueAccess = can('full_catalogue');
+  const catalogueUnlocked = catalogueAccess === 'full' || (catalogueAccess === 'limited' && unlocked);
+  const CATALOGUE_PREVIEW_COUNT = 4;
+  const visibleProducts = catalogueUnlocked ? products : products.slice(0, CATALOGUE_PREVIEW_COUNT);
+  const hiddenProductCount = products.length - visibleProducts.length;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -245,15 +284,24 @@ export default function SupplierDetail() {
                         </span>
                       )}
                       {supplier.website && (
-                        <a
-                          href={supplier.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 hover:text-primary"
+                        <GatedDetail
+                          access={can('website')}
+                          unlocked={unlocked}
+                          onUnlock={unlock}
+                          unlocking={unlocking}
+                          icon={<Globe className="h-4 w-4" />}
+                          label="Website"
                         >
-                          <Globe className="h-4 w-4" />
-                          Website
-                        </a>
+                          <a
+                            href={supplier.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 hover:text-primary"
+                          >
+                            <Globe className="h-4 w-4" />
+                            Website
+                          </a>
+                        </GatedDetail>
                       )}
                       <span className="flex items-center gap-1">
                         <Package className="h-4 w-4" />
@@ -282,9 +330,13 @@ export default function SupplierDetail() {
                         Chat
                       </Button>
                     )}
-                    <Button onClick={() => (user ? setEnquiryDialogOpen(true) : navigate('/auth'))}>
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Contact Supplier
+                    <Button onClick={handleContactClick} disabled={unlocking}>
+                      {unlocking ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                      )}
+                      {contactButtonLabel()}
                     </Button>
                   </div>
                 </div>
@@ -309,21 +361,40 @@ export default function SupplierDetail() {
                       <p className="text-muted-foreground">No products listed yet</p>
                     </div>
                   ) : (
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {products.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          id={product.id}
-                          name={product.name}
-                          description={product.description}
-                          images={product.images}
-                          categoryName={product.product_categories?.name}
-                          showSaveButton={true}
-                          isSaved={isProductSaved(product.id)}
-                          onSaveToggle={() => toggleSaveProduct(product.id)}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {visibleProducts.map((product) => (
+                          <ProductCard
+                            key={product.id}
+                            id={product.id}
+                            name={product.name}
+                            description={product.description}
+                            images={product.images}
+                            categoryName={product.product_categories?.name}
+                            showSaveButton={true}
+                            isSaved={isProductSaved(product.id)}
+                            onSaveToggle={() => toggleSaveProduct(product.id)}
+                          />
+                        ))}
+                      </div>
+                      {hiddenProductCount > 0 && (
+                        <div className="text-center mt-6 p-4 rounded-lg border border-dashed">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {hiddenProductCount} more product{hiddenProductCount !== 1 ? 's' : ''} in the full catalogue
+                          </p>
+                          {catalogueAccess === 'limited' ? (
+                            <Button size="sm" onClick={unlock} disabled={unlocking}>
+                              {unlocking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                              Unlock Full Catalogue
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" onClick={() => navigate(user ? '/subscribe' : '/auth')}>
+                              Upgrade to View
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </TabsContent>
 
@@ -355,16 +426,124 @@ export default function SupplierDetail() {
                       <Award className="h-5 w-5 text-primary" />
                       Certifications
                     </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {supplier.certifications.map((cert) => (
-                        <Badge key={cert} variant="secondary">
-                          {cert}
-                        </Badge>
-                      ))}
-                    </div>
+                    {can('view_certifications') === 'summary' ? (
+                      <p className="text-sm text-muted-foreground">
+                        {supplier.certifications.length} certification{supplier.certifications.length !== 1 ? 's' : ''} — sign in to view details
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {supplier.certifications.map((cert) => (
+                          <Badge key={cert} variant="secondary">
+                            {cert}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
+
+              {/* Business Details (contact, MOQ, export/manufacturing capability) */}
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <h3 className="font-semibold flex items-center gap-2 mb-1">
+                    <Store className="h-5 w-5 text-primary" />
+                    Business Details
+                  </h3>
+                  <GatedDetail
+                    access={can('contact_person')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<User className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="Contact Person"
+                  >
+                    {supplier.contact_person_name && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span>{supplier.contact_person_name}</span>
+                      </div>
+                    )}
+                  </GatedDetail>
+                  <GatedDetail
+                    access={can('phone_number')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<Phone className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="Phone Number"
+                  >
+                    {supplier.phone && (
+                      <a href={`tel:${supplier.phone}`} className="flex items-center gap-2 text-sm hover:text-primary">
+                        <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span>{supplier.phone}</span>
+                      </a>
+                    )}
+                  </GatedDetail>
+                  <GatedDetail
+                    access={can('email')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<Mail className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="Email"
+                  >
+                    {supplier.email && (
+                      <a href={`mailto:${supplier.email}`} className="flex items-center gap-2 text-sm hover:text-primary break-all">
+                        <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span>{supplier.email}</span>
+                      </a>
+                    )}
+                  </GatedDetail>
+                  <GatedDetail
+                    access={can('moq')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<Boxes className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="MOQ"
+                  >
+                    {supplier.moq && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Boxes className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span>MOQ: {supplier.moq}</span>
+                      </div>
+                    )}
+                  </GatedDetail>
+                  <GatedDetail
+                    access={can('manufacturing_capability')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<Factory className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="Manufacturing Capability"
+                    summary={supplier.manufacturing_capability ? 'Manufacturing details available — sign in to view' : undefined}
+                  >
+                    {supplier.manufacturing_capability && (
+                      <div className="flex items-start gap-2 text-sm">
+                        <Factory className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <span>{supplier.manufacturing_capability}</span>
+                      </div>
+                    )}
+                  </GatedDetail>
+                  <GatedDetail
+                    access={can('export_capabilities')}
+                    unlocked={unlocked}
+                    onUnlock={unlock}
+                    unlocking={unlocking}
+                    icon={<Ship className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    label="Export Capabilities"
+                    summary={supplier.export_capability ? 'Exports available — sign in to view details' : undefined}
+                  >
+                    {supplier.export_capability && (
+                      <div className="flex items-start gap-2 text-sm">
+                        <Ship className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <span>{supplier.export_capability}</span>
+                      </div>
+                    )}
+                  </GatedDetail>
+                </CardContent>
+              </Card>
 
               {/* Quick Actions */}
               <Card>
@@ -386,18 +565,29 @@ export default function SupplierDetail() {
                   )}
                   <Button
                     className="w-full"
-                    onClick={() => (user ? setEnquiryDialogOpen(true) : navigate('/auth'))}
+                    onClick={handleContactClick}
+                    disabled={unlocking}
                   >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Send Enquiry
+                    {unlocking ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                    )}
+                    {contactButtonLabel() === 'Contact Supplier' ? 'Send Enquiry' : contactButtonLabel()}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => toggleSaveSupplier(supplier.id)}
-                  >
-                    {isSupplierSaved(supplier.id) ? 'Remove from Saved' : 'Save Supplier'}
-                  </Button>
+                  {can('save_suppliers') === 'none' ? (
+                    <Button variant="outline" className="w-full" onClick={() => navigate(user ? '/subscribe' : '/auth')}>
+                      Sign in to Save
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => toggleSaveSupplier(supplier.id)}
+                    >
+                      {isSupplierSaved(supplier.id) ? 'Remove from Saved' : 'Save Supplier'}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </div>
