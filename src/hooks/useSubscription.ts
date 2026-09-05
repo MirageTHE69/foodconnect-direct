@@ -10,6 +10,7 @@ interface SubscriptionPlan {
   name: string;
   price_monthly: number;
   price_annual: number;
+  gst_percent: number;
   credits_per_month: number | null;
   description: string | null;
   features: string[];
@@ -21,11 +22,21 @@ interface UserSubscription {
   id: string;
   user_id: string;
   plan_id: string;
+  billing_cycle: string;
   status: string;
   starts_at: string;
   expires_at: string;
   payment_id: string | null;
   payment_status: string;
+  payment_reference: string | null;
+  amount_paid: number | null;
+  billing_state: string | null;
+  taxable_value: number | null;
+  cgst_amount: number;
+  sgst_amount: number;
+  igst_amount: number;
+  gst_rate: number;
+  invoice_number: string | null;
   created_at: string;
   plan?: SubscriptionPlan;
 }

@@ -103,6 +103,11 @@ serve(async (req) => {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + computeSubscriptionMonths(row.billing_cycle as 'monthly' | 'annual'));
 
+      const { data: invoiceNumber, error: invoiceError } = await admin.rpc('generate_invoice_number');
+      if (invoiceError) {
+        console.error('Failed to generate invoice number:', invoiceError);
+      }
+
       const { error: updateError } = await admin
         .from('user_subscriptions')
         .update({
@@ -113,6 +118,7 @@ serve(async (req) => {
           starts_at: startsAt.toISOString(),
           expires_at: expiresAt.toISOString(),
           activated_at: new Date().toISOString(),
+          invoice_number: invoiceNumber ?? null,
         })
         .eq('id', row.id)
         .eq('status', 'pending_payment');

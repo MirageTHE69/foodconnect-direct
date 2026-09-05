@@ -54,6 +54,7 @@ import AdminBlogs from "./pages/admin/Blogs";
 import AdminBlogEdit from "./pages/admin/BlogEdit";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import Subscribe from "./pages/Subscribe";
+import Invoice from "./pages/Invoice";
 import CategoryDetail from "./pages/CategoryDetail";
 import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
@@ -99,6 +100,7 @@ const App = () => (
             
             {/* Subscribe page - for users without active subscription */}
             <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />
+            <Route path="/invoice/:id" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
 
             {/* Unified Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

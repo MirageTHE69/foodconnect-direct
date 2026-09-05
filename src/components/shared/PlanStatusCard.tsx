@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePermissions } from '@/hooks/usePermissions';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 
 /**
@@ -12,7 +12,7 @@ import { format } from 'date-fns';
  * applicable. Used on both buyer and supplier profile pages.
  */
 export function PlanStatusCard() {
-  const { loading, hasActiveSubscription, planName, tierLabel, expiresAt, creditsPerMonth } = usePermissions();
+  const { loading, hasActiveSubscription, planName, tierLabel, expiresAt, creditsPerMonth, subscriptionId, invoiceNumber } = usePermissions();
 
   return (
     <Card>
@@ -47,9 +47,19 @@ export function PlanStatusCard() {
                 Renews / expires {format(new Date(expiresAt), 'dd MMM yyyy')}
               </p>
             )}
-            <Button asChild variant="outline" size="sm">
-              <Link to="/subscribe">Change Plan</Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/subscribe">Change Plan</Link>
+              </Button>
+              {invoiceNumber && subscriptionId && (
+                <Button asChild variant="outline" size="sm" className="gap-1.5">
+                  <Link to={`/invoice/${subscriptionId}`}>
+                    <Receipt className="h-4 w-4" />
+                    View Invoice
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { calculateGst, INDIAN_STATES } from "../_shared/gst.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,16 +45,19 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    const { plan_id, billing_cycle } = await req.json();
+    const { plan_id, billing_cycle, billing_state } = await req.json();
     if (!plan_id || (billing_cycle !== 'monthly' && billing_cycle !== 'annual')) {
       return json({ error: 'plan_id and a valid billing_cycle are required' }, 400);
+    }
+    if (!billing_state || !INDIAN_STATES.includes(billing_state)) {
+      return json({ error: 'A valid billing_state is required' }, 400);
     }
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { data: plan, error: planError } = await admin
       .from('subscription_plans')
-      .select('id, code, price_monthly, price_annual, is_active')
+      .select('id, code, price_monthly, price_annual, gst_percent, is_active')
       .eq('id', plan_id)
       .eq('is_active', true)
       .single();
@@ -67,6 +71,8 @@ serve(async (req) => {
       return json({ error: 'This plan does not require payment' }, 400);
     }
 
+    const gst = calculateGst(amount, plan.gst_percent ?? 18, billing_state);
+
     const { data: subRow, error: insertError } = await admin
       .from('user_subscriptions')
       .insert({
@@ -74,6 +80,12 @@ serve(async (req) => {
         plan_id: plan.id,
         billing_cycle,
         payment_provider: 'razorpay',
+        billing_state,
+        taxable_value: gst.taxableValue,
+        cgst_amount: gst.cgstAmount,
+        sgst_amount: gst.sgstAmount,
+        igst_amount: gst.igstAmount,
+        gst_rate: plan.gst_percent ?? 18,
       })
       .select('id')
       .single();

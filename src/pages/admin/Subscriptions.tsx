@@ -124,6 +124,9 @@ export default function AdminSubscriptions() {
       expiresAt.setMonth(expiresAt.getMonth() + computeSubscriptionMonths(sub.billing_cycle as 'monthly' | 'annual'));
       const price = sub.billing_cycle === 'annual' ? plan.price_annual : plan.price_monthly;
 
+      const { data: invoiceNumber, error: invoiceError } = await supabase.rpc('generate_invoice_number');
+      if (invoiceError) console.error('Failed to generate invoice number:', invoiceError);
+
       const { error } = await supabase
         .from('user_subscriptions')
         .update({
@@ -135,6 +138,7 @@ export default function AdminSubscriptions() {
           expires_at: expiresAt.toISOString(),
           activated_by: user.id,
           activated_at: new Date().toISOString(),
+          invoice_number: invoiceNumber ?? null,
         })
         .eq('id', actioningId);
 

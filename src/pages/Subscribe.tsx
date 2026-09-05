@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription, useSubscriptionPlans, SubscriptionPlan } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { startRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
 import { useSubscriptionActivationWatcher } from '@/hooks/useSubscriptionActivationWatcher';
-import { Check, Star, Loader2, ArrowLeft, Utensils, PartyPopper, CalendarCheck } from 'lucide-react';
+import { INDIAN_STATES } from '@/lib/gst';
+import { Check, Star, Loader2, ArrowLeft, Utensils, PartyPopper, CalendarCheck, Receipt } from 'lucide-react';
 
 export default function Subscribe() {
   const { plans, loading: plansLoading } = useSubscriptionPlans();
@@ -20,10 +23,12 @@ export default function Subscribe() {
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [billingState, setBillingState] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activatedPlan, setActivatedPlan] = useState<SubscriptionPlan | null>(null);
   const [isPaidActivation, setIsPaidActivation] = useState(false);
+  const [activatedSubscriptionId, setActivatedSubscriptionId] = useState<string | null>(null);
   const [pendingSubscription, setPendingSubscription] = useState<{ plan?: SubscriptionPlan } | null>(null);
   const [checkingPending, setCheckingPending] = useState(true);
   const [showProcessing, setShowProcessing] = useState(false);
@@ -59,7 +64,7 @@ export default function Subscribe() {
   }, [user, plansLoading]);
 
   const handleSubscribe = async () => {
-    if (!selectedPlan || !user) return;
+    if (!selectedPlan || !user || !billingState) return;
 
     const plan = plans.find(p => p.id === selectedPlan);
     if (!plan) return;
@@ -76,6 +81,7 @@ export default function Subscribe() {
             user_id: user.id,
             plan_id: plan.id,
             billing_cycle: billingCycle,
+            billing_state: billingState,
           });
 
         if (error) throw error;
@@ -86,10 +92,11 @@ export default function Subscribe() {
         return;
       }
 
-      const { result, subscriptionId } = await startRazorpayCheckout(plan.id, billingCycle);
+      const { result, subscriptionId } = await startRazorpayCheckout(plan.id, billingCycle, billingState);
       if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
 
       setActivatedPlan(plan);
+      setActivatedSubscriptionId(subscriptionId);
       setPendingActivationId(subscriptionId);
       setShowProcessing(true);
     } catch (err: any) {
@@ -200,7 +207,15 @@ export default function Subscribe() {
               </p>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center">
+          <DialogFooter className="sm:flex-col sm:justify-center gap-2">
+            {isPaidActivation && activatedSubscriptionId && (
+              <Button asChild variant="outline" size="lg" className="w-full gap-2">
+                <Link to={`/invoice/${activatedSubscriptionId}`}>
+                  <Receipt className="w-4 h-4" />
+                  View Invoice
+                </Link>
+              </Button>
+            )}
             <Button onClick={handleGoToDashboard} size="lg" className="w-full">
               Go to Dashboard →
             </Button>
@@ -244,6 +259,25 @@ export default function Subscribe() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="max-w-xs mx-auto mb-8">
+          <Label htmlFor="billing-state" className="text-sm font-medium mb-1.5 block">
+            Billing State <span className="text-destructive">*</span>
+          </Label>
+          <Select value={billingState} onValueChange={setBillingState}>
+            <SelectTrigger id="billing-state">
+              <SelectValue placeholder="Select your billing state" />
+            </SelectTrigger>
+            <SelectContent>
+              {INDIAN_STATES.map((state) => (
+                <SelectItem key={state} value={state}>{state}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Used to calculate GST (CGST+SGST or IGST) on your invoice.
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -320,7 +354,7 @@ export default function Subscribe() {
         <div className="mt-8 text-center">
           <Button
             size="lg"
-            disabled={!selectedPlan || isSubmitting}
+            disabled={!selectedPlan || !billingState || isSubmitting}
             onClick={handleSubscribe}
             className="px-12"
           >
@@ -336,7 +370,9 @@ export default function Subscribe() {
             )}
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            {selectedPlanIsFree
+            {!billingState
+              ? 'Select your billing state above to continue.'
+              : selectedPlanIsFree
               ? 'An admin will confirm payment and activate your plan. No card details needed yet.'
               : 'Pay securely with Razorpay — your plan activates instantly after payment.'}
           </p>

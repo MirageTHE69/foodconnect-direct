@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -1211,14 +1211,23 @@ export type Database = {
           admin_notes: string | null
           amount_paid: number | null
           billing_cycle: string
+          billing_state: string | null
+          cgst_amount: number
           created_at: string
           expires_at: string | null
+          gateway_order_id: string | null
+          gst_rate: number
           id: string
+          igst_amount: number
+          invoice_number: string | null
+          payment_provider: string
           payment_reference: string | null
           payment_status: string
           plan_id: string
+          sgst_amount: number
           starts_at: string | null
           status: string
+          taxable_value: number | null
           user_id: string
         }
         Insert: {
@@ -1227,14 +1236,23 @@ export type Database = {
           admin_notes?: string | null
           amount_paid?: number | null
           billing_cycle?: string
+          billing_state?: string | null
+          cgst_amount?: number
           created_at?: string
           expires_at?: string | null
+          gateway_order_id?: string | null
+          gst_rate?: number
           id?: string
+          igst_amount?: number
+          invoice_number?: string | null
+          payment_provider?: string
           payment_reference?: string | null
           payment_status?: string
           plan_id: string
+          sgst_amount?: number
           starts_at?: string | null
           status?: string
+          taxable_value?: number | null
           user_id: string
         }
         Update: {
@@ -1243,14 +1261,23 @@ export type Database = {
           admin_notes?: string | null
           amount_paid?: number | null
           billing_cycle?: string
+          billing_state?: string | null
+          cgst_amount?: number
           created_at?: string
           expires_at?: string | null
+          gateway_order_id?: string | null
+          gst_rate?: number
           id?: string
+          igst_amount?: number
+          invoice_number?: string | null
+          payment_provider?: string
           payment_reference?: string | null
           payment_status?: string
           plan_id?: string
+          sgst_amount?: number
           starts_at?: string | null
           status?: string
+          taxable_value?: number | null
           user_id?: string
         }
         Relationships: [
@@ -1268,6 +1295,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_invoice_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1312,12 +1340,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1341,11 +1369,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1366,11 +1394,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1391,11 +1419,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1408,11 +1436,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

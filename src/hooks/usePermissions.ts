@@ -37,5 +37,7 @@ export function usePermissions() {
     planName: subscription?.plan?.name ?? null,
     expiresAt: subscription?.expires_at ?? null,
     creditsPerMonth: subscription?.plan?.credits_per_month ?? null,
+    subscriptionId: subscription?.id ?? null,
+    invoiceNumber: subscription?.invoice_number ?? null,
   };
 }

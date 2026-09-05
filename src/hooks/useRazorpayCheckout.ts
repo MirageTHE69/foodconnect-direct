@@ -37,9 +37,9 @@ interface CheckoutResult {
  * real activation happens asynchronously via razorpay-webhook. Callers must
  * watch the returned subscriptionId (see useSubscriptionActivationWatcher).
  */
-export async function startRazorpayCheckout(planId: string, billingCycle: 'monthly' | 'annual'): Promise<CheckoutResult> {
+export async function startRazorpayCheckout(planId: string, billingCycle: 'monthly' | 'annual', billingState: string): Promise<CheckoutResult> {
   const { data, error } = await supabase.functions.invoke('create-payment-order', {
-    body: { plan_id: planId, billing_cycle: billingCycle },
+    body: { plan_id: planId, billing_cycle: billingCycle, billing_state: billingState },
   });
 
   if (error) {
