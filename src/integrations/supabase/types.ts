@@ -644,7 +644,7 @@ export type Database = {
           prep_time: number | null
           servings: number | null
           status: Database["public"]["Enums"]["product_status"]
-          supplier_id: string
+          supplier_id: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -660,7 +660,7 @@ export type Database = {
           prep_time?: number | null
           servings?: number | null
           status?: Database["public"]["Enums"]["product_status"]
-          supplier_id: string
+          supplier_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -676,7 +676,7 @@ export type Database = {
           prep_time?: number | null
           servings?: number | null
           status?: Database["public"]["Enums"]["product_status"]
-          supplier_id?: string
+          supplier_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -1140,6 +1140,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      talent_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          resume_url: string
+          skills: string[]
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          resume_url: string
+          skills?: string[]
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          resume_url?: string
+          skills?: string[]
+          status?: string
+        }
+        Relationships: []
       }
       testimonials: {
         Row: {

@@ -57,6 +57,9 @@ const Navbar = () => {
             <a href="#for-suppliers" onClick={goToAnchor("#for-suppliers")} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               For Suppliers
             </a>
+            <Link to="/recipes" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+              Recipes
+            </Link>
             <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               Jobs
             </Link>
@@ -152,10 +155,13 @@ const Navbar = () => {
               >
                 For Suppliers
               </a>
-              <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+              <Link to="/recipes" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2" onClick={() => setIsMenuOpen(false)}>
+                Recipes
+              </Link>
+              <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2" onClick={() => setIsMenuOpen(false)}>
                 Jobs
               </Link>
-              <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2 flex items-center gap-2">
+              <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2 flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
                 <ScanLine className="h-4 w-4" />
                 Scan Product
               </Link>

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Mail, Phone, Store } from "lucide-react";
+import { ArrowLeft, MapPin, Mail, Phone, Store, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { isUuid } from "@/lib/utils";
 import { useAnchorNav } from "@/hooks/useAnchorNav";
+import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -25,6 +26,7 @@ interface Vendor {
 const SubCategoryDetail = () => {
   const { categoryId, subId } = useParams<{ categoryId: string; subId: string }>();
   const goToAnchor = useAnchorNav();
+  const { user } = useAuth();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [subName, setSubName] = useState("");
   const [catName, setCatName] = useState("");
@@ -136,20 +138,34 @@ const SubCategoryDetail = () => {
                       <h3 className="font-semibold text-foreground text-base">{v.name}</h3>
                     </div>
 
-                    {v.address && (
-                      <p className="text-sm text-muted-foreground flex items-start gap-2">
-                        <MapPin className="w-4 h-4 mt-0.5 shrink-0" /> {v.address}
-                      </p>
-                    )}
-                    {v.email && (
-                      <a href={`mailto:${v.email}`} className="text-sm text-primary hover:underline flex items-center gap-2">
-                        <Mail className="w-4 h-4 shrink-0" /> {v.email}
-                      </a>
-                    )}
-                    {v.phone && (
-                      <a href={`tel:${v.phone}`} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2">
-                        <Phone className="w-4 h-4 shrink-0" /> {v.phone}
-                      </a>
+                    {user ? (
+                      <>
+                        {v.address && (
+                          <p className="text-sm text-muted-foreground flex items-start gap-2">
+                            <MapPin className="w-4 h-4 mt-0.5 shrink-0" /> {v.address}
+                          </p>
+                        )}
+                        {v.email && (
+                          <a href={`mailto:${v.email}`} className="text-sm text-primary hover:underline flex items-center gap-2">
+                            <Mail className="w-4 h-4 shrink-0" /> {v.email}
+                          </a>
+                        )}
+                        {v.phone && (
+                          <a href={`tel:${v.phone}`} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2">
+                            <Phone className="w-4 h-4 shrink-0" /> {v.phone}
+                          </a>
+                        )}
+                      </>
+                    ) : (
+                      (v.address || v.email || v.phone) && (
+                        <Link
+                          to="/auth"
+                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary bg-muted/50 rounded-lg px-3 py-2 transition-colors"
+                        >
+                          <Lock className="w-3.5 h-3.5 shrink-0" />
+                          Sign in to view contact details
+                        </Link>
+                      )
                     )}
                   </CardContent>
                 </Card>

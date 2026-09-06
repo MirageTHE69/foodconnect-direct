@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Briefcase, MapPin, Search, Loader2, Building2 } from "lucide-react";
+import { SubmitResumeSection } from "@/components/jobs/SubmitResumeSection";
 
 interface Job {
   id: string;
@@ -145,6 +146,10 @@ export default function Jobs() {
               ))}
             </div>
           )}
+
+          <div className="mt-12 max-w-3xl mx-auto">
+            <SubmitResumeSection />
+          </div>
         </div>
       </main>
       <Footer />

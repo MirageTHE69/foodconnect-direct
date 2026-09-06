@@ -25,6 +25,7 @@ import {
   CreditCard,
   Flame,
   Briefcase,
+  Contact,
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nav.png';
 
@@ -62,6 +63,8 @@ const adminNavItems: NavItem[] = [
   { label: 'Subscriptions', href: '/admin/subscriptions', icon: <CreditCard className="h-5 w-5" /> },
   { label: 'Hot Requirements', href: '/admin/hot-requirements', icon: <Flame className="h-5 w-5" /> },
   { label: 'Jobs', href: '/admin/jobs', icon: <Briefcase className="h-5 w-5" /> },
+  { label: 'Resumes & Skills', href: '/admin/talent', icon: <Contact className="h-5 w-5" /> },
+  { label: 'Recipes', href: '/admin/recipes', icon: <BookOpen className="h-5 w-5" /> },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {

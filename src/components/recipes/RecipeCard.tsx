@@ -96,16 +96,15 @@ export function RecipeCard({
         </div>
       </CardContent>
       
-      {supplierName && (
-        <CardFooter className="pt-0">
-          <Link
-            to={supplierId ? `/suppliers/${supplierId}` : '#'}
-            className="text-sm text-muted-foreground hover:text-primary"
-          >
+      <CardFooter className="pt-0">
+        {supplierName ? (
+          <Link to={supplierId ? `/suppliers/${supplierId}` : '#'} className="text-sm text-muted-foreground hover:text-primary">
             By {supplierName}
           </Link>
-        </CardFooter>
-      )}
+        ) : (
+          <span className="text-sm text-muted-foreground">By FoodAdda Team</span>
+        )}
+      </CardFooter>
     </Card>
   );
 }

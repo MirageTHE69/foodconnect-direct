@@ -321,7 +321,7 @@ export default function Subscribe() {
                   </div>
                   {!isFree && <p className="text-xs text-muted-foreground mt-1 italic">Inclusive of all taxes</p>}
                   {!isFree && (
-                    <p className="text-sm font-semibold text-primary mt-2">
+                    <p className="text-sm font-semibold text-foreground mt-2">
                       🎉 1 month FREE {billingCycle === 'annual' ? '— 13 months access' : '— 2 months access'}
                     </p>
                   )}

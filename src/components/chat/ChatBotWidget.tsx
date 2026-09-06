@@ -8,8 +8,16 @@ type Message = { role: 'user' | 'assistant'; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/website-bot`;
 
-export function ChatBotWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+interface ChatBotWidgetProps {
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function ChatBotWidget({ onOpenChange }: ChatBotWidgetProps = {}) {
+  const [isOpen, setIsOpenState] = useState(false);
+  const setIsOpen = (open: boolean) => {
+    setIsOpenState(open);
+    onOpenChange?.(open);
+  };
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

@@ -80,7 +80,7 @@ export default function Pricing() {
           </div>
           {!isFree && <p className="text-xs text-muted-foreground mt-1 italic">Inclusive of all taxes</p>}
           {!isFree && (
-            <p className="text-sm font-semibold text-primary mt-2">
+            <p className="text-sm font-semibold text-foreground mt-2">
               🎉 1 month FREE {billingCycle === 'annual' ? '— 13 months access' : '— 2 months access'}
             </p>
           )}
@@ -132,7 +132,7 @@ export default function Pricing() {
             Get full access to FoodAdda's marketplace. Connect with suppliers, manage enquiries, and grow your
             business.
           </p>
-          <p className="mt-4 inline-block text-sm font-semibold text-primary bg-primary/10 rounded-full px-4 py-1.5">
+          <p className="mt-4 inline-block text-sm font-semibold text-foreground bg-primary/10 rounded-full px-4 py-1.5">
             🎉 Limited-time launch offer: every paid plan includes 1 month free — on monthly or annual billing.
           </p>
         </div>

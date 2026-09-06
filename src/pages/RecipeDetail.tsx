@@ -368,6 +368,22 @@ export default function RecipeDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Supplier Card */}
+            {!supplier && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4">Recipe by</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <ChefHat className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">FoodAdda Team</p>
+                      <p className="text-sm text-muted-foreground">Official recipe</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {supplier && (
               <Card>
                 <CardContent className="pt-6">

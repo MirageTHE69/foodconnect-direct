@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { ChatBotWidget } from "@/components/chat/ChatBotWidget";
+import { FloatingWidgets } from "@/components/chat/FloatingWidgets";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import Index from "./pages/Index";
@@ -58,6 +58,9 @@ import Invoice from "./pages/Invoice";
 import CategoryDetail from "./pages/CategoryDetail";
 import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
+import AdminTalentProfiles from "./pages/admin/TalentProfiles";
+import AdminRecipes from "./pages/admin/Recipes";
+import AdminRecipeEdit from "./pages/admin/RecipeEdit";
 import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
 import AdminJobs from "./pages/admin/Jobs";
@@ -142,6 +145,10 @@ const App = () => (
             <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptions /></ProtectedRoute>} />
             <Route path="/admin/hot-requirements" element={<ProtectedRoute allowedRoles={['admin']}><AdminHotRequirements /></ProtectedRoute>} />
             <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobs /></ProtectedRoute>} />
+            <Route path="/admin/talent" element={<ProtectedRoute allowedRoles={['admin']}><AdminTalentProfiles /></ProtectedRoute>} />
+            <Route path="/admin/recipes" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipes /></ProtectedRoute>} />
+            <Route path="/admin/recipes/new" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipeEdit /></ProtectedRoute>} />
+            <Route path="/admin/recipes/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipeEdit /></ProtectedRoute>} />
             <Route path="/admin/jobs/new" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
             <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobEdit /></ProtectedRoute>} />
             <Route path="/admin/jobs/:id/applications" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobApplications /></ProtectedRoute>} />
@@ -150,7 +157,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
-        <ChatBotWidget />
+        <FloatingWidgets />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
