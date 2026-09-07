@@ -55,7 +55,7 @@ const PrivacyPolicy = () => {
             <h2>7. Changes to This Policy</h2>
             <p>We reserve the right to update this Privacy Policy at any time. Users will be notified of significant changes.</p>
 
-            <p>For any privacy-related queries, please contact us at <strong>consult.ajaysant@gmail.com</strong> or call <strong>9328137674</strong>.</p>
+            <p>For any privacy-related queries, please contact us at <strong>info@foodadda.in</strong> or call <strong>9328137674</strong>.</p>
             <p><em>By using FoodAdda.in, you agree to this Privacy Policy. Thank you for trusting us!</em></p>
           </div>
         </div>

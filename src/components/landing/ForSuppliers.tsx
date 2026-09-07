@@ -17,8 +17,10 @@ const ForSuppliers = () => {
   const navigate = useNavigate();
   const goToAnchor = useAnchorNav();
   const { plans } = useSubscriptionPlans();
-  const b2bPlan = plans.find((p) => p.code === "universal_b2b_b2c");
-  const b2bPrice = b2bPlan ? b2bPlan.price_monthly : null;
+  const womenPlans = plans.filter((p) => p.business_category === "women_enterprise");
+  const womenPrice = womenPlans.length > 0
+    ? Math.min(...womenPlans.map((p) => p.price_monthly))
+    : null;
 
   return (
     <section id="for-suppliers" className="py-24 bg-card">
@@ -48,12 +50,12 @@ const ForSuppliers = () => {
           {/* Right - Pricing Card */}
           <div className="relative">
             <div className="bg-background rounded-3xl p-8 border border-border/50 shadow-hover max-w-sm mx-auto">
-              <p className="text-sm text-muted-foreground mb-1">Pricing</p>
+              <p className="text-sm text-muted-foreground mb-1">Women Enterprise Plan</p>
               <div className="flex items-baseline gap-2 mb-6">
-                {b2bPrice !== null ? (
+                {womenPrice !== null ? (
                   <>
                     <span className="text-sm text-muted-foreground">from</span>
-                    <span className="text-5xl font-extrabold text-foreground">₹{b2bPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-5xl font-extrabold text-foreground">₹{womenPrice.toLocaleString('en-IN')}</span>
                     <span className="text-muted-foreground">/mo</span>
                   </>
                 ) : (
