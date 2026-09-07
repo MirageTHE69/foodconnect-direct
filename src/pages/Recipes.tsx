@@ -11,7 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChefHat, Search, Loader2 } from 'lucide-react';
-import { PublicPageLayout } from '@/components/shared/PublicPageLayout';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 
 interface Recipe {
   id: string;
@@ -66,7 +67,9 @@ export default function Recipes() {
   });
 
   return (
-    <PublicPageLayout>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="pt-16 md:pt-20 container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Recipes</h1>
@@ -128,6 +131,8 @@ export default function Recipes() {
           ))}
         </div>
       )}
-    </PublicPageLayout>
+      </div>
+      <Footer />
+    </div>
   );
 }

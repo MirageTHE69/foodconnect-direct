@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { RecipeCard } from '@/components/recipes/RecipeCard';
+import { PdfFlipbook } from '@/components/recipes/PdfFlipbook';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import Navbar from '@/components/landing/Navbar';
+import Footer from '@/components/landing/Footer';
 import {
   ChefHat,
   Clock,
@@ -27,6 +30,7 @@ interface RecipeDetail {
   difficulty: string | null;
   instructions: string | null;
   tags: string[] | null;
+  pdf_url: string | null;
   supplier_profiles: {
     id: string;
     company_name: string;
@@ -119,31 +123,34 @@ export default function RecipeDetail() {
 
       setIngredients(ingredientsData || []);
 
-      // Fetch related recipes from same supplier
-      if (recipeData.supplier_id) {
-        const { data: relatedData } = await supabase
-          .from('recipes')
-          .select(`
+      // Fetch related recipes: same supplier, or other official FoodAdda
+      // recipes when this one has no supplier.
+      let relatedQuery = supabase
+        .from('recipes')
+        .select(`
+          id,
+          title,
+          description,
+          images,
+          prep_time,
+          cook_time,
+          servings,
+          difficulty,
+          supplier_profiles (
             id,
-            title,
-            description,
-            images,
-            prep_time,
-            cook_time,
-            servings,
-            difficulty,
-            supplier_profiles (
-              id,
-              company_name
-            )
-          `)
-          .eq('supplier_id', recipeData.supplier_id)
-          .eq('status', 'approved')
-          .neq('id', recipeId)
-          .limit(4);
+            company_name
+          )
+        `)
+        .eq('status', 'approved')
+        .neq('id', recipeId)
+        .limit(4);
 
-        setRelatedRecipes(relatedData || []);
-      }
+      relatedQuery = recipeData.supplier_id
+        ? relatedQuery.eq('supplier_id', recipeData.supplier_id)
+        : relatedQuery.is('supplier_id', null);
+
+      const { data: relatedData } = await relatedQuery;
+      setRelatedRecipes(relatedData || []);
     } catch (error) {
       console.error('Error fetching recipe:', error);
     } finally {
@@ -153,23 +160,30 @@ export default function RecipeDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-16 md:pt-20 min-h-[80vh] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
 
   if (!recipe) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <ChefHat className="h-16 w-16 text-muted-foreground/50 mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Recipe Not Found</h1>
-        <p className="text-muted-foreground mb-4">
-          The recipe you're looking for doesn't exist
-        </p>
-        <Button asChild>
-          <Link to="/recipes">Browse Recipes</Link>
-        </Button>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-16 md:pt-20 min-h-[80vh] flex flex-col items-center justify-center">
+          <ChefHat className="h-16 w-16 text-muted-foreground/50 mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Recipe Not Found</h1>
+          <p className="text-muted-foreground mb-4">
+            The recipe you're looking for doesn't exist
+          </p>
+          <Button asChild>
+            <Link to="/recipes">Browse Recipes</Link>
+          </Button>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -194,32 +208,109 @@ export default function RecipeDetail() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <ChefHat className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl">FoodAdda</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link to="/products">
-                <Button variant="ghost">Products</Button>
-              </Link>
-              <Link to="/suppliers">
-                <Button variant="ghost">Suppliers</Button>
-              </Link>
-              <Link to="/recipes">
-                <Button variant="ghost">Recipes</Button>
-              </Link>
+  if (recipe.pdf_url) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-16 md:pt-20">
+          <div className="container mx-auto px-4 py-8">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+              <Link to="/" className="hover:text-foreground">Home</Link>
+              <span>/</span>
+              <Link to="/recipes" className="hover:text-foreground">Recipes</Link>
+              <span>/</span>
+              <span className="text-foreground">{recipe.title}</span>
             </div>
+
+            {/* Title */}
+            <div className="mb-6 max-w-4xl">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {recipe.difficulty && <Badge className={getDifficultyColor(recipe.difficulty)}>{recipe.difficulty}</Badge>}
+                {recipe.tags?.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>)}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">{recipe.title}</h1>
+              {recipe.description && <p className="text-muted-foreground text-lg">{recipe.description}</p>}
+            </div>
+
+            {/* Full-width, large flipbook */}
+            <PdfFlipbook url={recipe.pdf_url} />
+
+            {/* Recipe by */}
+            <div className="max-w-4xl mx-auto mt-8">
+              {supplier ? (
+                <Card>
+                  <CardContent className="pt-6 flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      {supplier.logo_url ? (
+                        <img src={supplier.logo_url} alt={supplier.company_name} loading="lazy" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center"><Store className="h-6 w-6 text-muted-foreground" /></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Link to={`/suppliers/${supplier.id}`} className="font-semibold hover:text-primary">{supplier.company_name}</Link>
+                        {isVerified && <CheckCircle className="h-4 w-4 text-green-500" />}
+                      </div>
+                      {supplierLocation && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="h-3 w-3" />{supplierLocation}</p>
+                      )}
+                    </div>
+                    <Button asChild variant="outline">
+                      <Link to={`/suppliers/${supplier.id}`}>View Supplier</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="pt-6 flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <ChefHat className="h-7 w-7 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">FoodAdda Team</p>
+                      <p className="text-sm text-muted-foreground">Official recipe</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Related Recipes */}
+            {relatedRecipes.length > 0 && (
+              <div className="mt-16">
+                <h2 className="text-2xl font-bold mb-6">{supplier ? `More from ${supplier.company_name}` : 'More Official Recipes'}</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {relatedRecipes.map((relRecipe) => (
+                    <RecipeCard
+                      key={relRecipe.id}
+                      id={relRecipe.id}
+                      title={relRecipe.title}
+                      description={relRecipe.description}
+                      images={relRecipe.images}
+                      prepTime={relRecipe.prep_time}
+                      cookTime={relRecipe.cook_time}
+                      servings={relRecipe.servings}
+                      difficulty={relRecipe.difficulty}
+                      supplierName={relRecipe.supplier_profiles?.company_name}
+                      supplierId={relRecipe.supplier_profiles?.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </header>
+        <Footer />
+      </div>
+    );
+  }
 
-      <main className="container mx-auto px-4 py-8">
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="pt-16 md:pt-20 container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-foreground">
@@ -367,23 +458,7 @@ export default function RecipeDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Supplier Card */}
-            {!supplier && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-4">Recipe by</h3>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <ChefHat className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">FoodAdda Team</p>
-                      <p className="text-sm text-muted-foreground">Official recipe</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Supplier Card (this branch always has a supplier -- the no-supplier PDF branch returns earlier) */}
             {supplier && (
               <Card>
                 <CardContent className="pt-6">
@@ -454,6 +529,7 @@ export default function RecipeDetail() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

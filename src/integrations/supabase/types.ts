@@ -641,6 +641,7 @@ export type Database = {
           id: string
           images: string[] | null
           instructions: string | null
+          pdf_url: string | null
           prep_time: number | null
           servings: number | null
           status: Database["public"]["Enums"]["product_status"]
@@ -657,6 +658,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           instructions?: string | null
+          pdf_url?: string | null
           prep_time?: number | null
           servings?: number | null
           status?: Database["public"]["Enums"]["product_status"]
@@ -673,6 +675,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           instructions?: string | null
+          pdf_url?: string | null
           prep_time?: number | null
           servings?: number | null
           status?: Database["public"]["Enums"]["product_status"]

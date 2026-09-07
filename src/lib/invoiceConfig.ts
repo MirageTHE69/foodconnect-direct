@@ -1,10 +1,10 @@
 // Seller details printed on every subscription invoice.
-// TODO: legalName, gstin and pan are placeholders — replace once confirmed.
+// TODO: legalName (registered entity name) still pending confirmation.
 // Everything else (address, email, phone) matches the public site footer.
 export const INVOICE_SELLER = {
   legalName: 'FoodAdda (Legal entity name pending)',
-  gstin: 'GSTIN PENDING',
-  pan: 'PAN PENDING',
+  gstin: '24AAPFC8060R1ZQ',
+  pan: 'AAPFC8060R',
   address: '337, 3rd Floor, Infinity Arcade, Pratap Nagar Bridge, Pratap Nagar, Vadodara - 390004, Gujarat',
   state: 'Gujarat',
   stateCode: '24',

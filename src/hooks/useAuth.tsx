@@ -34,11 +34,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
+    // Supabase fires onAuthStateChange (e.g. TOKEN_REFRESHED) whenever a tab
+    // regains focus, even when it's the same user with an already-known
+    // role. Only re-fetch (and only flip rolesLoading, which ProtectedRoute
+    // uses to swap children for a spinner -- unmounting the page and
+    // wiping any in-progress form state) when the signed-in user actually
+    // changes, not on every routine token refresh.
+    let lastUserId: string | null = null;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+
+        const newUserId = session?.user?.id ?? null;
+        if (newUserId === lastUserId) return;
+        lastUserId = newUserId;
 
         // Defer role fetching with setTimeout to avoid deadlock
         if (session?.user) {
@@ -58,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      lastUserId = session?.user?.id ?? null;
       if (session?.user) {
         fetchUserRole(session.user.id);
       } else {
