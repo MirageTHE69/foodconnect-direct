@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { FloatingWidgets } from "@/components/chat/FloatingWidgets";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { Analytics } from "@/components/shared/Analytics";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -77,6 +78,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <Analytics />
         <AuthProvider>
           <Routes>
             {/* Public Routes */}

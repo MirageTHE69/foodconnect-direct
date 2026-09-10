@@ -22,13 +22,16 @@
   <meta name="twitter:description" content="Connect directly with trusted food suppliers, manufacturers, and brands. Discover quality products, explore recipes, and grow your food business with FoodAdda.">
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0BMNQCXS35"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W03864RS6H"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-0BMNQCXS35');
+      // send_page_view disabled: this is a single-page app, so route changes
+      // are tracked explicitly (see src/components/shared/Analytics.tsx)
+      // instead of relying on gtag's default one-shot pageview.
+      gtag('config', 'G-W03864RS6H', { send_page_view: false });
     </script>
 </head>
 
