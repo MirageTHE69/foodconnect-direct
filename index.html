@@ -28,10 +28,11 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // send_page_view disabled: this is a single-page app, so route changes
-      // are tracked explicitly (see src/components/shared/Analytics.tsx)
-      // instead of relying on gtag's default one-shot pageview.
-      gtag('config', 'G-W03864RS6H', { send_page_view: false });
+      // The default auto-tracked pageview covers whatever page the browser
+      // actually lands on first (home or a deep link). Subsequent in-app
+      // route changes are tracked explicitly, see
+      // src/components/shared/Analytics.tsx.
+      gtag('config', 'G-W03864RS6H');
     </script>
 </head>
 

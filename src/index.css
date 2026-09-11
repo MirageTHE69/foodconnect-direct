@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Libre+Caslon+Display&display=swap');
 
 @layer base {
   :root {
@@ -116,6 +116,14 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  /* Caslon Old Face Heavy isn't a licensed web font we can embed, so
+     headings use Libre Caslon Display -- an open-source Caslon revival cut
+     specifically for bold display/headline use (unlike its thinner sibling
+     Libre Caslon Text), the closest free match for a "heavy" Caslon look. */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Libre Caslon Display', Georgia, 'Times New Roman', serif;
   }
 }
 

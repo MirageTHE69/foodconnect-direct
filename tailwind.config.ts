@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        heading: ['"Libre Caslon Display"', 'Georgia', '"Times New Roman"', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
