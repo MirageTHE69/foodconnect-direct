@@ -51,6 +51,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import Disclaimer from "./pages/Disclaimer";
+import BlogDisclaimer from "./pages/BlogDisclaimer";
 import AdminBlogs from "./pages/admin/Blogs";
 import AdminBlogEdit from "./pages/admin/BlogEdit";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/blog-disclaimer" element={<BlogDisclaimer />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
             <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
             <Route path="/jobs" element={<Jobs />} />

@@ -35,6 +35,7 @@ const Footer = () => {
       { name: "Terms & Conditions", to: "/terms-and-conditions" },
       { name: "Refund Policy", to: "/refund-policy" },
       { name: "Disclaimer", to: "/disclaimer" },
+      { name: "Blog Disclaimer", to: "/blog-disclaimer" },
     ],
   };
 

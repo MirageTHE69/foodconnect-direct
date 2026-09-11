@@ -143,6 +143,12 @@ const BlogDetail = () => {
               dangerouslySetInnerHTML={{ __html: blog.content || '' }}
             />
 
+            <p className="text-xs text-muted-foreground mt-8">
+              This article is for general informational purposes only and is not professional medical, dietary,
+              or legal advice. See our{' '}
+              <Link to="/blog-disclaimer" className="underline hover:text-foreground">full blog disclaimer</Link>.
+            </p>
+
             <div className="mt-12 pt-8 border-t">
               <Link to="/blog">
                 <Button variant="hero">

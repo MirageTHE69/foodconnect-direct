@@ -112,6 +112,11 @@ const Blog = () => {
         {filtered?.length === 0 && !isLoading && (
           <p className="text-center text-muted-foreground py-12">No blogs found.</p>
         )}
+
+        <p className="text-center text-xs text-muted-foreground mt-16">
+          Content on this page is for general informational purposes only.{' '}
+          <Link to="/blog-disclaimer" className="underline hover:text-foreground">Read our full blog disclaimer</Link>.
+        </p>
       </main>
 
       <Footer />
