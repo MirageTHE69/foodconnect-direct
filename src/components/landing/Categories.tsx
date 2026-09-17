@@ -66,10 +66,11 @@ const Categories = () => {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Explore our wide range of categories
+              Explore Our Wide Range of Food Industry Categories
             </h2>
-            <p className="text-muted-foreground mt-2">
-              {categories.length} categories across products & services
+            <p className="text-muted-foreground mt-2 max-w-2xl">
+              Discover {categories.length}+ categories of food products and services — from ingredients
+              and packaging to equipment and other essential solutions for food businesses.
             </p>
           </div>
         </div>

@@ -4,22 +4,22 @@ const features = [
   {
     icon: Building2,
     title: "Business Platform",
-    description: "Complete platform for food businesses to discover, connect, and grow together.",
+    description: "Complete B2B food business platform to discover trusted suppliers, connect with buyers, and grow your food business.",
   },
   {
     icon: BarChart3,
     title: "Your Food Dashboard",
-    description: "Track your connections, manage enquiries, and monitor your food business performance.",
+    description: "Track your business connections, manage enquiries, and monitor your food business activities in one place.",
   },
   {
     icon: ShieldCheck,
-    title: "Innovative Processing",
-    description: "Verified suppliers with FSSAI compliance, quality certifications and trusted profiles.",
+    title: "Trusted & Verified Suppliers",
+    description: "Connect with verified food suppliers with FSSAI compliance, quality certifications, and trusted business profiles.",
   },
   {
     icon: Headphones,
     title: "Product Support",
-    description: "Dedicated support to help you find the right suppliers and resolve queries quickly.",
+    description: "Get dedicated support to find the right food suppliers and products, connect with businesses, and resolve queries quickly.",
   },
 ];
 

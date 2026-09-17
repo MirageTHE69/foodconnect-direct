@@ -4,17 +4,17 @@ const solutions = [
   {
     icon: TrendingUp,
     title: "Expand Your Reach",
-    description: "Connect with food businesses across 50+ cities in India. Grow your supplier or buyer network exponentially.",
+    description: "Connect with food businesses across 50+ cities in India. Expand your supplier or buyer network and discover new B2B business opportunities.",
   },
   {
     icon: BarChart3,
     title: "Track Performance",
-    description: "Monitor enquiries, connections, and business metrics through your personalized dashboard.",
+    description: "Monitor enquiries, connections, and business activity through your personalized FoodAdda dashboard.",
   },
   {
     icon: Target,
     title: "Targeted Discovery",
-    description: "Smart search and category filters help you find exactly what you need, when you need it.",
+    description: "Find the right food suppliers, buyers, manufacturers, and products with smart search and category filters designed to help you discover exactly what you need.",
   },
 ];
 
@@ -26,7 +26,8 @@ const Testimonials = () => {
           Growth Solutions
         </h2>
         <p className="text-muted-foreground text-lg mb-12 max-w-2xl">
-          Tools and features designed to accelerate your food business growth and build lasting industry partnerships.
+          Powerful tools and features designed to grow your food business, connect with trusted industry partners,
+          and build lasting B2B relationships.
         </p>
 
         <div className="grid md:grid-cols-3 gap-8">

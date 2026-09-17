@@ -15,11 +15,12 @@ const ForBuyers = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="max-w-lg">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              Have a requirement?
+              Have a Requirement for Food Products or Supplies?
             </h2>
             <p className="text-secondary-foreground/70 text-lg mb-8">
-              Tell us what you need and we'll connect you with the best food suppliers, 
-              manufacturers, and brands across India. Direct connections, zero commissions.
+              Tell us what you need, and we'll connect you with trusted food suppliers,
+              manufacturers, distributors, and brands across India. Find the right products,
+              build direct business connections, and source with zero commissions and no middlemen.
             </p>
             <Button
               variant="hero"

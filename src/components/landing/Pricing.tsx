@@ -126,11 +126,11 @@ export default function Pricing() {
             Simple Pricing
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Subscribe to your one-stop platform<br className="hidden sm:block" /> for all food industry needs
+            Subscribe to Your One-Stop Platform<br className="hidden sm:block" /> for All Food Industry Needs
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Get full access to FoodAdda's marketplace. Connect with suppliers, manage enquiries, and grow your
-            business.
+            Get full access to FoodAdda's B2B food marketplace. Connect with trusted food suppliers,
+            manufacturers, distributors, and buyers, manage enquiries, and grow your food business.
           </p>
           <p className="mt-4 inline-block text-sm font-semibold text-foreground bg-primary/10 rounded-full px-4 py-1.5">
             🎉 Limited-time launch offer: every paid plan includes 1 month free — on monthly or annual billing.
@@ -150,7 +150,7 @@ export default function Pricing() {
         {/* Category-credit plans */}
         {categories.length > 0 && (
           <div className="mb-16">
-            <h3 className="text-xl font-bold text-center text-foreground mb-6">Category Plans for Suppliers</h3>
+            <h3 className="text-xl font-bold text-center text-foreground mb-6">B2B Category Plans for Food Suppliers</h3>
             <div className="flex justify-center mb-8">
               <div className="flex flex-wrap gap-2 justify-center">
                 {categories.map((cat) => (

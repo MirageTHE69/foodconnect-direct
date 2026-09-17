@@ -121,16 +121,17 @@ const Hero = () => {
           {/* Left Content */}
           <div className="max-w-xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 text-foreground">
-              India's first{" "}
+              India's First{" "}
               <span className="bg-primary text-primary-foreground px-2 inline-block -skew-x-2">
-                business platform
+                B2B Marketplace
               </span>{" "}
-              built exclusively for the food industry.
+              Built Exclusively for the Food Industry
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-md">
-              Discover trusted suppliers, explore quality products, and connect directly.
-              No middlemen. No commissions.
+              Discover trusted food suppliers, manufacturers, distributors, and quality products
+              in one place. Connect directly with businesses, find buyers, and source products
+              with no middlemen and no commissions.
             </p>
 
             {/* Search Bar */}

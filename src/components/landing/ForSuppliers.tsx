@@ -28,18 +28,15 @@ const ForSuppliers = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Content */}
           <div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2">
-              Subscribe to your
-            </h2>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              <span className="bg-primary text-primary-foreground px-2 -skew-x-1 inline-block">one-stop platform</span>
-            </h2>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-              for all food industry needs.
+              Subscribe to{" "}
+              <span className="bg-primary text-primary-foreground px-2 -skew-x-1 inline-block">India's B2B</span>{" "}
+              Food Industry Network
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-md">
-              Join India's fastest-growing food industry network. Showcase your products, 
-              share recipes, and connect with buyers.
+              Join FoodAdda, your one-stop platform for food industry needs. Showcase your
+              products, discover food suppliers and buyers, share recipes, and connect with
+              businesses across India.
             </p>
             <Button variant="hero" size="lg" onClick={() => navigate('/auth')}>
               Get Started as a Supplier

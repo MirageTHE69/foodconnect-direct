@@ -16,11 +16,11 @@ const CTA = () => {
           {/* Left */}
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Blogs &<br />Newsletters
+              Food Industry Blogs &<br />Newsletters
             </h2>
             <p className="text-muted-foreground mb-8 max-w-md">
-              Stay updated with the latest food industry insights, supplier stories, 
-              and platform updates delivered to your inbox.
+              Stay updated with the latest food industry insights, market trends, supplier
+              stories, business tips, and FoodAdda updates — delivered straight to your inbox.
             </p>
             <Button variant="hero" size="lg" onClick={() => navigate('/blog')}>
               View All Blogs
