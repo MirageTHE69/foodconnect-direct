@@ -12,6 +12,7 @@ interface RecipeCardProps {
   cookTime?: number | null;
   servings?: number | null;
   difficulty?: string | null;
+  category?: string | null;
   supplierName?: string;
   supplierId?: string;
 }
@@ -25,6 +26,7 @@ export function RecipeCard({
   cookTime,
   servings,
   difficulty,
+  category,
   supplierName,
   supplierId,
 }: RecipeCardProps) {
@@ -51,12 +53,18 @@ export function RecipeCard({
             <img
               src={images[0]}
               alt={title}
+              loading="lazy"
               className="w-full h-full object-cover transition-transform hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <ChefHat className="h-12 w-12 text-muted-foreground/50" />
             </div>
+          )}
+          {category && (
+            <Badge className="absolute top-2 left-2 bg-background/90 text-foreground hover:bg-background/90">
+              {category}
+            </Badge>
           )}
           {difficulty && (
             <Badge

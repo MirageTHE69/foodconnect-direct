@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { SupplierCard } from '@/components/shared/SupplierCard';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { useSavedItems } from '@/hooks/useSavedItems';
+import { useVendorNameAccess } from '@/hooks/useVendorNameAccess';
+import { MaskedVendorName } from '@/components/shared/MaskedVendorName';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,6 +49,7 @@ interface VendorResult {
 }
 
 export default function Search() {
+  const { canView: canViewNames } = useVendorNameAccess();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [inputValue, setInputValue] = useState(query);
@@ -239,7 +242,9 @@ export default function Search() {
                     <Link key={v.id} to={`/categories/${v.categorySlug}/sub/${v.subCategorySlug}`}>
                       <Card className="hover:shadow-hover hover:border-primary/30 transition-all duration-300">
                         <CardContent className="p-4 flex items-center justify-between">
-                          <span className="font-medium text-sm text-foreground">{v.name}</span>
+                          <span className="font-medium text-sm text-foreground">
+                            {canViewNames ? v.name : <MaskedVendorName name={v.name} />}
+                          </span>
                           <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                         </CardContent>
                       </Card>

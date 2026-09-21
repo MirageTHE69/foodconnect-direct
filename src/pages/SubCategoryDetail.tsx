@@ -12,6 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { isUuid } from "@/lib/utils";
 import { useAnchorNav } from "@/hooks/useAnchorNav";
 import { useAuth } from "@/hooks/useAuth";
+import { useVendorNameAccess } from "@/hooks/useVendorNameAccess";
+import { MaskedVendorName } from "@/components/shared/MaskedVendorName";
+import { VendorAccessDialog } from "@/components/shared/VendorAccessDialog";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -27,6 +30,8 @@ const SubCategoryDetail = () => {
   const { categoryId, subId } = useParams<{ categoryId: string; subId: string }>();
   const goToAnchor = useAnchorNav();
   const { user } = useAuth();
+  const { canView: canViewNames, reason: nameGateReason } = useVendorNameAccess();
+  const [gateOpen, setGateOpen] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [subName, setSubName] = useState("");
   const [catName, setCatName] = useState("");
@@ -129,13 +134,28 @@ const SubCategoryDetail = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {vendors.map((v) => (
-                <Card key={v.id} className="hover:shadow-lg transition-shadow duration-300 border-border">
+                <Card
+                  key={v.id}
+                  className={`hover:shadow-lg transition-shadow duration-300 border-border ${canViewNames ? '' : 'cursor-pointer'}`}
+                  onClick={canViewNames ? undefined : () => setGateOpen(true)}
+                >
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <Store className="w-5 h-5 text-primary" />
                       </div>
-                      <h3 className="font-semibold text-foreground text-base">{v.name}</h3>
+                      {canViewNames ? (
+                        <h3 className="font-semibold text-foreground text-base">{v.name}</h3>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setGateOpen(true)}
+                          className="text-left font-semibold text-foreground text-base hover:text-primary transition-colors"
+                          title="Sign up to see the full name"
+                        >
+                          <h3><MaskedVendorName name={v.name} /></h3>
+                        </button>
+                      )}
                     </div>
 
                     {user ? (
@@ -146,25 +166,22 @@ const SubCategoryDetail = () => {
                           </p>
                         )}
                         {v.email && (
-                          <a href={`mailto:${v.email}`} className="text-sm text-primary hover:underline flex items-center gap-2">
+                          <a href={`mailto:${v.email}`} onClick={(e) => e.stopPropagation()} className="text-sm text-primary hover:underline flex items-center gap-2">
                             <Mail className="w-4 h-4 shrink-0" /> {v.email}
                           </a>
                         )}
                         {v.phone && (
-                          <a href={`tel:${v.phone}`} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2">
+                          <a href={`tel:${v.phone}`} onClick={(e) => e.stopPropagation()} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2">
                             <Phone className="w-4 h-4 shrink-0" /> {v.phone}
                           </a>
                         )}
                       </>
                     ) : (
                       (v.address || v.email || v.phone) && (
-                        <Link
-                          to="/auth"
-                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary bg-muted/50 rounded-lg px-3 py-2 transition-colors"
-                        >
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
                           <Lock className="w-3.5 h-3.5 shrink-0" />
                           Sign in to view contact details
-                        </Link>
+                        </div>
                       )
                     )}
                   </CardContent>
@@ -175,6 +192,7 @@ const SubCategoryDetail = () => {
         </div>
       </section>
 
+      <VendorAccessDialog open={gateOpen} onOpenChange={setGateOpen} reason={nameGateReason} />
       <Footer />
     </div>
   );

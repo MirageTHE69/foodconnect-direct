@@ -26,7 +26,7 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const preSelectedPlanId = searchParams.get('plan');
 
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>(searchParams.get('tab') === 'signup' ? 'signup' : 'login');
   // Steps: 1=Plan, 2=Registration Form, 3=Create Account, 4=Confirm
   const [signupStep, setSignupStep] = useState<1 | 2 | 3 | 4>(preSelectedPlanId ? 2 : 1);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(preSelectedPlanId);

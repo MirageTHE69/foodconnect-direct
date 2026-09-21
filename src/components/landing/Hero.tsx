@@ -3,6 +3,8 @@ import { ArrowRight, Search, Store, Package, Tag, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useVendorNameAccess } from "@/hooks/useVendorNameAccess";
+import { maskVendorName } from "@/components/shared/MaskedVendorName";
 
 import poster1 from "@/assets/posters/poster-1.jpg";
 import poster3 from "@/assets/posters/poster-3.jpg";
@@ -26,6 +28,7 @@ const SUGGESTION_GROUPS: { label: string; types: SuggestionType[] }[] = [
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { canView: canViewNames } = useVendorNameAccess();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -180,7 +183,9 @@ const Hero = () => {
                                 ) : (
                                   <Package className="w-4 h-4 text-muted-foreground shrink-0" />
                                 )}
-                                <span className="truncate">{s.label}</span>
+                                <span className="truncate">
+                                  {s.type === "vendor" && !canViewNames ? maskVendorName(s.label) : s.label}
+                                </span>
                               </button>
                             ))}
                           </div>

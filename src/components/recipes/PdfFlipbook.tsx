@@ -45,6 +45,9 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setOutgoing(null);
+    setAnimate(false);
+    setCurrent(1);
 
     const load = async () => {
       const doc = await pdfjsLib.getDocument(url).promise;
@@ -108,23 +111,54 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
     return () => clearTimeout(t);
   }, [animate]);
 
+  // Keyboard paging only while the pointer is over the book (or it's
+  // fullscreen), and never while typing in a field -- a global window
+  // listener used to hijack arrow keys everywhere on the page.
+  const hoveredRef = useRef(false);
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && fullscreen) { setFullscreen(false); return; }
+      if (!hoveredRef.current && !fullscreen) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
-      if (e.key === 'Escape' && fullscreen) setFullscreen(false);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [current, goTo, fullscreen]);
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (wheelLockRef.current) return;
-    if (Math.abs(e.deltaY) < 15) return;
-    wheelLockRef.current = true;
-    goTo(e.deltaY > 0 ? current + 1 : current - 1);
-    setTimeout(() => { wheelLockRef.current = false; }, TRANSITION_MS + 150);
-  };
+  // Native non-passive wheel listener: React's onWheel can't reliably
+  // preventDefault, which made the page scroll behind the book at the same
+  // time as the pages turned. Every wheel event over the book is consumed;
+  // the delta threshold only decides whether to turn a page.
+  const frameRef = useRef<HTMLDivElement>(null);
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
+  const currentRef = useRef(current);
+  currentRef.current = current;
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (wheelLockRef.current || Math.abs(e.deltaY) < 15) return;
+      wheelLockRef.current = true;
+      goToRef.current(e.deltaY > 0 ? currentRef.current + 1 : currentRef.current - 1);
+      setTimeout(() => { wheelLockRef.current = false; }, TRANSITION_MS + 150);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [loading, error]);
+
+  // Lock the page behind the fullscreen overlay.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [fullscreen]);
 
   if (error) {
     return (
@@ -138,19 +172,23 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
   return (
     <div
       ref={containerRef}
+      onContextMenu={(e) => e.preventDefault()}
+      onMouseEnter={() => { hoveredRef.current = true; }}
+      onMouseLeave={() => { hoveredRef.current = false; }}
       className={cn(
         'relative select-none',
         fullscreen && 'fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4',
         className
       )}
+      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
     >
       <div
+        ref={frameRef}
         className={cn(
           'relative w-full mx-auto rounded-xl overflow-hidden shadow-2xl bg-white',
           fullscreen ? 'max-w-6xl h-[85vh]' : 'max-w-6xl h-[70vh] md:h-[82vh]'
         )}
-        style={{ perspective: '2000px' }}
-        onWheel={handleWheel}
+        style={{ perspective: '2000px', overscrollBehavior: 'contain' }}
       >
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-muted">
@@ -163,7 +201,7 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
               <img
                 src={pageCache.current.get(current)}
                 alt={`Page ${current}`}
-                className="absolute inset-0 w-full h-full object-contain bg-white"
+                className="absolute inset-0 w-full h-full object-contain bg-white pointer-events-none"
                 draggable={false}
               />
             )}
@@ -174,7 +212,7 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
                 src={pageCache.current.get(outgoing.page)}
                 alt=""
                 draggable={false}
-                className="absolute inset-0 w-full h-full object-contain bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.25)]"
+                className="absolute inset-0 w-full h-full object-contain bg-white pointer-events-none shadow-[0_-8px_30px_rgba(0,0,0,0.25)]"
                 style={{
                   transformOrigin: outgoing.dir === 1 ? 'bottom center' : 'top center',
                   transform: animate

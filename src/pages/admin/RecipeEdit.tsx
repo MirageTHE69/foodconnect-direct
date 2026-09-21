@@ -31,7 +31,16 @@ export default function AdminRecipeEdit() {
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [pdfUrl, setPdfUrl] = useState('');
+
+  useEffect(() => {
+    supabase.from('recipes').select('category').not('category', 'is', null).then(({ data }) => {
+      const unique = Array.from(new Set((data || []).map((r) => (r.category || '').trim()).filter(Boolean)));
+      setExistingCategories(unique.sort((a, b) => a.localeCompare(b)));
+    });
+  }, []);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
 
   useEffect(() => {
@@ -40,9 +49,10 @@ export default function AdminRecipeEdit() {
 
   const loadRecipe = async (recipeId: string) => {
     setLoading(true);
-    const { data: recipe } = await supabase.from('recipes').select('title, pdf_url, images').eq('id', recipeId).maybeSingle();
+    const { data: recipe } = await supabase.from('recipes').select('title, pdf_url, images, category').eq('id', recipeId).maybeSingle();
     if (recipe) {
       setTitle(recipe.title || '');
+      setCategory(recipe.category || '');
       setPdfUrl(recipe.pdf_url || '');
       setThumbnailUrl(recipe.images?.[0] || '');
     }
@@ -113,6 +123,7 @@ export default function AdminRecipeEdit() {
 
     const recipeData = {
       title,
+      category: category.trim() || null,
       pdf_url: pdfUrl,
       images: thumbnailUrl ? [thumbnailUrl] : null,
       status: 'approved',
@@ -175,6 +186,23 @@ export default function AdminRecipeEdit() {
                 className="mt-1"
                 placeholder="Enter recipe title"
               />
+              <Label htmlFor="category" className="mt-4 block">Recipe Category *</Label>
+              <Input
+                id="category"
+                list="recipe-categories"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+                maxLength={60}
+                className="mt-1"
+                placeholder="e.g. Dal & Curries, Sweets, Snacks"
+              />
+              <datalist id="recipe-categories">
+                {existingCategories.map((c) => <option key={c} value={c} />)}
+              </datalist>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pick an existing category or type a new one. Visitors can filter recipes by this on the Recipes page.
+              </p>
             </CardContent>
           </Card>
 

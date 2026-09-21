@@ -31,6 +31,7 @@ interface RecipeDetail {
   instructions: string | null;
   tags: string[] | null;
   pdf_url: string | null;
+  category: string | null;
   supplier_profiles: {
     id: string;
     company_name: string;
@@ -77,13 +78,25 @@ export default function RecipeDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
-    if (id) {
-      fetchRecipeDetails(id);
-    }
+    if (!id) return;
+    let cancelled = false;
+    setSelectedImage(0);
+    fetchRecipeDetails(id, () => cancelled);
+    return () => { cancelled = true; };
   }, [id]);
 
-  const fetchRecipeDetails = async (recipeId: string) => {
+  useEffect(() => {
+    if (!recipe) return;
+    document.title = `${recipe.title} | FoodAdda Recipes`;
+  }, [recipe]);
+
+  const fetchRecipeDetails = async (recipeId: string, isCancelled: () => boolean) => {
     setLoading(true);
+    // Clear the previous recipe so a failed load never shows stale content
+    // from the recipe you just navigated away from.
+    setRecipe(null);
+    setIngredients([]);
+    setRelatedRecipes([]);
     try {
       // Fetch recipe
       const { data: recipeData, error: recipeError } = await supabase
@@ -103,6 +116,7 @@ export default function RecipeDetail() {
         .single();
 
       if (recipeError) throw recipeError;
+      if (isCancelled()) return;
       setRecipe(recipeData);
 
       // Fetch ingredients with product info
@@ -121,6 +135,7 @@ export default function RecipeDetail() {
         `)
         .eq('recipe_id', recipeId);
 
+      if (isCancelled()) return;
       setIngredients(ingredientsData || []);
 
       // Fetch related recipes: same supplier, or other official FoodAdda
@@ -150,11 +165,12 @@ export default function RecipeDetail() {
         : relatedQuery.is('supplier_id', null);
 
       const { data: relatedData } = await relatedQuery;
+      if (isCancelled()) return;
       setRelatedRecipes(relatedData || []);
     } catch (error) {
       console.error('Error fetching recipe:', error);
     } finally {
-      setLoading(false);
+      if (!isCancelled()) setLoading(false);
     }
   };
 
@@ -226,6 +242,7 @@ export default function RecipeDetail() {
             {/* Title */}
             <div className="mb-6 max-w-4xl">
               <div className="flex flex-wrap items-center gap-2 mb-3">
+                {recipe.category && <Badge>{recipe.category}</Badge>}
                 {recipe.difficulty && <Badge className={getDifficultyColor(recipe.difficulty)}>{recipe.difficulty}</Badge>}
                 {recipe.tags?.map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>)}
               </div>
@@ -508,7 +525,7 @@ export default function RecipeDetail() {
         {/* Related Recipes */}
         {relatedRecipes.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">More from {supplier?.company_name}</h2>
+            <h2 className="text-2xl font-bold mb-6">{supplier ? `More from ${supplier.company_name}` : 'More Official Recipes'}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {relatedRecipes.map((relRecipe) => (
                 <RecipeCard

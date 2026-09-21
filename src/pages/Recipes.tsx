@@ -2,14 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RecipeCard } from '@/components/recipes/RecipeCard';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { ChefHat, Search, Loader2 } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
@@ -23,6 +17,7 @@ interface Recipe {
   cook_time: number | null;
   servings: number | null;
   difficulty: string | null;
+  category: string | null;
   supplier_profiles: {
     id: string;
     company_name: string;
@@ -33,19 +28,23 @@ export default function Recipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    document.title = 'Recipes | FoodAdda';
     fetchRecipes();
   }, []);
 
   const fetchRecipes = async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const { data, error } = await supabase
         .from('recipes')
         .select(`
-          id, title, description, images, prep_time, cook_time, servings, difficulty,
+          id, title, description, images, prep_time, cook_time, servings, difficulty, category,
           supplier_profiles ( id, company_name )
         `)
         .eq('status', 'approved')
@@ -55,15 +54,27 @@ export default function Recipes() {
       setRecipes(data || []);
     } catch (error) {
       console.error('Error fetching recipes:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
   };
 
+  // Categories are free-text from the admin, so group case-insensitively
+  // ("sweets" / "Sweets") and show the first spelling seen.
+  const categoryOptions = (() => {
+    const map = new Map<string, string>();
+    recipes.forEach((r) => {
+      const label = r.category?.trim();
+      if (label && !map.has(label.toLowerCase())) map.set(label.toLowerCase(), label);
+    });
+    return Array.from(map, ([key, label]) => ({ key, label })).sort((a, b) => a.label.localeCompare(b.label));
+  })();
+
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDifficulty = difficultyFilter === 'all' || recipe.difficulty?.toLowerCase() === difficultyFilter.toLowerCase();
-    return matchesSearch && matchesDifficulty;
+    const matchesCategory = categoryFilter === 'all' || recipe.category?.trim().toLowerCase() === categoryFilter;
+    return matchesSearch && matchesCategory;
   });
 
   return (
@@ -86,16 +97,26 @@ export default function Recipes() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search recipes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
             </div>
-            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]"><SelectValue placeholder="Difficulty" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="easy">Easy</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
+          {categoryOptions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {[{ key: 'all', label: 'All' }, ...categoryOptions].map(({ key, label }) => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setCategoryFilter(key)}
+                  className={
+                    categoryFilter === key
+                      ? 'text-foreground bg-primary border-primary hover:bg-primary hover:text-foreground'
+                      : 'text-foreground border-foreground/30 bg-transparent hover:bg-primary/20 hover:text-foreground'
+                  }
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -104,12 +125,19 @@ export default function Recipes() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : loadError ? (
+        <div className="text-center py-12">
+          <ChefHat className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Couldn't load recipes</h2>
+          <p className="text-muted-foreground mb-4">Please check your connection and try again.</p>
+          <Button onClick={fetchRecipes}>Try again</Button>
+        </div>
       ) : filteredRecipes.length === 0 ? (
         <div className="text-center py-12">
           <ChefHat className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">No recipes found</h2>
           <p className="text-muted-foreground">
-            {searchQuery || difficultyFilter !== 'all' ? 'Try adjusting your search or filters' : 'Check back soon for new recipes'}
+            {searchQuery || categoryFilter !== 'all' ? 'Try adjusting your search or filters' : 'Check back soon for new recipes'}
           </p>
         </div>
       ) : (
@@ -125,6 +153,7 @@ export default function Recipes() {
               cookTime={recipe.cook_time}
               servings={recipe.servings}
               difficulty={recipe.difficulty}
+              category={recipe.category}
               supplierName={recipe.supplier_profiles?.company_name}
               supplierId={recipe.supplier_profiles?.id}
             />
