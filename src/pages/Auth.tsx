@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useSubscription, useSubscriptionPlans, type SubscriptionPlan } from '@/hooks/useSubscription';
+import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { startRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
-import { Utensils, ShoppingBag, Store, Loader2, Eye, EyeOff, ArrowLeft, ArrowRight, Check, Star } from 'lucide-react';
+import { Utensils, ShoppingBag, Store, Loader2, Eye, EyeOff, ArrowLeft, Check } from 'lucide-react';
 import { z } from 'zod';
 import { UserTypeSelector, type UserType } from '@/components/registration/UserTypeSelector';
 import { RegistrationForm, type RegistrationData } from '@/components/registration/RegistrationForm';
@@ -24,12 +22,10 @@ type UserRole = 'buyer' | 'supplier';
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const preSelectedPlanId = searchParams.get('plan');
-
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>(searchParams.get('tab') === 'signup' ? 'signup' : 'login');
-  // Steps: 1=Plan, 2=Registration Form, 3=Create Account, 4=Confirm
-  const [signupStep, setSignupStep] = useState<1 | 2 | 3 | 4>(preSelectedPlanId ? 2 : 1);
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(preSelectedPlanId);
+  // Steps: 1=Registration Form, 2=Create Account. No plan is chosen at
+  // sign-up: every new account starts with one free month automatically.
+  const [signupStep, setSignupStep] = useState<1 | 2>(1);
   const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
   const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
   const [email, setEmail] = useState('');
@@ -42,19 +38,15 @@ export default function Auth() {
 
   const { signIn, signUp, user, userRole, loading } = useAuth();
   const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
-  const { plans, loading: plansLoading } = useSubscriptionPlans();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (preSelectedPlanId) setActiveTab('signup');
-  }, [preSelectedPlanId]);
-
-  useEffect(() => {
-    if (!loading && !subscriptionLoading && user && userRole && hasActiveSubscription) {
-      const redirectPath = userRole === 'admin' ? '/admin' : '/dashboard';
-      navigate(redirectPath, { replace: true });
-    }
+    if (loading || subscriptionLoading || !user || !userRole) return;
+    // A lapsed account goes straight to the plans page instead of bouncing
+    // off the dashboard.
+    const redirectPath = userRole === 'admin' ? '/admin' : hasActiveSubscription ? '/dashboard' : '/subscribe';
+    navigate(redirectPath, { replace: true });
   }, [user, loading, userRole, hasActiveSubscription, subscriptionLoading, navigate]);
 
   const validateForm = () => {
@@ -75,7 +67,7 @@ export default function Auth() {
       setIsLoading(false);
       toast({ variant: 'destructive', title: 'Login Failed', description: error.message === 'Invalid login credentials' ? 'Invalid email or password.' : error.message });
     } else {
-      toast({ title: 'Welcome back!', description: 'Redirecting to your dashboard...' });
+      toast({ title: 'Welcome back!', description: 'Signing you in...' });
     }
   };
 
@@ -85,7 +77,7 @@ export default function Auth() {
     if (data.email) setEmail(data.email);
     if (data.full_name) setFullName(data.full_name);
     else if (data.contact_person_name) setFullName(data.contact_person_name);
-    setSignupStep(3);
+    setSignupStep(2);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -164,59 +156,12 @@ export default function Auth() {
     }
 
     setIsLoading(false);
-    if (!selectedPlanId) {
-      toast({ title: 'Account created!', description: 'You can explore FoodAdda now, or upgrade anytime from your dashboard.' });
-      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
-      return;
-    }
-    setSignupStep(4);
+    toast({ title: 'Account created!', description: 'Your 1 month free access has started. Choose a plan any time from your dashboard.' });
+    navigate('/dashboard', { replace: true });
   };
-
-  const handleActivateSubscription = async () => {
-    if (!selectedPlanId) {
-      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
-      return;
-    }
-    const plan = plans.find(p => p.id === selectedPlanId);
-    if (!plan) return;
-
-    setIsLoading(true);
-    try {
-      let currentUser = user;
-      if (!currentUser) {
-        const { data } = await supabase.auth.getUser();
-        currentUser = data.user;
-      }
-      if (!currentUser) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Please wait a moment and try again — your account is still being set up.' });
-        setIsLoading(false);
-        return;
-      }
-
-      // Free plans (e.g. Small Homemade Food), or any plan/cycle combo priced
-      // at 0, don't need a subscription row at all.
-      if (plan.plan_type === 'free' || plan.price_monthly === 0) {
-        navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
-        return;
-      }
-
-      const { result } = await startRazorpayCheckout(plan.id, 'monthly');
-      if (result.error) throw new Error(result.error.message || 'Payment was not completed.');
-
-      toast({ title: 'Payment successful', description: 'Your plan is now active.' });
-      navigate('/dashboard', { replace: true, state: { freshSubscription: true } });
-    } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Error', description: err.message || 'Failed to submit subscription request.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const selectedPlan = plans.find(p => p.id === selectedPlanId);
 
   const handleBackStep = () => {
-    if (signupStep === 2) setSignupStep(1);
-    else if (signupStep === 3) setSignupStep(2);
+    if (activeTab === 'signup' && signupStep === 2) setSignupStep(1);
     else navigate('/');
   };
 
@@ -228,19 +173,19 @@ export default function Auth() {
     );
   }
 
-  const stepLabels = ['Plan', 'Registration', 'Account', 'Confirm'];
+  const stepLabels = ['Registration', 'Account'];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <header className="p-4">
         <Button variant="ghost" onClick={handleBackStep} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
-          {signupStep > 1 && activeTab === 'signup' && signupStep < 4 ? 'Back' : 'Back to Home'}
+          {signupStep === 2 && activeTab === 'signup' ? 'Back' : 'Back to Home'}
         </Button>
       </header>
 
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className={`w-full ${signupStep === 2 && activeTab === 'signup' ? 'max-w-2xl' : 'max-w-md'}`}>
+        <div className={`w-full ${signupStep === 1 && activeTab === 'signup' ? 'max-w-2xl' : 'max-w-md'}`}>
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -253,7 +198,7 @@ export default function Auth() {
           </div>
 
           <Card className="border-2 shadow-xl">
-            <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'signup'); setSignupStep(preSelectedPlanId ? 2 : 1); }}>
+            <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'signup'); setSignupStep(1); }}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -295,94 +240,31 @@ export default function Auth() {
               <TabsContent value="signup">
                 {/* Step indicator */}
                 <div className="px-6 pt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    {[1, 2, 3, 4].map((step) => (
+                  <div className="flex items-center justify-center mb-2">
+                    {[1, 2].map((step) => (
                       <div key={step} className="flex items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                           signupStep >= step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                         }`}>
                           {signupStep > step ? <Check className="w-4 h-4" /> : step}
                         </div>
-                        {step < 4 && <div className={`w-8 sm:w-16 h-0.5 mx-1 ${signupStep > step ? 'bg-primary' : 'bg-muted'}`} />}
+                        {step < 2 && <div className={`w-24 sm:w-40 h-0.5 mx-1 ${signupStep > step ? 'bg-primary' : 'bg-muted'}`} />}
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <div className="flex justify-center gap-24 sm:gap-40 text-[10px] text-muted-foreground">
                     {stepLabels.map(l => <span key={l}>{l}</span>)}
                   </div>
                 </div>
 
-                {/* Step 1: Choose Plan */}
+                {/* Step 1: User Type Selection + Registration Form */}
                 {signupStep === 1 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Choose Your Plan</CardTitle>
-                      <CardDescription>Select a subscription plan to get started</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {plansLoading ? (
-                        <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-                      ) : (
-                        plans.map((plan) => {
-                          const isFree = plan.plan_type === 'free' || plan.price_monthly === 0;
-                          return (
-                            <div
-                              key={plan.id}
-                              onClick={() => setSelectedPlanId(plan.id)}
-                              className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                                selectedPlanId === plan.id
-                                  ? 'border-primary bg-primary/5 shadow-soft'
-                                  : 'border-border hover:border-primary/30'
-                              }`}
-                            >
-                              {plan.is_popular && (
-                                <Badge className="absolute -top-2.5 right-3 gradient-primary text-primary-foreground text-[10px] gap-1">
-                                  <Star className="w-2.5 h-2.5 fill-current" /> POPULAR
-                                </Badge>
-                              )}
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-bold text-foreground">{plan.name}</h4>
-                                  <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
-                                </div>
-                                <div className="text-right">
-                                  {isFree ? (
-                                    <span className="text-xl font-extrabold text-foreground">Free</span>
-                                  ) : (
-                                    <>
-                                      <span className="text-xl font-extrabold text-foreground">₹{plan.price_monthly.toLocaleString('en-IN')}</span>
-                                      <p className="text-xs text-muted-foreground">/ month</p>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                              {!isFree && (
-                                <p className="text-[11px] font-semibold text-primary mt-2">🎉 1 month free — 2 months access</p>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </CardContent>
-                    <CardFooter className="flex-col gap-2">
-                      <Button className="w-full" disabled={!selectedPlanId} onClick={() => setSignupStep(2)}>
-                        Continue <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                      <Button variant="ghost" className="w-full" onClick={() => { setSelectedPlanId(null); setSignupStep(2); }}>
-                        Skip — Continue Free
-                      </Button>
-                    </CardFooter>
-                  </>
-                )}
-
-                {/* Step 2: User Type Selection + Registration Form */}
-                {signupStep === 2 && (
                   <>
                     <CardHeader>
                       <CardTitle>Join FoodAdda</CardTitle>
                       <CardDescription>
-                        {selectedPlan && <span className="text-primary font-medium">{selectedPlan.name}</span>}
-                        {' — '}Complete your registration
+                        <span className="font-medium text-foreground">1 month free, full access.</span>{' '}
+                        No payment needed to start. Complete your registration.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -409,8 +291,8 @@ export default function Auth() {
                   </>
                 )}
 
-                {/* Step 3: Create Account */}
-                {signupStep === 3 && (
+                {/* Step 2: Create Account */}
+                {signupStep === 2 && (
                   <form onSubmit={handleSignup}>
                     <CardHeader>
                       <CardTitle>Create Account</CardTitle>
@@ -470,51 +352,6 @@ export default function Auth() {
                   </form>
                 )}
 
-                {/* Step 4: Confirm Subscription */}
-                {signupStep === 4 && selectedPlan && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Confirm Your Plan</CardTitle>
-                      <CardDescription>Review your selection and activate</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 rounded-lg border-2 border-primary bg-primary/5">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-bold text-foreground">{selectedPlan.name}</h4>
-                            <p className="text-sm text-muted-foreground">Monthly billing</p>
-                          </div>
-                          <span className="text-2xl font-extrabold text-foreground">
-                            {selectedPlan.plan_type === 'free' ? 'Free' : `₹${selectedPlan.price_monthly.toLocaleString('en-IN')}`}
-                          </span>
-                        </div>
-                        {selectedPlan.plan_type !== 'free' && (
-                          <p className="text-sm font-semibold text-primary mt-2">🎉 1 month free — 2 months access</p>
-                        )}
-                        <ul className="mt-4 space-y-2">
-                          {selectedPlan.features.map((f, i) => (
-                            <li key={i} className="flex items-center gap-2 text-sm text-foreground">
-                              <Check className="w-3.5 h-3.5 text-primary shrink-0" />
-                              {f}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="p-3 rounded-lg bg-muted text-center">
-                        <p className="text-xs text-muted-foreground">
-                          {selectedPlan.plan_type === 'free'
-                            ? 'This is a free plan — no payment needed.'
-                            : '💳 Pay securely with Razorpay — your plan activates instantly after payment.'}
-                        </p>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full" size="lg" onClick={handleActivateSubscription} disabled={isLoading}>
-                        {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{selectedPlan.plan_type === 'free' ? 'Submitting...' : 'Redirecting to payment...'}</> : selectedPlan.plan_type === 'free' ? 'Continue' : 'Proceed to Payment'}
-                      </Button>
-                    </CardFooter>
-                  </>
-                )}
               </TabsContent>
             </Tabs>
           </Card>

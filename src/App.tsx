@@ -61,6 +61,8 @@ import CategoryDetail from "./pages/CategoryDetail";
 import SubCategoryDetail from "./pages/SubCategoryDetail";
 import AdminHotRequirements from "./pages/admin/HotRequirements";
 import AdminTalentProfiles from "./pages/admin/TalentProfiles";
+import AdminOutreach from "./pages/admin/Outreach";
+import Unsubscribe from "./pages/Unsubscribe";
 import AdminRecipes from "./pages/admin/Recipes";
 import AdminRecipeEdit from "./pages/admin/RecipeEdit";
 import Jobs from "./pages/Jobs";
@@ -106,8 +108,8 @@ const App = () => (
             <Route path="/jobs/:id" element={<JobDetail />} />
             
             {/* Subscribe page - for users without active subscription */}
-            <Route path="/subscribe" element={<ProtectedRoute><Subscribe /></ProtectedRoute>} />
-            <Route path="/invoice/:id" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
+            <Route path="/subscribe" element={<ProtectedRoute requireSubscription={false}><Subscribe /></ProtectedRoute>} />
+            <Route path="/invoice/:id" element={<ProtectedRoute requireSubscription={false}><Invoice /></ProtectedRoute>} />
 
             {/* Unified Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -150,6 +152,8 @@ const App = () => (
             <Route path="/admin/hot-requirements" element={<ProtectedRoute allowedRoles={['admin']}><AdminHotRequirements /></ProtectedRoute>} />
             <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobs /></ProtectedRoute>} />
             <Route path="/admin/talent" element={<ProtectedRoute allowedRoles={['admin']}><AdminTalentProfiles /></ProtectedRoute>} />
+            <Route path="/admin/outreach" element={<ProtectedRoute allowedRoles={['admin']}><AdminOutreach /></ProtectedRoute>} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/admin/recipes" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipes /></ProtectedRoute>} />
             <Route path="/admin/recipes/new" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipeEdit /></ProtectedRoute>} />
             <Route path="/admin/recipes/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><AdminRecipeEdit /></ProtectedRoute>} />

@@ -25,7 +25,7 @@ import { Loader2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { computeSubscriptionMonths } from '@/lib/subscriptionPromo';
+import { computeSubscriptionPeriod } from '@/lib/subscriptionPromo';
 
 interface SubscriptionRow {
   id: string;
@@ -38,6 +38,7 @@ interface SubscriptionRow {
   payment_reference: string | null;
   payment_status: string;
   amount_paid: number | null;
+  is_trial: boolean;
   created_at: string;
 }
 
@@ -119,9 +120,22 @@ export default function AdminSubscriptions() {
 
     setSaving(true);
     try {
-      const startsAt = new Date();
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + computeSubscriptionMonths(sub.billing_cycle as 'monthly' | 'annual'));
+      // If the user still has access (free month or an unexpired plan), the
+      // new plan starts when that ends.
+      const { data: current } = await supabase
+        .from('user_subscriptions')
+        .select('expires_at')
+        .eq('user_id', sub.user_id)
+        .eq('status', 'active')
+        .neq('id', sub.id)
+        .gt('expires_at', new Date().toISOString())
+        .order('expires_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const { startsAt, expiresAt } = computeSubscriptionPeriod(
+        sub.billing_cycle as 'monthly' | 'annual',
+        current?.expires_at ?? null,
+      );
       const price = sub.billing_cycle === 'annual' ? plan.price_annual : plan.price_monthly;
 
       const { data: invoiceNumber, error: invoiceError } = await supabase.rpc('generate_invoice_number');
@@ -232,11 +246,11 @@ export default function AdminSubscriptions() {
                               <p className="text-xs text-muted-foreground">{profile?.email || sub.user_id.slice(0, 8)}</p>
                             </div>
                           </TableCell>
-                          <TableCell>{plans[sub.plan_id]?.name || 'Unknown'}</TableCell>
-                          <TableCell className="capitalize text-sm">{sub.billing_cycle}</TableCell>
+                          <TableCell>{sub.is_trial ? 'Free month (full access)' : plans[sub.plan_id]?.name || 'Unknown'}</TableCell>
+                          <TableCell className="capitalize text-sm">{sub.is_trial ? '—' : sub.billing_cycle}</TableCell>
                           <TableCell>{getStatusBadge(sub.status, sub.expires_at)}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="capitalize">{sub.payment_status}</Badge>
+                            <Badge variant="outline" className="capitalize">{sub.is_trial ? 'Free' : sub.payment_status}</Badge>
                           </TableCell>
                           <TableCell className="text-sm">{sub.starts_at ? format(new Date(sub.starts_at), 'dd MMM yyyy') : '—'}</TableCell>
                           <TableCell className="text-sm">{sub.expires_at ? format(new Date(sub.expires_at), 'dd MMM yyyy') : '—'}</TableCell>

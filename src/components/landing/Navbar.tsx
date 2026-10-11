@@ -47,7 +47,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             <a href="#how-it-works" onClick={goToAnchor("#how-it-works")} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               How It Works
             </a>
@@ -60,6 +60,9 @@ const Navbar = () => {
             <Link to="/recipes" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               Recipes
             </Link>
+            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+              Blog
+            </Link>
             <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
               Jobs
             </Link>
@@ -70,7 +73,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : user ? (
@@ -123,7 +126,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -132,7 +135,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/50">
+          <div className="lg:hidden py-4 border-t border-border/50">
             <div className="flex flex-col gap-4">
               <a
                 href="#how-it-works"
@@ -157,6 +160,9 @@ const Navbar = () => {
               </a>
               <Link to="/recipes" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2" onClick={() => setIsMenuOpen(false)}>
                 Recipes
+              </Link>
+              <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2" onClick={() => setIsMenuOpen(false)}>
+                Blog
               </Link>
               <Link to="/jobs" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2" onClick={() => setIsMenuOpen(false)}>
                 Jobs

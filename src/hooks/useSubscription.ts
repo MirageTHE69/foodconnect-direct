@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -26,7 +27,6 @@ interface UserSubscription {
   status: string;
   starts_at: string;
   expires_at: string;
-  payment_id: string | null;
   payment_status: string;
   payment_reference: string | null;
   amount_paid: number | null;
@@ -37,67 +37,60 @@ interface UserSubscription {
   igst_amount: number;
   gst_rate: number;
   invoice_number: string | null;
+  is_trial: boolean;
   created_at: string;
   plan?: SubscriptionPlan;
 }
 
+/**
+ * The signed-in user's access. `subscription` is what they have right now
+ * (the free sign-up month, or a paid plan). `upcoming` is a paid plan bought
+ * during the free month, which starts when the free month ends. Admins
+ * always count as active. Cached with react-query so the route guard and the
+ * pages behind it share one request.
+ */
 export function useSubscription() {
-  const { user, userRole } = useAuth();
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const { user, userRole, loading: authLoading, rolesLoading } = useAuth();
+  const queryClient = useQueryClient();
+  const isAdmin = userRole === 'admin';
 
-  useEffect(() => {
-    if (!user) {
-      setSubscription(null);
-      setHasActiveSubscription(false);
-      setLoading(false);
-      return;
-    }
-
-    // Admins bypass subscription check
-    if (userRole === 'admin') {
-      setHasActiveSubscription(true);
-      setLoading(false);
-      return;
-    }
-
-    fetchSubscription();
-  }, [user, userRole]);
-
-  const fetchSubscription = async () => {
-    if (!user) return;
-    
-    try {
+  const query = useQuery({
+    queryKey: ['subscription', user?.id],
+    enabled: !!user && !rolesLoading && !isAdmin,
+    staleTime: 60_000,
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*, plan:subscription_plans(*)')
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .eq('status', 'active')
         .gte('expires_at', new Date().toISOString())
-        .order('expires_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('expires_at', { ascending: false });
+      if (error) throw error;
 
-      if (error) {
-        console.error('Error fetching subscription:', error);
-        setHasActiveSubscription(false);
-      } else if (data) {
-        setSubscription(data as UserSubscription);
-        setHasActiveSubscription(true);
-      } else {
-        setSubscription(null);
-        setHasActiveSubscription(false);
-      }
-    } catch (err) {
-      console.error('Error fetching subscription:', err);
-      setHasActiveSubscription(false);
-    } finally {
-      setLoading(false);
-    }
+      const rows = (data ?? []) as unknown as UserSubscription[];
+      const now = Date.now();
+      const started = (s: UserSubscription) => !s.starts_at || new Date(s.starts_at).getTime() <= now;
+      return {
+        current: rows.find(started) ?? null,
+        upcoming: rows.find((s) => !started(s)) ?? null,
+      };
+    },
+  });
+
+  const subscription = isAdmin ? null : query.data?.current ?? null;
+  const upcoming = isAdmin ? null : query.data?.upcoming ?? null;
+  const refetch = useCallback(() => queryClient.invalidateQueries({ queryKey: ['subscription'] }), [queryClient]);
+  const loading = authLoading || (!!user && (rolesLoading || (!isAdmin && query.isPending)));
+
+  return {
+    subscription,
+    upcoming,
+    isTrial: !!subscription?.is_trial,
+    hasActiveSubscription: !!user && (isAdmin || !!subscription),
+    loading,
+    refetch,
   };
-
-  return { subscription, hasActiveSubscription, loading, refetch: fetchSubscription };
 }
 
 export function useSubscriptionPlans() {

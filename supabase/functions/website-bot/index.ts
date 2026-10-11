@@ -165,9 +165,9 @@ Rules:
 
 Platform info:
 - Users can browse products, suppliers, recipes and categories, post requirements, and message suppliers
-- Vendor directory contact details require a free sign-up; some access levels depend on the subscription plan
-- New users sign up, pick a plan and complete registration
-- Every paid plan currently includes 1 month free (launch offer). Prices include 18% GST.
+- Vendor names and contact details are visible only to signed-in users on their free month or a paid plan; some access levels depend on the plan
+- New users sign up and complete registration; the free month starts immediately and they can choose a paid plan any time (it begins when the free month ends)
+- Every new account gets 1 month free with full access at sign-up, no payment needed. After that month a paid plan (monthly or annual) is required to keep using the account. There is no permanently free plan. Prices include 18% GST.
 - Plans (per month):
 ${plans.map((p: any) => `  - ${p.name}: ${p.price_monthly > 0 ? "₹" + p.price_monthly : "Free"}${p.credits_per_month ? `, ${p.credits_per_month} supplier unlocks/month` : ""}`).join("\n")}
 - Suppliers choose a business category (Founders, Women Enterprise, North East Startups, Micro & First-Time Startups, Small Homemade Food) for credit-based plans, or the flat-fee B2B & B2C plan for full access.

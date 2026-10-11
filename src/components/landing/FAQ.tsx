@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 const faqs = [
   {
     question: "Is FoodAdda free to use?",
-    answer: "Yes! FoodAdda is completely free for buyers. Suppliers can list their business and products for free. We may introduce premium features in the future, but core functionality will always remain free.",
+    answer: "Every new account gets 1 month free with full access, and no payment is needed to start. After the free month you need a paid plan, monthly or annual, to keep using your account. The public pages (categories, recipes, blog and jobs) stay open to everyone.",
   },
   {
     question: "How are suppliers verified?",
@@ -40,23 +40,23 @@ const faqs = [
   },
   {
     question: "How does FoodAdda's subscription model work?",
-    answer: "Suppliers choose a Business Category (Founders, Women Enterprise, North East Startups, Micro & First-Time Startups, or Small Homemade Food) at signup — each has its own category-credit plan and pricing. You can also upgrade to a Universal Tier (B2B & B2C, Business Growth, or Business Pro) for flat-fee, category-independent full access.",
+    answer: "You start with 1 month free. After that you choose a plan: each Business Category (Founders, Women Enterprise, North East Startups, Micro & First-Time Startups, or Small Homemade Food) has its own credit plans and pricing, or you can take the flat-fee B2B & B2C plan for full access to every supplier.",
   },
   {
     question: 'What does a "credit" unlock?',
     answer: "On a category-credit plan, 1 credit unlocks 1 supplier's full company details (contact info, full catalogue, certifications) for the month. Credits reset monthly and don't roll over. Universal Tier plans have no credit limit — full access to every supplier.",
   },
   {
-    question: "Is annual billing cheaper than monthly?",
-    answer: "Yes — every paid plan offers annual billing at 12× the monthly price for 13 months of access, so you effectively get 1 month free compared to paying monthly all year.",
+    question: "Can I pay monthly or annually?",
+    answer: "Yes. Every plan can be paid month by month, or once for the full year. Annual billing costs the same as 12 monthly payments and saves you from renewing every month.",
   },
   {
-    question: "Can I upgrade from a category plan to a Universal Tier later?",
-    answer: "Yes, anytime from your dashboard's Upgrade Plan page. A Universal Tier overrides your category's credit limit with full, unlimited access regardless of your business category.",
+    question: "Can I change my plan later?",
+    answer: "Yes. When your current plan period ends you can pick any plan, including moving from a category plan to B2B & B2C, which gives full, unlimited access regardless of your business category.",
   },
   {
     question: "How long does it take for my plan to be activated?",
-    answer: "After you submit a plan request, an admin reviews and confirms payment, typically within one business day. You can keep using FoodAdda on your current access level while your request is pending.",
+    answer: "Plans paid online activate within seconds of payment. If you choose a plan during your free month, it starts on the day the free month ends, so you keep every free day.",
   },
   {
     question: "How does buyer-supplier chat work?",

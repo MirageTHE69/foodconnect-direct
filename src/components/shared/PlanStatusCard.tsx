@@ -7,12 +7,15 @@ import { CreditCard, Loader2, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 
 /**
- * Shows the signed-in user's active subscription plan (or "Free/Guest
- * access" if none), their access tier, and monthly credits remaining where
- * applicable. Used on both buyer and supplier profile pages.
+ * Shows the signed-in user's free sign-up month or paid plan, when it ends,
+ * and any paid plan lined up to start after the free month. Used on both
+ * buyer and supplier profile pages.
  */
 export function PlanStatusCard() {
-  const { loading, hasActiveSubscription, planName, tierLabel, expiresAt, creditsPerMonth, subscriptionId, invoiceNumber } = usePermissions();
+  const {
+    loading, hasActiveSubscription, planName, tierLabel, expiresAt, creditsPerMonth, subscriptionId, invoiceNumber,
+    isTrial, upcomingPlanName, upcomingStartsAt,
+  } = usePermissions();
 
   return (
     <Card>
@@ -35,22 +38,31 @@ export function PlanStatusCard() {
                 <p className="font-semibold text-foreground">{planName}</p>
                 <p className="text-xs text-muted-foreground">Access tier: {tierLabel}</p>
               </div>
-              <Badge className="bg-primary text-primary-foreground">Active</Badge>
+              <Badge className="bg-primary text-primary-foreground">{isTrial ? 'Free month' : 'Active'}</Badge>
             </div>
-            {creditsPerMonth != null && (
+            {!isTrial && creditsPerMonth != null && (
               <p className="text-sm text-muted-foreground">
                 {creditsPerMonth} supplier unlocks / month
               </p>
             )}
             {expiresAt && (
               <p className="text-sm text-muted-foreground">
-                Renews / expires {format(new Date(expiresAt), 'dd MMM yyyy')}
+                {isTrial ? 'Free month ends' : 'Active until'} {format(new Date(expiresAt), 'dd MMM yyyy')}
+              </p>
+            )}
+            {isTrial && (
+              <p className="text-sm text-muted-foreground">
+                {upcomingPlanName
+                  ? `${upcomingPlanName} starts on ${upcomingStartsAt ? format(new Date(upcomingStartsAt), 'dd MMM yyyy') : 'that date'}.`
+                  : 'After that, a paid plan is needed to keep using your account.'}
               </p>
             )}
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/subscribe">Change Plan</Link>
-              </Button>
+              {isTrial && !upcomingPlanName && (
+                <Button asChild size="sm">
+                  <Link to="/subscribe">Choose a Plan</Link>
+                </Button>
+              )}
               {invoiceNumber && subscriptionId && (
                 <Button asChild variant="outline" size="sm" className="gap-1.5">
                   <Link to={`/invoice/${subscriptionId}`}>
@@ -64,8 +76,8 @@ export function PlanStatusCard() {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">No active subscription — Guest access only</p>
-              <Badge variant="outline">Free</Badge>
+              <p className="text-sm text-muted-foreground">No active plan</p>
+              <Badge variant="outline">Inactive</Badge>
             </div>
             <Button asChild size="sm">
               <Link to="/subscribe">View Plans</Link>

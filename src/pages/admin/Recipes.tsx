@@ -37,7 +37,7 @@ export default function AdminRecipes() {
     setLoading(false);
   };
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: 'pending' | 'approved' | 'rejected') => {
     const { error } = await supabase.from("recipes").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Status updated"); setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r))); }
@@ -89,7 +89,7 @@ export default function AdminRecipes() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Select value={recipe.status} onValueChange={(v) => updateStatus(recipe.id, v)}>
+                  <Select value={recipe.status} onValueChange={(v) => updateStatus(recipe.id, v as 'pending' | 'approved' | 'rejected')}>
                     <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}

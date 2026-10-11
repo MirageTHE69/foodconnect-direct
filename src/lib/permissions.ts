@@ -4,9 +4,13 @@
 // as full-access (✓) on most rows while Founders / NE Startups stayed
 // "Limited" on the same rows -- confirmed as a spec error, so Women
 // Enterprise and Micro/First-Time now mirror Founders/NE Startups' credit-
-// gated "limited" behavior. "Homemade" (Small Homemade Food Products) was
-// almost entirely blank ("n/s") in the source sheet -- confirmed to default
-// to Guest-level access, since it's a free showcase-only tier.
+// gated "limited" behavior. "Homemade" (Small Homemade Food) used to be a
+// free, Guest-level tier; since 2026-10-11 there is no free plan and it is a
+// paid 5-credit plan, so its column mirrors Micro & First-Time Startups.
+//
+// The 'guest' column now only applies to visitors who are not signed in:
+// signed-in accounts are either on the free sign-up month (b2b_b2c access),
+// on a paid plan, or locked out to /subscribe by ProtectedRoute.
 
 export type Tier =
   | 'guest'
@@ -65,20 +69,20 @@ const MATRIX: Record<FeatureKey, Record<Tier, AccessLevel>> = {
   view_company_summary:       row(['full',    'full',    'full',    'full',    'full',    'full',    'full']),
   view_product_photos:        row(['full',    'full',    'full',    'full',    'full',    'full',    'full']),
   full_product_specs:         row(['limited', 'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
-  full_catalogue:              row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
-  contact_person:             row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
-  phone_number:                row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
+  full_catalogue:              row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
+  contact_person:             row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
+  phone_number:                row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
   email:                       row(['none',    'none',    'none',    'none',    'full',    'none',    'none']),
   website:                     row(['limited', 'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
-  send_enquiry:                row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
-  save_suppliers:              row(['none',    'full',    'full',    'full',    'full',    'full',    'none']),
-  compare_suppliers:           row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
-  view_certifications:         row(['summary', 'full',    'full',    'full',    'full',    'full',    'summary']),
+  send_enquiry:                row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
+  save_suppliers:              row(['none',    'full',    'full',    'full',    'full',    'full',    'full']),
+  compare_suppliers:           row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
+  view_certifications:         row(['summary', 'full',    'full',    'full',    'full',    'full',    'full']),
   manufacturing_capability:    row(['limited', 'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
-  moq:                         row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'none']),
+  moq:                         row(['none',    'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
   oem_private_label:           row(['none',    'none',    'none',    'none',    'full',    'none',    'none']),
-  export_capabilities:         row(['summary', 'limited', 'limited', 'limited', 'full',    'limited', 'summary']),
-  post_sourcing_requirement:   row(['none',    'limited', 'limited', 'none',    'full',    'limited', 'none']),
+  export_capabilities:         row(['summary', 'limited', 'limited', 'limited', 'full',    'limited', 'limited']),
+  post_sourcing_requirement:   row(['none',    'limited', 'limited', 'none',    'full',    'limited', 'limited']),
   enquiry_history:              row(['none',    'none',    'none',    'none',    'full',    'none',    'none']),
   buyer_sourcing_dashboard:     row(['none',    'none',    'none',    'none',    'full',    'none',    'none']),
 };
@@ -94,7 +98,7 @@ const TIER_LABELS: Record<Tier, string> = {
   north_east_startups: 'North East Startups',
   b2b_b2c: 'B2B & B2C',
   micro_first_time: 'Micro & First-Time Startups',
-  small_homemade_food: 'Small Homemade Food Products',
+  small_homemade_food: 'Small Homemade Food',
 };
 
 export function getTierLabel(tier: Tier): string {

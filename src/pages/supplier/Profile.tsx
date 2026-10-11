@@ -91,7 +91,7 @@ export default function SupplierProfile() {
     e.preventDefault();
     await updateProfile({
       ...formData,
-      business_category: formData.business_category || null,
+      business_category: (formData.business_category || null) as Exclude<Tier, 'guest' | 'b2b_b2c'> | null,
     });
   };
 

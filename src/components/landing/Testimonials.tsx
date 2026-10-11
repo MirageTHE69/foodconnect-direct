@@ -156,7 +156,7 @@ const Testimonials = () => {
                 <iframe
                   src={`${postUrl}embed`}
                   className="w-[320px] h-[420px] border-0"
-                  allowtransparency="true"
+                  allowTransparency
                   scrolling="no"
                   loading="lazy"
                   title={`Instagram post ${i + 1}`}

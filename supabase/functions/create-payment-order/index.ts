@@ -73,6 +73,15 @@ serve(async (req) => {
 
     const gst = calculateGst(amount, plan.gst_percent ?? 18, billing_state);
 
+    // Checkouts the user abandoned (closed the payment popup) leave unpaid
+    // rows behind; clear them so they never pile up or block a new purchase.
+    await admin
+      .from('user_subscriptions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('status', 'pending_payment')
+      .eq('payment_provider', 'razorpay');
+
     const { data: subRow, error: insertError } = await admin
       .from('user_subscriptions')
       .insert({

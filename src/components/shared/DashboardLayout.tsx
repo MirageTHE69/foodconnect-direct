@@ -26,6 +26,7 @@ import {
   Flame,
   Briefcase,
   Contact,
+  Send,
 } from 'lucide-react';
 import logoImg from '@/assets/logo-nav.png';
 
@@ -65,11 +66,15 @@ const adminNavItems: NavItem[] = [
   { label: 'Jobs', href: '/admin/jobs', icon: <Briefcase className="h-5 w-5" /> },
   { label: 'Resumes & Skills', href: '/admin/talent', icon: <Contact className="h-5 w-5" /> },
   { label: 'Recipes', href: '/admin/recipes', icon: <BookOpen className="h-5 w-5" /> },
+  { label: 'Outreach', href: '/admin/outreach', icon: <Send className="h-5 w-5" /> },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, userRole, signOut } = useAuth();
-  const { planName, hasActiveSubscription } = usePermissions();
+  const { planName, hasActiveSubscription, isTrial, expiresAt, upcomingPlanName } = usePermissions();
+  const trialDaysLeft = isTrial && expiresAt
+    ? Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000))
+    : null;
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -136,7 +141,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 to="/profile"
                 className="block px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors truncate"
               >
-                Plan: <span className="font-medium text-foreground">{hasActiveSubscription && planName ? planName : 'Free / Guest'}</span>
+                Plan: <span className="font-medium text-foreground">{hasActiveSubscription && planName ? planName : 'No active plan'}</span>
               </Link>
             )}
           </div>
@@ -186,6 +191,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         <div className="p-6 lg:p-8">
+          {userRole !== 'admin' && trialDaysLeft !== null && !upcomingPlanName && (
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3">
+              <p className="text-sm text-foreground">
+                <span className="font-semibold">
+                  Free month: {trialDaysLeft} day{trialDaysLeft === 1 ? '' : 's'} left.
+                </span>{' '}
+                After that, a paid plan is needed to keep using your account.
+              </p>
+              <Button asChild size="sm" className="shrink-0">
+                <Link to="/subscribe">Choose a Plan</Link>
+              </Button>
+            </div>
+          )}
           {children}
         </div>
       </main>

@@ -21,12 +21,12 @@ export function VendorAccessDialog({ open, onOpenChange, reason }: VendorAccessD
             <Lock className="w-6 h-6 text-primary" />
           </div>
           <DialogTitle className="text-xl">
-            {isGuest ? 'Sign up to see vendor details' : 'Subscribe to see vendor details'}
+            {isGuest ? 'Sign up to see vendor details' : 'Choose a plan to see vendor details'}
           </DialogTitle>
           <DialogDescription className="text-base">
             {isGuest
-              ? 'Create a free account or sign in to view vendor names and contact details.'
-              : 'Vendor names are available on an active FoodAdda plan. Pick a plan to unlock them.'}
+              ? 'Sign up and get 1 month free with full access to vendor names and contact details, or log in.'
+              : 'Vendor names and contact details need an active plan. Choose a plan to see them.'}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:flex-col gap-2 sm:space-x-0">

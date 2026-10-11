@@ -126,7 +126,7 @@ export default function AdminRecipeEdit() {
       category: category.trim() || null,
       pdf_url: pdfUrl,
       images: thumbnailUrl ? [thumbnailUrl] : null,
-      status: 'approved',
+      status: 'approved' as const,
       supplier_id: null,
     };
 

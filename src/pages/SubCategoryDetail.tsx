@@ -151,14 +151,14 @@ const SubCategoryDetail = () => {
                           type="button"
                           onClick={() => setGateOpen(true)}
                           className="text-left font-semibold text-foreground text-base hover:text-primary transition-colors"
-                          title="Sign up to see the full name"
+                          title={user ? 'Choose a plan to see the full name' : 'Sign up to see the full name'}
                         >
                           <h3><MaskedVendorName name={v.name} /></h3>
                         </button>
                       )}
                     </div>
 
-                    {user ? (
+                    {canViewNames ? (
                       <>
                         {v.address && (
                           <p className="text-sm text-muted-foreground flex items-start gap-2">
@@ -180,7 +180,7 @@ const SubCategoryDetail = () => {
                       (v.address || v.email || v.phone) && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
                           <Lock className="w-3.5 h-3.5 shrink-0" />
-                          Sign in to view contact details
+                          {user ? 'Choose a plan to view contact details' : 'Sign in to view contact details'}
                         </div>
                       )
                     )}

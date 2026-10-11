@@ -467,6 +467,137 @@ export type Database = {
           },
         ]
       }
+      outreach_email_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          lead_id: string | null
+          provider_message_id: string | null
+          sent_by: string | null
+          status: string
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          lead_id?: string | null
+          provider_message_id?: string | null
+          sent_by?: string | null
+          status: string
+          subject: string
+          to_email: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          lead_id?: string | null
+          provider_message_id?: string | null
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_email_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      outreach_leads: {
+        Row: {
+          business_type: string | null
+          city: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          email_count: number
+          email_status: string
+          id: string
+          last_emailed_at: string | null
+          last_whatsapp_at: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          seq: number
+          source: string | null
+          unsubscribe_token: string
+          unsubscribed: boolean
+        }
+        Insert: {
+          business_type?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          email_count?: number
+          email_status?: string
+          id?: string
+          last_emailed_at?: string | null
+          last_whatsapp_at?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          seq?: never
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed?: boolean
+        }
+        Update: {
+          business_type?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          email_count?: number
+          email_status?: string
+          id?: string
+          last_emailed_at?: string | null
+          last_whatsapp_at?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          seq?: never
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed?: boolean
+        }
+        Relationships: []
+      }
       product_categories: {
         Row: {
           created_at: string
@@ -1262,6 +1393,7 @@ export type Database = {
           id: string
           igst_amount: number
           invoice_number: string | null
+          is_trial: boolean
           payment_provider: string
           payment_reference: string | null
           payment_status: string
@@ -1287,6 +1419,7 @@ export type Database = {
           id?: string
           igst_amount?: number
           invoice_number?: string | null
+          is_trial?: boolean
           payment_provider?: string
           payment_reference?: string | null
           payment_status?: string
@@ -1312,6 +1445,7 @@ export type Database = {
           id?: string
           igst_amount?: number
           invoice_number?: string | null
+          is_trial?: boolean
           payment_provider?: string
           payment_reference?: string | null
           payment_status?: string
@@ -1338,6 +1472,7 @@ export type Database = {
     }
     Functions: {
       generate_invoice_number: { Args: never; Returns: string }
+      grant_free_trial: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

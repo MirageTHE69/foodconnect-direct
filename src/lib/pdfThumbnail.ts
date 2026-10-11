@@ -12,7 +12,7 @@ export async function renderPdfFirstPageAsBlob(file: File, scale = 1.5): Promise
     canvas.height = viewport.height;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas not supported');
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
     return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Failed to generate thumbnail'))), 'image/jpeg', 0.85);
     });

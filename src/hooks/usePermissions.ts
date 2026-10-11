@@ -12,7 +12,7 @@ import { getAccess, getTierLabel, resolveTier, type AccessLevel, type FeatureKey
  */
 export function usePermissions() {
   const { user, userRole } = useAuth();
-  const { subscription, hasActiveSubscription, loading } = useSubscription();
+  const { subscription, upcoming, isTrial, hasActiveSubscription, loading } = useSubscription();
 
   const tier: Tier = useMemo(() => {
     if (!user) return 'guest';
@@ -34,7 +34,10 @@ export function usePermissions() {
     loading,
     hasActiveSubscription,
     plan: subscription?.plan ?? null,
-    planName: subscription?.plan?.name ?? null,
+    planName: isTrial ? 'Free month (full access)' : subscription?.plan?.name ?? null,
+    isTrial,
+    upcomingPlanName: upcoming?.plan?.name ?? null,
+    upcomingStartsAt: upcoming?.starts_at ?? null,
     expiresAt: subscription?.expires_at ?? null,
     creditsPerMonth: subscription?.plan?.credits_per_month ?? null,
     subscriptionId: subscription?.id ?? null,

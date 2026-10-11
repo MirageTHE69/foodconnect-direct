@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { computeSubscriptionMonths } from "../_shared/subscriptionPromo.ts";
+import { computeSubscriptionPeriod } from "../_shared/subscriptionPromo.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -82,7 +82,7 @@ serve(async (req) => {
 
     const { data: row, error: fetchError } = await admin
       .from('user_subscriptions')
-      .select('id, status, payment_status, billing_cycle')
+      .select('id, user_id, status, payment_status, billing_cycle')
       .eq('gateway_order_id', payment.order_id)
       .eq('payment_provider', 'razorpay')
       .maybeSingle();
@@ -99,9 +99,22 @@ serve(async (req) => {
     }
 
     if (eventType === 'payment.captured') {
-      const startsAt = new Date();
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + computeSubscriptionMonths(row.billing_cycle as 'monthly' | 'annual'));
+      // If the user still has access (free month or an unexpired plan), the
+      // new plan starts when that ends.
+      const { data: current } = await admin
+        .from('user_subscriptions')
+        .select('expires_at')
+        .eq('user_id', row.user_id)
+        .eq('status', 'active')
+        .neq('id', row.id)
+        .gt('expires_at', new Date().toISOString())
+        .order('expires_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const { startsAt, expiresAt } = computeSubscriptionPeriod(
+        row.billing_cycle as 'monthly' | 'annual',
+        current?.expires_at ?? null,
+      );
 
       const { data: invoiceNumber, error: invoiceError } = await admin.rpc('generate_invoice_number');
       if (invoiceError) {

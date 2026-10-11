@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, Star, Sparkles, Loader2 } from 'lucide-react';
 import { useSubscriptionPlans } from '@/hooks/useSubscription';
+import { useAuth } from '@/hooks/useAuth';
 
 const CATEGORY_LABELS: Record<string, string> = {
   founders: 'Founders',
@@ -18,6 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function Pricing() {
   const { plans, loading } = useSubscriptionPlans();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   const categories = useMemo(() => {
@@ -45,7 +47,6 @@ export default function Pricing() {
 
   const renderPlanCard = (plan: (typeof plans)[number]) => {
     const price = billingCycle === 'annual' ? plan.price_annual : plan.price_monthly;
-    const isFree = plan.plan_type === 'free' || price === 0;
 
     return (
       <Card
@@ -67,23 +68,11 @@ export default function Pricing() {
           <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
           <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
           <div className="mt-4">
-            {isFree ? (
-              <span className="text-4xl font-extrabold text-foreground">Free</span>
-            ) : (
-              <>
-                <span className="text-4xl font-extrabold text-foreground">₹{price.toLocaleString('en-IN')}</span>
-                <span className="text-muted-foreground ml-2">
-                  / {billingCycle === 'annual' ? '13 months' : 'month'}
-                </span>
-              </>
-            )}
+            <span className="text-4xl font-extrabold text-foreground">₹{price.toLocaleString('en-IN')}</span>
+            <span className="text-muted-foreground ml-2">/ {billingCycle === 'annual' ? 'year' : 'month'}</span>
           </div>
-          {!isFree && <p className="text-xs text-muted-foreground mt-1 italic">Inclusive of all taxes</p>}
-          {!isFree && (
-            <p className="text-sm font-semibold text-foreground mt-2">
-              🎉 1 month FREE {billingCycle === 'annual' ? '— 13 months access' : '— 2 months access'}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mt-1 italic">Inclusive of all taxes</p>
+          <p className="text-sm font-semibold text-foreground mt-2">First month free, then this price</p>
           {plan.credits_per_month && (
             <p className="text-sm font-medium text-foreground mt-2">
               {plan.credits_per_month} supplier unlocks / month
@@ -107,9 +96,9 @@ export default function Pricing() {
             className={plan.is_popular ? 'w-full' : 'w-full text-foreground border-foreground/30 hover:bg-primary hover:text-foreground hover:border-primary'}
             variant={plan.is_popular ? 'default' : 'outline'}
             size="lg"
-            onClick={() => navigate(`/auth?planCode=${plan.code}`)}
+            onClick={() => navigate(user ? '/subscribe' : '/auth?tab=signup')}
           >
-            Get Started
+            {user ? 'Choose Plan' : 'Start 1 Month Free'}
           </Button>
         </CardFooter>
       </Card>
@@ -131,9 +120,10 @@ export default function Pricing() {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Get full access to FoodAdda's B2B food marketplace. Connect with trusted food suppliers,
             manufacturers, distributors, and buyers, manage enquiries, and grow your food business.
+            After your free month, choose any plan below, monthly or annual.
           </p>
           <p className="mt-4 inline-block text-sm font-semibold text-foreground bg-primary/10 rounded-full px-4 py-1.5">
-            🎉 Limited-time launch offer: every paid plan includes 1 month free — on monthly or annual billing.
+            🎉 Every new account gets 1 month free with full access. No payment needed to start.
           </p>
         </div>
 
@@ -141,8 +131,8 @@ export default function Pricing() {
         <div className="flex justify-center mb-10">
           <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as 'monthly' | 'annual')}>
             <TabsList>
-              <TabsTrigger value="monthly">Monthly (1 month free)</TabsTrigger>
-              <TabsTrigger value="annual">Annual (1 month free)</TabsTrigger>
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="annual">Annual</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

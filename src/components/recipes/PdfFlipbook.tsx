@@ -37,7 +37,7 @@ export function PdfFlipbook({ url, className }: PdfFlipbookProps) {
     canvas.height = viewport.height;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
     pageCache.current.set(pageNumber, canvas.toDataURL('image/jpeg', 0.9));
   }, []);
 
