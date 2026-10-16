@@ -14,13 +14,14 @@ import { format } from 'date-fns';
 import { ImportLeadsDialog } from '@/components/admin/outreach/ImportLeadsDialog';
 import { ComposeEmailDialog } from '@/components/admin/outreach/ComposeEmailDialog';
 import { TemplatesDialog } from '@/components/admin/outreach/TemplatesDialog';
+import { WhatsAppBulkDialog } from '@/components/admin/outreach/WhatsAppBulkDialog';
 import { MAX_BATCH, canEmail, fetchAllRows, invokeOutreach, type OutreachLead, type OutreachStatus } from '@/lib/outreach';
 import { toWhatsAppNumber, whatsAppLink } from '@/lib/phone';
 
 const PAGE_SIZE = 50;
 const ALL = 'all';
 
-type StatusFilter = 'all' | 'not_sent' | 'sent' | 'failed' | 'unsubscribed' | 'no_email';
+type StatusFilter = 'all' | 'not_sent' | 'sent' | 'failed' | 'unsubscribed' | 'no_email' | 'wa_not_sent' | 'wa_opened';
 
 const whatsAppMessage = (name: string) =>
   `Hi ${name}, this is Team FoodAdda (foodadda.in), India's B2B marketplace for the food industry. ` +
@@ -31,6 +32,18 @@ function StatusBadge({ lead }: { lead: OutreachLead }) {
   if (!lead.email) return <Badge variant="outline" className="whitespace-nowrap">No email</Badge>;
   if (lead.email_status === 'sent') return <Badge className="bg-green-600 text-white hover:bg-green-600 whitespace-nowrap">Sent{lead.email_count > 1 ? ` ×${lead.email_count}` : ''}</Badge>;
   if (lead.email_status === 'failed') return <Badge variant="destructive">Failed</Badge>;
+  return <Badge variant="secondary" className="whitespace-nowrap">Not sent</Badge>;
+}
+
+function WhatsAppBadge({ lead }: { lead: OutreachLead }) {
+  if (!toWhatsAppNumber(lead.phone)) return <Badge variant="outline" className="whitespace-nowrap">No number</Badge>;
+  if (lead.last_whatsapp_at) {
+    return (
+      <Badge className="bg-[#25D366]/15 text-[#128C7E] hover:bg-[#25D366]/15 border-0 whitespace-nowrap">
+        Opened {format(new Date(lead.last_whatsapp_at), 'dd MMM')}
+      </Badge>
+    );
+  }
   return <Badge variant="secondary" className="whitespace-nowrap">Not sent</Badge>;
 }
 
@@ -49,12 +62,26 @@ export default function AdminOutreach() {
   const [importOpen, setImportOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [recipients, setRecipients] = useState<OutreachLead[] | null>(null);
-  const [pickingNext, setPickingNext] = useState(false);
+  const [pickingNext, setPickingNext] = useState<'email' | 'whatsapp' | null>(null);
+  const [waRecipients, setWaRecipients] = useState<OutreachLead[] | null>(null);
+  const [waToday, setWaToday] = useState<number | null>(null);
 
   useEffect(() => {
     document.title = 'Outreach | FoodAdda Admin';
     invokeOutreach<OutreachStatus>({ action: 'status' }).then(setStatus).catch(() => setStatus(null));
   }, []);
+
+  const loadWhatsAppToday = useCallback(async () => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from('outreach_leads')
+      .select('id', { count: 'exact', head: true })
+      .gte('last_whatsapp_at', start.toISOString());
+    setWaToday(count ?? 0);
+  }, []);
+
+  useEffect(() => { loadWhatsAppToday(); }, [loadWhatsAppToday]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -91,6 +118,8 @@ export default function AdminOutreach() {
     if (typeFilter !== ALL) query = query.eq('business_type', typeFilter);
     if (statusFilter === 'unsubscribed') query = query.eq('unsubscribed', true);
     else if (statusFilter === 'no_email') query = query.is('email', null);
+    else if (statusFilter === 'wa_not_sent') query = query.not('phone', 'is', null).is('last_whatsapp_at', null);
+    else if (statusFilter === 'wa_opened') query = query.not('last_whatsapp_at', 'is', null);
     else if (statusFilter !== 'all') query = query.eq('email_status', statusFilter).eq('unsubscribed', false).not('email', 'is', null);
 
     const { data, count, error } = await query;
@@ -118,7 +147,7 @@ export default function AdminOutreach() {
   };
 
   const selectNextUnsent = async () => {
-    setPickingNext(true);
+    setPickingNext('email');
     let query = supabase
       .from('outreach_leads')
       .select('*')
@@ -129,7 +158,7 @@ export default function AdminOutreach() {
       .limit(MAX_BATCH);
     if (typeFilter !== ALL) query = query.eq('business_type', typeFilter);
     const { data, error } = await query;
-    setPickingNext(false);
+    setPickingNext(null);
     if (error) {
       toast.error(error.message);
       return;
@@ -142,13 +171,48 @@ export default function AdminOutreach() {
     toast.success(`Selected the next ${data.length} unsent lead${data.length === 1 ? '' : 's'}`);
   };
 
+  const selectNextWhatsApp = async () => {
+    setPickingNext('whatsapp');
+    let query = supabase
+      .from('outreach_leads')
+      .select('*')
+      .not('phone', 'is', null)
+      .is('last_whatsapp_at', null)
+      .order('seq', { ascending: true })
+      .limit(MAX_BATCH * 5);
+    if (typeFilter !== ALL) query = query.eq('business_type', typeFilter);
+    const { data, error } = await query;
+    setPickingNext(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    // Phone cells often hold landlines or junk, so keep only real mobiles.
+    const picked = (data ?? []).filter((l) => toWhatsAppNumber(l.phone)).slice(0, MAX_BATCH);
+    if (picked.length === 0) {
+      toast.info('No leads with a mobile number are left to message on WhatsApp.');
+      return;
+    }
+    setSelected(new Map(picked.map((l) => [l.id, l])));
+    toast.success(`Selected the next ${picked.length} lead${picked.length === 1 ? '' : 's'} for WhatsApp`);
+  };
+
+  const markWhatsAppOpened = (leadId: string, at: string) => {
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, last_whatsapp_at: at } : l)));
+    setSelected((prev) => {
+      const lead = prev.get(leadId);
+      return lead ? new Map(prev).set(leadId, { ...lead, last_whatsapp_at: at }) : prev;
+    });
+    loadWhatsAppToday();
+  };
+
   const openWhatsApp = async (lead: OutreachLead) => {
     const number = toWhatsAppNumber(lead.phone);
     if (!number) return;
     window.open(whatsAppLink(number, whatsAppMessage(lead.name)), '_blank', 'noopener,noreferrer');
     const now = new Date().toISOString();
     await supabase.from('outreach_leads').update({ last_whatsapp_at: now }).eq('id', lead.id);
-    setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, last_whatsapp_at: now } : l)));
+    markWhatsAppOpened(lead.id, now);
   };
 
   const removeLead = async (lead: OutreachLead) => {
@@ -171,6 +235,9 @@ export default function AdminOutreach() {
   };
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const selectedLeads = Array.from(selected.values());
+  const emailSelection = selectedLeads.filter(canEmail);
+  const whatsAppSelection = selectedLeads.filter((l) => toWhatsAppNumber(l.phone));
 
   return (
     <DashboardLayout>
@@ -178,7 +245,7 @@ export default function AdminOutreach() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Outreach</h1>
-            <p className="text-muted-foreground">Import leads and email them in batches of up to {MAX_BATCH}</p>
+            <p className="text-muted-foreground">Import leads and reach them by email or WhatsApp in batches of up to {MAX_BATCH}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setTemplatesOpen(true)}><FileText className="h-4 w-4 mr-2" />Templates</Button>
@@ -186,7 +253,7 @@ export default function AdminOutreach() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6 flex items-center gap-3">
               <Users className="h-8 w-8 text-primary" />
@@ -203,6 +270,18 @@ export default function AdminOutreach() {
                 <p className="text-2xl font-bold tabular-nums">{status ? `${status.sent_today} / ${status.daily_limit}` : '—'}</p>
                 <p className="text-sm text-muted-foreground">
                   {status && !status.configured ? 'emails sent today · email sending not set up yet' : 'emails sent today'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6 flex items-center gap-3">
+              <MessageCircle className="h-8 w-8 text-[#25D366]" />
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{waToday ?? '—'}</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap">
+                  WhatsApp chats today
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-[#25D366]/50 text-[#128C7E]">Auto-send soon</Badge>
                 </p>
               </div>
             </CardContent>
@@ -232,17 +311,30 @@ export default function AdminOutreach() {
                   <SelectItem value="failed">Failed</SelectItem>
                   <SelectItem value="no_email">No email</SelectItem>
                   <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
+                  <SelectItem value="wa_not_sent">WhatsApp: not sent</SelectItem>
+                  <SelectItem value="wa_opened">WhatsApp: opened</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" onClick={selectNextUnsent} disabled={pickingNext}>
-                {pickingNext ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ListChecks className="h-4 w-4 mr-2" />}
-                Select next {MAX_BATCH} unsent
+              <Button variant="outline" onClick={selectNextUnsent} disabled={pickingNext !== null}>
+                {pickingNext === 'email' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ListChecks className="h-4 w-4 mr-2" />}
+                Next {MAX_BATCH} for email
               </Button>
-              <Button onClick={() => setRecipients(Array.from(selected.values()))} disabled={selected.size === 0}>
-                <Send className="h-4 w-4 mr-2" />Send email to selected ({selected.size}/{MAX_BATCH})
+              <Button variant="outline" onClick={selectNextWhatsApp} disabled={pickingNext !== null}>
+                {pickingNext === 'whatsapp' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ListChecks className="h-4 w-4 mr-2" />}
+                Next {MAX_BATCH} for WhatsApp
+              </Button>
+              <Button onClick={() => setRecipients(emailSelection)} disabled={emailSelection.length === 0}>
+                <Send className="h-4 w-4 mr-2" />Send email ({emailSelection.length}/{MAX_BATCH})
+              </Button>
+              <Button
+                onClick={() => setWaRecipients(whatsAppSelection)}
+                disabled={whatsAppSelection.length === 0}
+                className="bg-[#25D366] hover:bg-[#1fb855] text-white"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />Send WhatsApp ({whatsAppSelection.length}/{MAX_BATCH})
               </Button>
               {selected.size > 0 && <Button variant="ghost" onClick={() => setSelected(new Map())}>Clear selection</Button>}
             </div>
@@ -256,17 +348,18 @@ export default function AdminOutreach() {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Business type</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Email status</TableHead>
+                    <TableHead>WhatsApp</TableHead>
                     <TableHead>Last emailed</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={8} className="py-12 text-center"><Loader2 className="h-6 w-6 animate-spin text-primary inline" /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="py-12 text-center"><Loader2 className="h-6 w-6 animate-spin text-primary inline" /></TableCell></TableRow>
                   ) : leads.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
+                      <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
                         {total === 0 && !search && statusFilter === 'all' && typeFilter === ALL
                           ? 'No leads yet. Use "Import leads" to add your first contacts.'
                           : 'No leads match your search or filters.'}
@@ -281,7 +374,7 @@ export default function AdminOutreach() {
                           <Checkbox
                             checked={selected.has(lead.id)}
                             onCheckedChange={() => toggle(lead)}
-                            disabled={!emailable}
+                            disabled={!emailable && !waNumber}
                             aria-label={`Select ${lead.name}`}
                           />
                         </TableCell>
@@ -290,6 +383,7 @@ export default function AdminOutreach() {
                         <TableCell className="text-sm whitespace-nowrap">{lead.phone ?? '—'}</TableCell>
                         <TableCell className="text-sm">{lead.business_type ?? '—'}</TableCell>
                         <TableCell><StatusBadge lead={lead} /></TableCell>
+                        <TableCell><WhatsAppBadge lead={lead} /></TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                           {lead.last_emailed_at ? format(new Date(lead.last_emailed_at), 'dd MMM yyyy') : '—'}
                         </TableCell>
@@ -354,6 +448,12 @@ export default function AdminOutreach() {
         recipients={recipients ?? []}
         status={status}
         onSent={handleSent}
+      />
+      <WhatsAppBulkDialog
+        open={waRecipients !== null}
+        onOpenChange={(o) => { if (!o) setWaRecipients(null); }}
+        recipients={waRecipients ?? []}
+        onOpened={markWhatsAppOpened}
       />
     </DashboardLayout>
   );
