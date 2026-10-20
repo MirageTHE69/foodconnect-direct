@@ -26,6 +26,8 @@ const SUGGESTION_GROUPS: { label: string; types: SuggestionType[] }[] = [
   { label: "Products", types: ["product"] },
 ];
 
+const FIND_WORDS = ["Suppliers", "Buyers", "Products", "Jobs"];
+
 const Hero = () => {
   const navigate = useNavigate();
   const { canView: canViewNames } = useVendorNameAccess();
@@ -37,6 +39,12 @@ const Hero = () => {
   const requestIdRef = useRef(0);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [findWord, setFindWord] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setFindWord((i) => (i + 1) % FIND_WORDS.length), 2200);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -126,9 +134,9 @@ const Hero = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 text-foreground">
               India's First{" "}
               <span className="bg-primary text-primary-foreground px-2 inline-block -skew-x-2">
-                B2B Marketplace
+                Business Food
               </span>{" "}
-              Built Exclusively for the Food Industry
+              Network
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-md">
@@ -199,9 +207,15 @@ const Hero = () => {
                 type="submit"
                 variant="hero"
                 size="lg"
-                className="h-14"
+                className="h-14 min-w-[10.5rem] justify-between"
+                aria-label="Find suppliers, buyers, products and jobs"
               >
-                Find Suppliers
+                <span className="inline-flex items-baseline gap-1">
+                  Find
+                  <span key={findWord} className="inline-block animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {FIND_WORDS[findWord]}
+                  </span>
+                </span>
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </form>

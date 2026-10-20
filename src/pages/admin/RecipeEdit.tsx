@@ -8,6 +8,7 @@ import { renderPdfFirstPageAsBlob } from '@/lib/pdfThumbnail';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, ArrowLeft, FileUp, FileText } from 'lucide-react';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ export default function AdminRecipeEdit() {
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
   const [existingCategories, setExistingCategories] = useState<string[]>([]);
   const [pdfUrl, setPdfUrl] = useState('');
 
@@ -49,10 +51,11 @@ export default function AdminRecipeEdit() {
 
   const loadRecipe = async (recipeId: string) => {
     setLoading(true);
-    const { data: recipe } = await supabase.from('recipes').select('title, pdf_url, images, category').eq('id', recipeId).maybeSingle();
+    const { data: recipe } = await supabase.from('recipes').select('title, description, pdf_url, images, category').eq('id', recipeId).maybeSingle();
     if (recipe) {
       setTitle(recipe.title || '');
       setCategory(recipe.category || '');
+      setDescription(recipe.description || '');
       setPdfUrl(recipe.pdf_url || '');
       setThumbnailUrl(recipe.images?.[0] || '');
     }
@@ -124,6 +127,7 @@ export default function AdminRecipeEdit() {
     const recipeData = {
       title,
       category: category.trim() || null,
+      description: description.trim() || null,
       pdf_url: pdfUrl,
       images: thumbnailUrl ? [thumbnailUrl] : null,
       status: 'approved' as const,
@@ -174,7 +178,7 @@ export default function AdminRecipeEdit() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Recipe Title</CardTitle>
+              <CardTitle>Recipe Details</CardTitle>
             </CardHeader>
             <CardContent>
               <Label htmlFor="title">Title *</Label>
@@ -202,6 +206,23 @@ export default function AdminRecipeEdit() {
               </datalist>
               <p className="text-xs text-muted-foreground mt-1">
                 Pick an existing category or type a new one. Visitors can filter recipes by this on the Recipes page.
+              </p>
+              <Label htmlFor="description" className="mt-4 block">Description *</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                rows={4}
+                maxLength={500}
+                className="mt-1"
+                placeholder="e.g. Classic Gujarati dal dhokli made with toor dal and wheat flour dumplings, ready in 40 minutes. Perfect for restaurant menus and home kitchens."
+              />
+              <p className={`text-xs mt-1 ${description.length > 160 ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                {description.length} / 500 characters. Shown on the recipe card and page, and used by Google in search results.
+                {description.length > 160
+                  ? ' Google usually shows only the first 160 characters, so put the key words first.'
+                  : ' Aim for 120–160 characters and mention the dish name and main ingredients.'}
               </p>
             </CardContent>
           </Card>

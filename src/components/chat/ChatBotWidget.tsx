@@ -152,10 +152,11 @@ export function ChatBotWidget({ onOpenChange }: ChatBotWidgetProps = {}) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
-          aria-label="Open chat"
+          className="fixed bottom-6 right-6 z-50 h-14 pl-4 pr-5 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 font-semibold text-sm"
+          aria-label="Ask FoodAdda Bot"
         >
-          <Bot className="h-7 w-7" />
+          <Bot className="h-6 w-6 shrink-0" />
+          Ask FoodAdda Bot
         </button>
       )}
 

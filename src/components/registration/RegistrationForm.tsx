@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -101,6 +102,13 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
   const isHoReCa = userType === 'horeca';
   const isFranchise = userType === 'franchise';
   const isRecruitment = userType === 'recruitment';
+
+  const [jobCategories, setJobCategories] = useState<string[]>([]);
+  useEffect(() => {
+    if (!isRecruitment) return;
+    supabase.from('job_categories').select('name').is('parent_id', null).order('display_order')
+      .then(({ data }) => setJobCategories((data || []).map((c) => c.name)));
+  }, [isRecruitment]);
 
   const validateGST = (value: string) => {
     set('gst_number', value.toUpperCase());
@@ -384,7 +392,12 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
             </div>
             <div className="space-y-1.5">
               <Label>Job Category</Label>
-              <Input value={data.job_category} onChange={e => set('job_category', e.target.value)} placeholder="e.g., Chef, Manager" />
+              <Select value={data.job_category || undefined} onValueChange={v => set('job_category', v)}>
+                <SelectTrigger><SelectValue placeholder="Select your job category" /></SelectTrigger>
+                <SelectContent>
+                  {jobCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Preferred City</Label>

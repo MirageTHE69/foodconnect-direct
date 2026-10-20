@@ -201,7 +201,7 @@ export default function Auth() {
             <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'login' | 'signup'); setSignupStep(1); }}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signup">Join FoodAdda</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}

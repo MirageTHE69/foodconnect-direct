@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
+import { setPageMeta } from '@/lib/seo';
 import {
   ChefHat,
   Clock,
@@ -32,6 +33,7 @@ interface RecipeDetail {
   tags: string[] | null;
   pdf_url: string | null;
   category: string | null;
+  created_at?: string;
   supplier_profiles: {
     id: string;
     company_name: string;
@@ -87,7 +89,26 @@ export default function RecipeDetail() {
 
   useEffect(() => {
     if (!recipe) return;
-    document.title = `${recipe.title} | FoodAdda Recipes`;
+    const description = recipe.description?.trim()
+      || `${recipe.title}${recipe.category ? ` (${recipe.category})` : ''} recipe on FoodAdda, India's business food network.`;
+    return setPageMeta({
+      title: `${recipe.title} | FoodAdda Recipes`,
+      description,
+      image: recipe.images?.[0],
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'Recipe',
+        name: recipe.title,
+        description,
+        ...(recipe.images?.length ? { image: recipe.images } : {}),
+        ...(recipe.category ? { recipeCategory: recipe.category } : {}),
+        ...(recipe.tags?.length ? { keywords: recipe.tags.join(', ') } : {}),
+        ...(recipe.created_at ? { datePublished: recipe.created_at.slice(0, 10) } : {}),
+        author: { '@type': 'Organization', name: recipe.supplier_profiles?.company_name ?? 'FoodAdda' },
+        publisher: { '@type': 'Organization', name: 'FoodAdda', url: 'https://foodadda.in' },
+        url: window.location.href,
+      },
+    });
   }, [recipe]);
 
   const fetchRecipeDetails = async (recipeId: string, isCancelled: () => boolean) => {

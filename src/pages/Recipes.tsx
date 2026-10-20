@@ -72,7 +72,8 @@ export default function Recipes() {
   })();
 
   const filteredRecipes = recipes.filter((recipe) => {
-    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = recipe.title.toLowerCase().includes(q) || (recipe.description ?? '').toLowerCase().includes(q);
     const matchesCategory = categoryFilter === 'all' || recipe.category?.trim().toLowerCase() === categoryFilter;
     return matchesSearch && matchesCategory;
   });

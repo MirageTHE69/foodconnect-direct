@@ -12,13 +12,25 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
+interface JobCategory { id: string; name: string; parent_id: string | null }
+
+// Roles are the leaves under a category: category -> role, or category -> group -> role.
+function rolesUnder(all: JobCategory[], categoryId: string): string[] {
+  const children = all.filter((c) => c.parent_id === categoryId);
+  return children.flatMap((child) => {
+    const grandchildren = all.filter((c) => c.parent_id === child.id);
+    return grandchildren.length ? grandchildren.map((g) => g.name) : [child.name];
+  });
+}
+
 export default function AdminJobEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = !id;
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [allCategories, setAllCategories] = useState<JobCategory[]>([]);
+  const categories = allCategories.filter((c) => !c.parent_id);
   const [form, setForm] = useState({
     title: "", company: "", location: "", job_type: "full-time",
     category_id: "", experience_required: "", salary_range: "",
@@ -26,8 +38,8 @@ export default function AdminJobEdit() {
   });
 
   useEffect(() => {
-    supabase.from("job_categories").select("*").is("parent_id", null).order("display_order")
-      .then(({ data }) => setCategories(data || []));
+    supabase.from("job_categories").select("id, name, parent_id").order("display_order").range(0, 1999)
+      .then(({ data }) => setAllCategories(data || []));
     if (id) {
       supabase.from("jobs").select("*").eq("id", id).single().then(({ data }) => {
         if (data) setForm({
@@ -65,7 +77,19 @@ export default function AdminJobEdit() {
         <CardContent>
           <form onSubmit={save} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
-              <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
+              <div>
+                <Label>Title *</Label>
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  required
+                  list="job-role-suggestions"
+                  placeholder={form.category_id ? "Pick a role or type your own" : "e.g. QA Executive"}
+                />
+                <datalist id="job-role-suggestions">
+                  {Array.from(new Set(form.category_id ? rolesUnder(allCategories, form.category_id) : [])).map((r) => <option key={r} value={r} />)}
+                </datalist>
+              </div>
               <div><Label>Company *</Label><Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} required /></div>
               <div><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Mumbai" /></div>
               <div>
