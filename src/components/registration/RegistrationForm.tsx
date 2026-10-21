@@ -12,6 +12,9 @@ import { FileUpload } from '@/components/registration/FileUpload';
 import type { UserType } from './UserTypeSelector';
 
 const GST_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
+const FSSAI_REGEX = /^\d{14}$/;
+// Aadhaar numbers are 12 digits and never start with 0 or 1.
+const AADHAR_REGEX = /^[2-9]\d{11}$/;
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa',
@@ -55,6 +58,7 @@ export interface RegistrationData {
   menu_upload_url: string;
   cv_url: string;
   passport_photo_url: string;
+  aadhar_number: string;
   aadhar_front_url: string;
   aadhar_back_url: string;
   terms_accepted: boolean;
@@ -77,7 +81,7 @@ const initialData = (userType: UserType): RegistrationData => ({
   preferred_franchise_location: '', franchise_category: '',
   qualification: '', years_experience: '', job_category: '', preferred_city: '',
   uploaded_photos: [], menu_upload_url: '', cv_url: '', passport_photo_url: '',
-  aadhar_front_url: '', aadhar_back_url: '', terms_accepted: false,
+  aadhar_number: '', aadhar_front_url: '', aadhar_back_url: '', terms_accepted: false,
   b2b_category: '', private_label: '', export_capability: '', logistics_support: '',
   pricing_tier: '', certifications_text: '',
 });
@@ -126,8 +130,17 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
     if (!data.address.trim()) e.address = 'Required';
     if (!data.city.trim()) e.city = 'Required';
     if (!data.state) e.state = 'Required';
+    if (!data.google_location.trim()) e.google_location = 'Required';
     if (!data.phone.trim()) e.phone = 'Required';
     if (!data.email.trim()) e.email = 'Required';
+    const aadhar = data.aadhar_number.replace(/\s/g, '');
+    if (!aadhar) e.aadhar_number = 'Required';
+    else if (!AADHAR_REGEX.test(aadhar)) e.aadhar_number = 'Enter a valid 12-digit Aadhaar number';
+    if (!isRecruitment) {
+      if (!data.fssai_number.trim()) e.fssai_number = 'Required';
+      else if (!FSSAI_REGEX.test(data.fssai_number.trim())) e.fssai_number = 'FSSAI number must be 14 digits';
+      if (!data.contact_phone.trim()) e.contact_phone = 'Required';
+    }
     if (data.gst_number && gstStatus === 'invalid') e.gst_number = 'Invalid GST number';
     if (isHoReCa && !data.horeca_category) e.horeca_category = 'Required';
     if (!data.terms_accepted) e.terms_accepted = 'You must accept the Terms and Conditions';
@@ -191,8 +204,9 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
             <Input value={data.country} onChange={e => set('country', e.target.value)} placeholder="India" />
           </div>
           <div className="space-y-1.5">
-            <Label>Google Location</Label>
-            <Input value={data.google_location} onChange={e => set('google_location', e.target.value)} placeholder="Google Maps link" />
+            <Label>Google Location *</Label>
+            <Input value={data.google_location} onChange={e => set('google_location', e.target.value)} className={fieldClass('google_location')} placeholder="Google Maps link" />
+            {errors.google_location && <p className="text-xs text-destructive">{errors.google_location}</p>}
           </div>
 
           {isHoReCa && (
@@ -238,6 +252,20 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
             <Input type="email" value={data.email} onChange={e => set('email', e.target.value)} className={fieldClass('email')} placeholder="you@example.com" />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
+          <div className="space-y-1.5">
+            <Label>Aadhaar Card Number *</Label>
+            <Input
+              value={data.aadhar_number}
+              onChange={e => set('aadhar_number', e.target.value.replace(/[^\d\s]/g, ''))}
+              className={fieldClass('aadhar_number')}
+              placeholder="XXXX XXXX XXXX"
+              inputMode="numeric"
+              maxLength={14}
+            />
+            {errors.aadhar_number
+              ? <p className="text-xs text-destructive">{errors.aadhar_number}</p>
+              : <p className="text-xs text-muted-foreground">Kept private: only you and FoodAdda admins can see it.</p>}
+          </div>
           {!isRecruitment && (
             <div className="space-y-1.5">
               <Label>Website URL</Label>
@@ -268,8 +296,16 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
               {gstStatus === 'invalid' && <p className="text-xs text-destructive">Invalid GST number</p>}
             </div>
             <div className="space-y-1.5">
-              <Label>FSSAI Number</Label>
-              <Input value={data.fssai_number} onChange={e => set('fssai_number', e.target.value)} placeholder="FSSAI License Number" />
+              <Label>FSSAI Number *</Label>
+              <Input
+                value={data.fssai_number}
+                onChange={e => set('fssai_number', e.target.value.replace(/\D/g, ''))}
+                className={fieldClass('fssai_number')}
+                placeholder="14-digit FSSAI licence number"
+                inputMode="numeric"
+                maxLength={14}
+              />
+              {errors.fssai_number && <p className="text-xs text-destructive">{errors.fssai_number}</p>}
             </div>
 
             {(isB2BorB2C || isFranchise) && (
@@ -370,8 +406,9 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
               </div>
             )}
             <div className="space-y-1.5">
-              <Label>Contact Phone Number</Label>
-              <Input value={data.contact_phone} onChange={e => set('contact_phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+              <Label>Contact Phone Number *</Label>
+              <Input value={data.contact_phone} onChange={e => set('contact_phone', e.target.value)} className={fieldClass('contact_phone')} placeholder="+91 XXXXX XXXXX" />
+              {errors.contact_phone && <p className="text-xs text-destructive">{errors.contact_phone}</p>}
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -832,6 +832,7 @@ export type Database = {
         Row: {
           aadhar_back_url: string | null
           aadhar_front_url: string | null
+          aadhar_number: string | null
           address: string | null
           b2b_category: string | null
           certifications_text: string | null
@@ -879,6 +880,7 @@ export type Database = {
         Insert: {
           aadhar_back_url?: string | null
           aadhar_front_url?: string | null
+          aadhar_number?: string | null
           address?: string | null
           b2b_category?: string | null
           certifications_text?: string | null
@@ -926,6 +928,7 @@ export type Database = {
         Update: {
           aadhar_back_url?: string | null
           aadhar_front_url?: string | null
+          aadhar_number?: string | null
           address?: string | null
           b2b_category?: string | null
           certifications_text?: string | null

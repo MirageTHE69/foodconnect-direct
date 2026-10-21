@@ -38,15 +38,38 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Loader2, CheckCircle, XCircle, Clock, Trash2, Tag, Building2 } from 'lucide-react';
+import { Search, Loader2, CheckCircle, XCircle, Clock, Trash2, Tag, Building2, FolderCog } from 'lucide-react';
+import { ManageProductCategoriesDialog } from '@/components/admin/ManageProductCategoriesDialog';
 import { format } from 'date-fns';
 
 type StatusFilter = 'all' | 'pending' | 'approved' | 'rejected';
 
+const ALL_CATEGORIES = '__all__';
+const UNCATEGORIZED = '__none__';
+
 export default function AdminProducts() {
-  const { products, isLoading, updateStatus, toggleFeatured, deleteProduct, isUpdating } = useAdminProducts();
+  const {
+    products, isLoading, updateStatus, toggleFeatured, deleteProduct, isUpdating,
+    categories, updateCategory, isUpdatingCategory,
+  } = useAdminProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>(ALL_CATEGORIES);
+  const [manageOpen, setManageOpen] = useState(false);
+
+  const categorySelect = (productId: string, categoryId: string | null, className = 'w-48') => (
+    <Select
+      value={categoryId ?? UNCATEGORIZED}
+      onValueChange={(v) => updateCategory({ productId, categoryId: v === UNCATEGORIZED ? null : v })}
+      disabled={isUpdatingCategory}
+    >
+      <SelectTrigger className={`h-8 ${className}`} aria-label="Product category"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={UNCATEGORIZED}>Uncategorized</SelectItem>
+        {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
   const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
@@ -58,8 +81,11 @@ export default function AdminProducts() {
       product.category_name?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+    const matchesCategory =
+      categoryFilter === ALL_CATEGORIES ||
+      (categoryFilter === UNCATEGORIZED ? !product.category_id : product.category_id === categoryFilter);
+
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const getStatusBadge = (status: string) => {
@@ -111,6 +137,19 @@ export default function AdminProducts() {
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_CATEGORIES}>All Categories</SelectItem>
+              <SelectItem value={UNCATEGORIZED}>Uncategorized</SelectItem>
+              {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={() => setManageOpen(true)}>
+            <FolderCog className="h-4 w-4 mr-2" />Manage categories
+          </Button>
         </div>
 
         {/* Products Table */}
@@ -162,13 +201,7 @@ export default function AdminProducts() {
                       <TableCell className="text-muted-foreground">
                         {product.supplier_name ?? 'Unknown'}
                       </TableCell>
-                      <TableCell>
-                        {product.category_name ? (
-                          <Badge variant="outline">{product.category_name}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground">Uncategorized</span>
-                        )}
-                      </TableCell>
+                      <TableCell>{categorySelect(product.id, product.category_id)}</TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>
                       <TableCell>
                         <Switch
@@ -271,7 +304,11 @@ export default function AdminProducts() {
                     <div className="flex items-center gap-2 text-sm">
                       <Tag className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Category:</span>
-                      <span className="text-muted-foreground">{selectedProduct.category_name ?? 'Uncategorized'}</span>
+                      {categorySelect(
+                        selectedProduct.id,
+                        products.find((p) => p.id === selectedProduct.id)?.category_id ?? null,
+                        'w-56',
+                      )}
                     </div>
                     {selectedProduct.tags && selectedProduct.tags.length > 0 && (
                       <div className="flex items-start gap-2 text-sm">
@@ -356,6 +393,16 @@ export default function AdminProducts() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <ManageProductCategoriesDialog
+          open={manageOpen}
+          onOpenChange={setManageOpen}
+          categories={categories}
+          productCounts={products.reduce<Record<string, number>>((acc, p) => {
+            if (p.category_id) acc[p.category_id] = (acc[p.category_id] ?? 0) + 1;
+            return acc;
+          }, {})}
+        />
       </div>
     </DashboardLayout>
   );

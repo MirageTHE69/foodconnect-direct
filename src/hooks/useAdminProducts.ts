@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Product = Tables<'products'>;
+type ProductCategory = Tables<'product_categories'>;
 
 interface ProductWithSupplier extends Product {
   supplier_name: string | null;
@@ -55,6 +56,34 @@ export function useAdminProducts() {
         supplier_name: suppliersMap.get(product.supplier_id) ?? null,
         category_name: product.category_id ? categoriesMap.get(product.category_id) ?? null : null,
       }));
+    },
+  });
+
+  const categoriesQuery = useQuery({
+    queryKey: ['product-categories'],
+    queryFn: async (): Promise<ProductCategory[]> => {
+      const { data, error } = await supabase.from('product_categories').select('*').order('name');
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ productId, categoryId }: { productId: string; categoryId: string | null }) => {
+      const { error } = await supabase
+        .from('products')
+        .update({ category_id: categoryId })
+        .eq('id', productId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      toast.success('Product category updated');
+    },
+    onError: (error) => {
+      console.error('Error updating product category:', error);
+      toast.error('Failed to update product category');
     },
   });
 
@@ -124,6 +153,9 @@ export function useAdminProducts() {
     updateStatus: updateStatusMutation.mutate,
     toggleFeatured: toggleFeaturedMutation.mutate,
     deleteProduct: deleteProductMutation.mutate,
+    categories: categoriesQuery.data ?? [],
+    updateCategory: updateCategoryMutation.mutate,
+    isUpdatingCategory: updateCategoryMutation.isPending,
     isUpdating: updateStatusMutation.isPending || toggleFeaturedMutation.isPending || deleteProductMutation.isPending,
   };
 }

@@ -136,6 +136,7 @@ export default function Auth() {
             menu_upload_url: registrationData.menu_upload_url || null,
             cv_url: registrationData.cv_url || null,
             passport_photo_url: registrationData.passport_photo_url || null,
+            aadhar_number: registrationData.aadhar_number.replace(/\s/g, '') || null,
             aadhar_front_url: registrationData.aadhar_front_url || null,
             aadhar_back_url: registrationData.aadhar_back_url || null,
             terms_accepted: registrationData.terms_accepted,
