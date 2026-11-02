@@ -19,29 +19,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Loader2, User, Mail, Phone, Calendar } from 'lucide-react';
+import { Search, Loader2, CheckCircle2 } from 'lucide-react';
+import { UserDetailsSheet } from '@/components/admin/users/UserDetailsSheet';
 import { format } from 'date-fns';
 
 type RoleFilter = 'all' | 'buyer' | 'supplier' | 'admin';
 
 export default function AdminUsers() {
-  const { users, isLoading, updateRole, isUpdating } = useAdminUsers();
+  const { users, isLoading, updateRole, isUpdating, saveDetails, isSaving } = useAdminUsers();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
-  const [selectedUser, setSelectedUser] = useState<typeof users[0] | null>(null);
+  // Keep the id, not the object, so the panel shows fresh data after a save.
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const selectedUser = users.find((u) => u.user_id === selectedUserId) ?? null;
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q || [
+      user.full_name, user.email, user.phone,
+      user.registration?.company_name, user.registration?.phone, user.registration?.gst_number,
+      user.registration?.fssai_number, user.supplier?.company_name, user.supplier?.gst_number,
+    ].some((v) => v?.toLowerCase().includes(q));
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
@@ -74,7 +73,7 @@ export default function AdminUsers() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Search name, email, phone, company, GST or FSSAI..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -104,7 +103,9 @@ export default function AdminUsers() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>GST / FSSAI</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -113,7 +114,7 @@ export default function AdminUsers() {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -131,7 +132,28 @@ export default function AdminUsers() {
                           <span className="font-medium">{user.full_name ?? 'Unnamed User'}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="text-sm">
+                        <div className="text-muted-foreground">{user.email}</div>
+                        {user.phone && <div className="text-muted-foreground tabular-nums">{user.phone}</div>}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {user.registration?.company_name || user.supplier?.company_name || <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {(user.registration?.gst_number || user.supplier?.gst_number) && (
+                            <Badge variant="outline" className="gap-1 whitespace-nowrap">
+                              {user.registration?.gst_verified && <CheckCircle2 className="h-3 w-3 text-green-600" />}GST
+                            </Badge>
+                          )}
+                          {(user.registration?.fssai_number || user.supplier?.fssai_number) && (
+                            <Badge variant="outline" className="whitespace-nowrap">FSSAI</Badge>
+                          )}
+                          {!user.registration?.gst_number && !user.supplier?.gst_number && !user.registration?.fssai_number && !user.supplier?.fssai_number && (
+                            <span className="text-sm text-muted-foreground">Missing</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={getRoleBadgeVariant(user.role)}>
                           {user.role ?? 'No role'}
@@ -144,9 +166,9 @@ export default function AdminUsers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setSelectedUser(user)}
+                          onClick={() => setSelectedUserId(user.user_id)}
                         >
-                          View Details
+                          View / Edit
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -157,68 +179,14 @@ export default function AdminUsers() {
           </div>
         )}
 
-        {/* User Details Dialog */}
-        <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>User Details</DialogTitle>
-              <DialogDescription>View and manage user information</DialogDescription>
-            </DialogHeader>
-            {selectedUser && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={selectedUser.avatar_url ?? undefined} />
-                    <AvatarFallback className="text-lg">
-                      {selectedUser.full_name?.charAt(0) ?? selectedUser.email?.charAt(0) ?? 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-semibold">{selectedUser.full_name ?? 'Unnamed User'}</h3>
-                    <Badge variant={getRoleBadgeVariant(selectedUser.role)}>
-                      {selectedUser.role ?? 'No role'}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>{selectedUser.email ?? 'No email'}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{selectedUser.phone ?? 'No phone'}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Joined {format(new Date(selectedUser.created_at), 'MMMM d, yyyy')}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Change Role</label>
-                  <Select
-                    value={selectedUser.role ?? undefined}
-                    onValueChange={(value: 'buyer' | 'supplier' | 'admin') => {
-                      updateRole({ userId: selectedUser.user_id, newRole: value });
-                    }}
-                    disabled={isUpdating}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buyer">Buyer</SelectItem>
-                      <SelectItem value="supplier">Supplier</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        <UserDetailsSheet
+          user={selectedUser}
+          onOpenChange={(open) => { if (!open) setSelectedUserId(null); }}
+          onSave={saveDetails}
+          saving={isSaving}
+          onRoleChange={(role) => selectedUser && updateRole({ userId: selectedUser.user_id, newRole: role })}
+          roleUpdating={isUpdating}
+        />
       </div>
     </DashboardLayout>
   );

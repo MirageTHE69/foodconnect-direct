@@ -10,20 +10,13 @@ import { Loader2, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { MultiImageUpload } from '@/components/shared/MultiImageUpload';
 import { FileUpload } from '@/components/registration/FileUpload';
 import type { UserType } from './UserTypeSelector';
+import { INDIAN_STATES } from '@/lib/indianStates';
 
 const GST_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
 const FSSAI_REGEX = /^\d{14}$/;
 // Aadhaar numbers are 12 digits and never start with 0 or 1.
 const AADHAR_REGEX = /^[2-9]\d{11}$/;
 
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa',
-  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
-  'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
-  'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-  'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Jammu and Kashmir',
-  'Ladakh', 'Chandigarh', 'Puducherry', 'Lakshadweep', 'Andaman and Nicobar Islands',
-];
 
 export interface RegistrationData {
   user_type: UserType;
