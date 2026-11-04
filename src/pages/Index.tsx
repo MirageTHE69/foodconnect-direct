@@ -6,6 +6,7 @@ import Categories from "@/components/landing/Categories";
 import ForBuyers from "@/components/landing/ForBuyers";
 import ForSuppliers from "@/components/landing/ForSuppliers";
 import FeaturedSuppliers from "@/components/landing/FeaturedSuppliers";
+import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import GrowthSolutions from "@/components/landing/GrowthSolutions";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
@@ -24,6 +25,7 @@ const Index = () => {
       <Categories />
       <ForBuyers />
       <ForSuppliers />
+      <FeaturedProducts />
       <FeaturedSuppliers />
       <HotRequirements />
       <Pricing />

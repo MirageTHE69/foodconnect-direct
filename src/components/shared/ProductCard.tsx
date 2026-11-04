@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package } from 'lucide-react';
+import { Package, Star } from 'lucide-react';
 import { SaveButton } from '@/components/buyer/SaveButton';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ interface ProductCardProps {
   supplierId?: string;
   categoryName?: string;
   status?: 'pending' | 'approved' | 'rejected';
+  isFeatured?: boolean;
   showSaveButton?: boolean;
   isSaved?: boolean;
   onSaveToggle?: () => void;
@@ -29,6 +30,7 @@ export function ProductCard({
   supplierId,
   categoryName,
   status,
+  isFeatured = false,
   showSaveButton = true,
   isSaved = false,
   onSaveToggle,
@@ -63,11 +65,18 @@ export function ProductCard({
             </Badge>
           )}
           
+          {isFeatured && (!status || status === 'approved') && (
+            <Badge className="absolute top-2 left-2 gap-1 bg-primary text-primary-foreground hover:bg-primary shadow">
+              <Star className="h-3 w-3 fill-current" />Featured
+            </Badge>
+          )}
+
           {/* Category Badge */}
           {categoryName && (
             <Badge
               variant="secondary"
-              className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm"
+              className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate bg-background/95 text-foreground hover:bg-background/95 backdrop-blur-sm"
+              title={categoryName}
             >
               {categoryName}
             </Badge>

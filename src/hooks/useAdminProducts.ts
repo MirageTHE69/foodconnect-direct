@@ -116,9 +116,12 @@ export function useAdminProducts() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, { isFeatured }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-      toast.success('Product featured status updated');
+      queryClient.invalidateQueries({ queryKey: ['featured-products'] });
+      toast.success(isFeatured
+        ? 'Product featured. It now shows on the home page (if approved and the supplier is verified).'
+        : 'Product removed from Featured');
     },
     onError: (error) => {
       console.error('Error updating featured status:', error);

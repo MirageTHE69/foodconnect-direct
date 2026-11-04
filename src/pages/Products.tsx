@@ -33,6 +33,7 @@ interface ProductWithDetails {
   description: string | null;
   images: string[] | null;
   status: string;
+  is_featured: boolean | null;
   supplier_profiles: {
     id: string;
     company_name: string;
@@ -101,6 +102,7 @@ export default function BrowseProducts() {
           description,
           images,
           status,
+          is_featured,
           supplier_profiles!inner (
             id,
             company_name,
@@ -128,7 +130,11 @@ export default function BrowseProducts() {
 
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
-      query = query.range(from, to).order('created_at', { ascending: false });
+      // Featured products first, then newest.
+      query = query
+        .range(from, to)
+        .order('is_featured', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false });
 
       const { data, count, error } = await query;
       if (error) throw error;
@@ -228,6 +234,7 @@ export default function BrowseProducts() {
               supplierName={product.supplier_profiles?.company_name}
               supplierId={product.supplier_profiles?.id}
               categoryName={product.product_categories?.name}
+              isFeatured={product.is_featured ?? false}
               isSaved={isProductSaved(product.id)}
               onSaveToggle={() => toggleSaveProduct(product.id)}
             />
