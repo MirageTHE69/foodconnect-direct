@@ -151,6 +151,21 @@ export default function Auth() {
         if (regError) {
           console.error('Registration profile error:', regError);
         }
+
+        // List the new supplier on the category pages they chose.
+        if (registrationData.sub_category_ids.length > 0) {
+          const { data: supplier } = await supabase
+            .from('supplier_profiles')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+          if (supplier) {
+            const { error: linkError } = await supabase
+              .from('supplier_sub_categories')
+              .insert(registrationData.sub_category_ids.map((id) => ({ supplier_id: supplier.id, sub_category_id: id })));
+            if (linkError) console.error('Supplier category link error:', linkError);
+          }
+        }
       }
     } catch (err) {
       console.error('Error saving registration:', err);

@@ -2,6 +2,8 @@ interface PageMeta {
   title: string;
   description: string;
   image?: string | null;
+  /** Longest description kept before trimming (default 160). */
+  descriptionMax?: number;
   /** Structured data (schema.org) added as a JSON-LD script. */
   jsonLd?: Record<string, unknown>;
 }
@@ -37,13 +39,13 @@ export function snippet(text: string, max = 160): string {
  * current page. Returns a cleanup that puts the site defaults back, for use
  * as a useEffect cleanup.
  */
-export function setPageMeta({ title, description, image, jsonLd }: PageMeta): () => void {
+export function setPageMeta({ title, description, image, jsonLd, descriptionMax = 160 }: PageMeta): () => void {
   const restore: (() => void)[] = [];
   const previousTitle = document.title;
   restore.push(() => { document.title = previousTitle; });
   document.title = title;
 
-  const desc = snippet(description);
+  const desc = snippet(description, descriptionMax);
   upsertMeta('name', 'description', desc, restore);
   upsertMeta('property', 'og:title', title, restore);
   upsertMeta('property', 'og:description', desc, restore);

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertCircle, CheckCircle2, ExternalLink, FileText, Loader2, Save } from 'lucide-react';
 import { INDIAN_STATES } from '@/lib/indianStates';
+import { SupplierCategoriesEditor } from '@/components/shared/SupplierCategoriesEditor';
 import type { SaveUserDetailsInput, UserWithRole } from '@/hooks/useAdminUsers';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -373,6 +374,13 @@ export function UserDetailsSheet({ user, onOpenChange, onSave, saving, onRoleCha
               {supField('pincode', 'Pincode')}
               {supField('website', 'Website')}
               {supField('business_description', 'Business description', { textarea: true, span: true })}
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Listed in categories</Label>
+                <SupplierCategoriesEditor
+                  supplierId={user.supplier.id}
+                  hint="Shown on these category pages once the listing is verified. Saved with its own button."
+                />
+              </div>
             </>
           ), 'What buyers see on the public supplier page.')}
 

@@ -20,6 +20,7 @@ import { Loader2, CheckCircle, Clock, XCircle, Save } from 'lucide-react';
 import { getTierLabel, type Tier } from '@/lib/permissions';
 import { INDIAN_STATES } from '@/lib/gst';
 import { PlanStatusCard } from '@/components/shared/PlanStatusCard';
+import { SupplierCategoriesEditor } from '@/components/shared/SupplierCategoriesEditor';
 
 const BUSINESS_CATEGORIES: { value: Tier; label: string }[] =
   (['founders', 'women_enterprise', 'north_east_startups', 'micro_first_time', 'small_homemade_food'] as Tier[])
@@ -150,6 +151,20 @@ export default function SupplierProfile() {
         </div>
 
         <PlanStatusCard />
+
+        {profile?.id && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Where buyers find you</CardTitle>
+              <CardDescription>
+                Choose the categories you deal in. Once your business is verified, you are listed on these category pages.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SupplierCategoriesEditor supplierId={profile.id} />
+            </CardContent>
+          </Card>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Images */}

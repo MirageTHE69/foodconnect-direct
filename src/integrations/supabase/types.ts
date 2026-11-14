@@ -22,7 +22,9 @@ export type Database = {
           created_at: string
           excerpt: string | null
           id: string
+          previous_slugs: string[]
           published_at: string | null
+          seo_title: string | null
           slug: string
           status: string
           tag: string | null
@@ -36,7 +38,9 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: string
+          previous_slugs?: string[]
           published_at?: string | null
+          seo_title?: string | null
           slug: string
           status?: string
           tag?: string | null
@@ -50,7 +54,9 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: string
+          previous_slugs?: string[]
           published_at?: string | null
+          seo_title?: string | null
           slug?: string
           status?: string
           tag?: string | null
@@ -1238,6 +1244,39 @@ export type Database = {
           years_in_business?: number | null
         }
         Relationships: []
+      }
+      supplier_sub_categories: {
+        Row: {
+          created_at: string
+          sub_category_id: string
+          supplier_id: string
+        }
+        Insert: {
+          created_at?: string
+          sub_category_id: string
+          supplier_id: string
+        }
+        Update: {
+          created_at?: string
+          sub_category_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_sub_categories_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_sub_categories_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_unlocks: {
         Row: {

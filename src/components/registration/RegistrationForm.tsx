@@ -11,6 +11,7 @@ import { MultiImageUpload } from '@/components/shared/MultiImageUpload';
 import { FileUpload } from '@/components/registration/FileUpload';
 import type { UserType } from './UserTypeSelector';
 import { INDIAN_STATES } from '@/lib/indianStates';
+import { SubCategoryPicker, useDirectoryTaxonomy } from '@/components/shared/SubCategoryPicker';
 
 const GST_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
 const FSSAI_REGEX = /^\d{14}$/;
@@ -57,6 +58,8 @@ export interface RegistrationData {
   terms_accepted: boolean;
   // B2B-specific fields
   b2b_category: string;
+  /** Directory sub-categories the business deals in; linked to its supplier listing. */
+  sub_category_ids: string[];
   private_label: string;
   export_capability: string;
   logistics_support: string;
@@ -75,7 +78,7 @@ const initialData = (userType: UserType): RegistrationData => ({
   qualification: '', years_experience: '', job_category: '', preferred_city: '',
   uploaded_photos: [], menu_upload_url: '', cv_url: '', passport_photo_url: '',
   aadhar_number: '', aadhar_front_url: '', aadhar_back_url: '', terms_accepted: false,
-  b2b_category: '', private_label: '', export_capability: '', logistics_support: '',
+  b2b_category: '', sub_category_ids: [], private_label: '', export_capability: '', logistics_support: '',
   pricing_tier: '', certifications_text: '',
 });
 
@@ -99,6 +102,7 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
   const isHoReCa = userType === 'horeca';
   const isFranchise = userType === 'franchise';
   const isRecruitment = userType === 'recruitment';
+  const { data: taxonomy = [] } = useDirectoryTaxonomy();
 
   const [jobCategories, setJobCategories] = useState<string[]>([]);
   useEffect(() => {
@@ -136,6 +140,7 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
     }
     if (data.gst_number && gstStatus === 'invalid') e.gst_number = 'Invalid GST number';
     if (isHoReCa && !data.horeca_category) e.horeca_category = 'Required';
+    if (isB2BorB2C && data.sub_category_ids.length === 0) e.sub_category_ids = 'Choose at least one category';
     if (!data.terms_accepted) e.terms_accepted = 'You must accept the Terms and Conditions';
 
     setErrors(e);
@@ -317,9 +322,19 @@ export function RegistrationForm({ userType, onSubmit, isLoading }: Registration
 
             {isB2BorB2C && (
               <>
-                <div className="space-y-1.5">
-                  <Label>Category</Label>
-                  <Input value={data.b2b_category} onChange={e => set('b2b_category', e.target.value)} placeholder="e.g., Spices, Dairy, Beverages" />
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>What do you deal in? *</Label>
+                  <SubCategoryPicker
+                    value={data.sub_category_ids}
+                    onChange={ids => {
+                      set('sub_category_ids', ids);
+                      set('b2b_category', ids.map(id => taxonomy.find(t => t.id === id)?.name).filter(Boolean).join(', '));
+                    }}
+                    invalid={!!errors.sub_category_ids}
+                  />
+                  {errors.sub_category_ids
+                    ? <p className="text-xs text-destructive">{errors.sub_category_ids}</p>
+                    : <p className="text-xs text-muted-foreground">Buyers will find you on these category pages. Pick up to 5.</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Minimum Order Quantity (MOQ)</Label>

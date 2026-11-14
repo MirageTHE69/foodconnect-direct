@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Mail, Phone, Store, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, Mail, Phone, Store, Lock, BadgeCheck, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,9 @@ interface Vendor {
   address: string | null;
   email: string | null;
   phone: string | null;
+  /** Set for suppliers registered on FoodAdda (links to their profile page). */
+  supplierId?: string;
+  logoUrl?: string | null;
 }
 
 const SubCategoryDetail = () => {
@@ -58,11 +61,26 @@ const SubCategoryDetail = () => {
       const { data: subData } = await subQuery;
       if (subData) {
         setSubName(subData.name);
-        const { data: vendorData } = await supabase
-          .from("directory_vendors")
-          .select("*")
-          .eq("sub_category_id", subData.id);
-        if (vendorData) setVendors(vendorData as Vendor[]);
+        const [{ data: vendorData }, { data: linkData }] = await Promise.all([
+          supabase.from("directory_vendors").select("*").eq("sub_category_id", subData.id),
+          // Verified suppliers registered on FoodAdda who chose this sub-category.
+          supabase
+            .from("supplier_sub_categories")
+            .select("supplier_profiles!inner(id, company_name, city, state, logo_url, verification_status)")
+            .eq("sub_category_id", subData.id)
+            .eq("supplier_profiles.verification_status", "verified"),
+        ]);
+        const registered: Vendor[] = (linkData ?? []).map(({ supplier_profiles: sp }) => ({
+          id: `supplier-${sp.id}`,
+          name: sp.company_name,
+          address: [sp.city, sp.state].filter(Boolean).join(", ") || null,
+          email: null,
+          phone: null,
+          supplierId: sp.id,
+          logoUrl: sp.logo_url,
+        }));
+        // Registered suppliers first, then the imported directory.
+        setVendors([...registered, ...((vendorData as Vendor[]) ?? [])]);
       }
       setLoading(false);
     };
@@ -141,8 +159,10 @@ const SubCategoryDetail = () => {
                 >
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Store className="w-5 h-5 text-primary" />
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                        {v.logoUrl && canViewNames
+                          ? <img src={v.logoUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
+                          : <Store className="w-5 h-5 text-primary" />}
                       </div>
                       {canViewNames ? (
                         <h3 className="font-semibold text-foreground text-base">{v.name}</h3>
@@ -158,7 +178,34 @@ const SubCategoryDetail = () => {
                       )}
                     </div>
 
-                    {canViewNames ? (
+                    {v.supplierId && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-foreground">
+                        <BadgeCheck className="w-3.5 h-3.5 text-primary" /> Verified FoodAdda supplier
+                      </span>
+                    )}
+
+                    {v.supplierId ? (
+                      <>
+                        {canViewNames && v.address && (
+                          <p className="text-sm text-muted-foreground flex items-start gap-2">
+                            <MapPin className="w-4 h-4 mt-0.5 shrink-0" /> {v.address}
+                          </p>
+                        )}
+                        {canViewNames ? (
+                          <Link
+                            to={`/suppliers/${v.supplierId}`}
+                            className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+                          >
+                            View products & contact <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        ) : (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                            <Lock className="w-3.5 h-3.5 shrink-0" />
+                            {user ? 'Choose a plan to view contact details' : 'Sign in to view contact details'}
+                          </div>
+                        )}
+                      </>
+                    ) : canViewNames ? (
                       <>
                         {v.address && (
                           <p className="text-sm text-muted-foreground flex items-start gap-2">

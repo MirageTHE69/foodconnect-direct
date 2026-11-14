@@ -7,6 +7,10 @@ export interface Blog {
   title: string;
   slug: string;
   excerpt: string | null;
+  /** Short title for search results and the browser tab; falls back to title. */
+  seo_title: string | null;
+  /** Old URLs of this post; visiting one redirects here. */
+  previous_slugs: string[];
   content: string | null;
   cover_image_url: string | null;
   tag: string | null;
@@ -39,9 +43,19 @@ export function useBlog(slug: string) {
         .from('blogs')
         .select('*')
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data as Blog;
+      if (data) return data as Blog;
+      // The post may have moved to a new URL; the caller redirects when the
+      // returned slug differs from the one requested.
+      const { data: moved, error: movedError } = await supabase
+        .from('blogs')
+        .select('*')
+        .contains('previous_slugs', [slug])
+        .limit(1)
+        .maybeSingle();
+      if (movedError) throw movedError;
+      return (moved as Blog | null) ?? null;
     },
     enabled: !!slug,
   });
@@ -87,6 +101,7 @@ export function useSaveBlog() {
         title: blog.title,
         slug: blog.slug,
         excerpt: blog.excerpt,
+        seo_title: blog.seo_title?.trim() || null,
         content: blog.content,
         cover_image_url: blog.cover_image_url,
         tag: blog.tag,
@@ -95,7 +110,12 @@ export function useSaveBlog() {
       };
 
       if (blog.id) {
-        const { data, error } = await supabase.from('blogs').update(payload).eq('id', blog.id).select().single();
+        // Changing the URL of a saved post keeps the old one working as a redirect.
+        const { data: current } = await supabase.from('blogs').select('slug, previous_slugs').eq('id', blog.id).single();
+        const previous_slugs = current && blog.slug && current.slug !== blog.slug
+          ? Array.from(new Set([...(current.previous_slugs ?? []), current.slug])).filter((s) => s !== blog.slug)
+          : current?.previous_slugs ?? [];
+        const { data, error } = await supabase.from('blogs').update({ ...payload, previous_slugs }).eq('id', blog.id).select().single();
         if (error) throw error;
         return data;
       } else {

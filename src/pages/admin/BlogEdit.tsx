@@ -24,6 +24,7 @@ const BlogEdit = () => {
     title: '',
     slug: '',
     excerpt: '',
+    seo_title: '',
     content: '',
     tag: 'Industry',
     status: 'draft' as string,
@@ -36,6 +37,7 @@ const BlogEdit = () => {
         title: existing.title,
         slug: existing.slug,
         excerpt: existing.excerpt || '',
+        seo_title: existing.seo_title || '',
         content: existing.content || '',
         tag: existing.tag || 'Industry',
         status: existing.status,
@@ -86,6 +88,15 @@ const BlogEdit = () => {
         <div className="space-y-2">
           <Label>Excerpt</Label>
           <Textarea value={form.excerpt} onChange={e => setForm(prev => ({ ...prev, excerpt: e.target.value }))} placeholder="Short summary for cards" rows={2} />
+          <p className="text-xs text-muted-foreground">Also used as the meta description in Google results. Aim for 120–160 characters ({form.excerpt.length} now).</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>SEO title (optional)</Label>
+          <Input value={form.seo_title} onChange={e => setForm(prev => ({ ...prev, seo_title: e.target.value }))} placeholder="Short title for Google and the browser tab" maxLength={70} />
+          <p className="text-xs text-muted-foreground">
+            Shown in Google results instead of the full title. Keep it under 60 characters ({form.seo_title.length} now). Changing a saved post's slug keeps the old link working.
+          </p>
         </div>
 
         <div className="space-y-2">

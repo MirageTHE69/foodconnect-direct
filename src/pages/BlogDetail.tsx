@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useBlog, useBlogs } from '@/hooks/useBlogs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight, Calendar, Clock, Store, Package, LayoutGrid, Che
 import { format } from 'date-fns';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
+import { setPageMeta } from '@/lib/seo';
 
 const EXPLORE_LINKS = [
   { label: 'Browse Suppliers', href: '/suppliers', icon: Store },
@@ -20,6 +21,26 @@ const EXPLORE_LINKS = [
   { label: 'Recipes', href: '/recipes', icon: ChefHat },
   { label: 'View Pricing', href: '/subscribe', icon: Sparkles },
 ];
+
+/** Question/answer pairs from an article's "Frequently Asked Questions" section, for FAQ rich results. */
+function extractFaqs(html: string | null): { question: string; answer: string }[] {
+  if (!html) return [];
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const heading = Array.from(doc.querySelectorAll('h2')).find((h) => /frequently asked questions|faq/i.test(h.textContent ?? ''));
+  if (!heading) return [];
+  const faqs: { question: string; answer: string }[] = [];
+  for (let el = heading.nextElementSibling; el && el.tagName !== 'H2'; el = el.nextElementSibling) {
+    if (el.tagName === 'H3') {
+      const answer: string[] = [];
+      for (let a = el.nextElementSibling; a && a.tagName !== 'H3' && a.tagName !== 'H2'; a = a.nextElementSibling) {
+        answer.push(a.textContent?.trim() ?? '');
+      }
+      const question = (el.textContent ?? '').replace(/^\s*\d+\.\s*/, '').trim();
+      if (question && answer.join(' ').trim()) faqs.push({ question, answer: answer.join(' ').trim() });
+    }
+  }
+  return faqs;
+}
 
 function readingTime(html: string | null): number {
   if (!html) return 1;
@@ -33,17 +54,45 @@ const BlogDetail = () => {
   const { data: allBlogs } = useBlogs({ status: 'published' });
 
   useEffect(() => {
-    if (!blog) return;
-    document.title = `${blog.title} | FoodAdda Blog`;
-    const desc = blog.excerpt || blog.title;
-    let tag = document.querySelector('meta[name="description"]');
-    if (!tag) {
-      tag = document.createElement('meta');
-      tag.setAttribute('name', 'description');
-      document.head.appendChild(tag);
-    }
-    tag.setAttribute('content', desc);
-  }, [blog]);
+    if (!blog || blog.slug !== slug) return;
+    const description = blog.excerpt || blog.title;
+    const url = `https://foodadda.in/blog/${blog.slug}`;
+    const faqs = extractFaqs(blog.content);
+    return setPageMeta({
+      title: `${blog.seo_title || blog.title} | FoodAdda Blog`,
+      description,
+      image: blog.cover_image_url,
+      // Editors write the excerpt as the meta description; keep it as written.
+      descriptionMax: 320,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'BlogPosting',
+            headline: blog.title,
+            description,
+            ...(blog.cover_image_url ? { image: blog.cover_image_url } : {}),
+            ...(blog.published_at ? { datePublished: blog.published_at } : {}),
+            dateModified: blog.updated_at,
+            author: { '@type': 'Organization', name: 'FoodAdda', url: 'https://foodadda.in' },
+            publisher: { '@type': 'Organization', name: 'FoodAdda', url: 'https://foodadda.in' },
+            mainEntityOfPage: url,
+            url,
+          },
+          ...(faqs.length
+            ? [{
+                '@type': 'FAQPage',
+                mainEntity: faqs.map((f) => ({
+                  '@type': 'Question',
+                  name: f.question,
+                  acceptedAnswer: { '@type': 'Answer', text: f.answer },
+                })),
+              }]
+            : []),
+        ],
+      },
+    });
+  }, [blog, slug]);
 
   const relatedPosts = useMemo(() => {
     if (!allBlogs || !blog) return [];
@@ -62,6 +111,11 @@ const BlogDetail = () => {
         </div>
       </div>
     );
+  }
+
+  // Old URL of a post that has moved: send visitors (and search engines) to the new one.
+  if (blog && blog.slug !== slug) {
+    return <Navigate to={`/blog/${blog.slug}`} replace />;
   }
 
   if (!blog) {
