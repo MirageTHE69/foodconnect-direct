@@ -40,7 +40,7 @@ function WhatsAppBadge({ lead }: { lead: OutreachLead }) {
   if (lead.last_whatsapp_at) {
     return (
       <Badge className="bg-[#25D366]/15 text-[#128C7E] hover:bg-[#25D366]/15 border-0 whitespace-nowrap">
-        Opened {format(new Date(lead.last_whatsapp_at), 'dd MMM')}
+        Sent {format(new Date(lead.last_whatsapp_at), 'dd MMM')}
       </Badge>
     );
   }
@@ -280,8 +280,7 @@ export default function AdminOutreach() {
               <div>
                 <p className="text-2xl font-bold tabular-nums">{waToday ?? '—'}</p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap">
-                  WhatsApp chats today
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-[#25D366]/50 text-[#128C7E]">Auto-send soon</Badge>
+                  WhatsApp messages sent today
                 </p>
               </div>
             </CardContent>
@@ -312,7 +311,7 @@ export default function AdminOutreach() {
                   <SelectItem value="no_email">No email</SelectItem>
                   <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
                   <SelectItem value="wa_not_sent">WhatsApp: not sent</SelectItem>
-                  <SelectItem value="wa_opened">WhatsApp: opened</SelectItem>
+                  <SelectItem value="wa_opened">WhatsApp: sent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -334,7 +333,7 @@ export default function AdminOutreach() {
                 disabled={whatsAppSelection.length === 0}
                 className="bg-[#25D366] hover:bg-[#1fb855] text-white"
               >
-                <MessageCircle className="h-4 w-4 mr-2" />Send WhatsApp ({whatsAppSelection.length}/{MAX_BATCH})
+                <MessageCircle className="h-4 w-4 mr-2" />Start WhatsApp campaign ({whatsAppSelection.length}/{MAX_BATCH})
               </Button>
               {selected.size > 0 && <Button variant="ghost" onClick={() => setSelected(new Map())}>Clear selection</Button>}
             </div>
@@ -398,7 +397,7 @@ export default function AdminOutreach() {
                             </Button>
                             <Button
                               variant="outline" size="icon" aria-label={`WhatsApp ${lead.name}`}
-                              title={waNumber ? (lead.last_whatsapp_at ? `WhatsApp (last opened ${format(new Date(lead.last_whatsapp_at), 'dd MMM')})` : 'Open WhatsApp') : 'No valid mobile number'}
+                              title={waNumber ? (lead.last_whatsapp_at ? `Send on WhatsApp (last sent ${format(new Date(lead.last_whatsapp_at), 'dd MMM')})` : 'Send on WhatsApp') : 'No valid mobile number'}
                               disabled={!waNumber} onClick={() => openWhatsApp(lead)}
                               className={waNumber ? 'text-[#128C7E] border-[#25D366]/50 hover:bg-[#25D366]/10 hover:text-[#128C7E]' : ''}
                             >
