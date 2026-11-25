@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -6,8 +5,8 @@ import {
   Leaf, Droplets, Box, Snowflake, Cog, Palette, Hotel, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { categoryImage, tileStyle } from "@/lib/brandVisuals";
 
 const iconMap: Record<string, React.ElementType> = {
   Apple, Wheat, Milk, Beef, Coffee, Flame, Cookie, Package,
@@ -24,7 +23,13 @@ interface Category {
   display_order: number;
 }
 
-const Categories = () => {
+interface CategoriesProps {
+  /** Show only the first N product categories, with a "View All" link. */
+  limit?: number;
+  showHeader?: boolean;
+}
+
+const Categories = ({ limit, showHeader = true }: CategoriesProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,83 +47,82 @@ const Categories = () => {
     fetchCategories();
   }, []);
 
-  if (loading) {
+  // Product categories and business services are shown separately.
+  const allProducts = categories.filter((c) => c.type !== "service");
+  const products = limit ? allProducts.slice(0, limit) : allProducts;
+  const services = limit ? [] : categories.filter((c) => c.type === "service");
+
+  const renderCard = (category: Category, i: number) => {
+    const IconComp = iconMap[category.icon] || Package;
     return (
-      <section className="py-24 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-6">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-3 animate-pulse">
-                <div className="w-20 h-20 rounded-full bg-muted" />
-                <div className="w-16 h-3 rounded bg-muted" />
-              </div>
-            ))}
+      <Link
+        to={`/categories/${category.slug}`}
+        key={category.id}
+        className="group card-modern overflow-hidden flex flex-col"
+      >
+        <div className="relative w-full aspect-[16/10] overflow-hidden bg-muted">
+          <img
+            src={categoryImage(category.slug)}
+            alt={category.name}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-secondary/70 via-secondary/10 to-transparent" />
+          <div className="absolute left-3 bottom-3 icon-tile w-10 h-10 ring-2 ring-white/70" style={tileStyle(i)}>
+            <IconComp className="w-5 h-5" />
           </div>
         </div>
-      </section>
+        <div className="p-4 md:p-5">
+          <h3 className="font-semibold text-heading leading-snug line-clamp-2 min-h-[2.75rem] font-sans">{category.name}</h3>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary mt-1">
+            Explore suppliers <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </span>
+        </div>
+      </Link>
     );
-  }
+  };
+
+  const grid = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6";
 
   return (
-    <section id="categories" className="py-24 bg-card">
+    <section id="categories" className="py-20 md:py-28 bg-mesh scroll-mt-20">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Explore Our Wide Range of Food Industry Categories
-            </h2>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-              Discover {categories.length}+ categories of food products and services — from ingredients
-              and packaging to equipment and other essential solutions for food businesses.
-            </p>
+        {showHeader && (
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+            <div>
+              <p className="eyebrow mb-4">Product categories</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">Explore Food Categories</h2>
+              <p className="text-muted-foreground mt-2 max-w-2xl">
+                From spices and staples to packaging, machinery and testing services, find suppliers
+                for every part of your food business.
+              </p>
+            </div>
+            {limit && (
+              <Button asChild variant="outline" className="rounded-xl border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground self-start md:self-auto">
+                <Link to="/categories">View All Categories <ArrowRight className="w-4 h-4" /></Link>
+              </Button>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-6">
-          {categories.map((category) => {
-            const IconComp = iconMap[category.icon] || Package;
-            const isService = category.type === "service";
+        {loading ? (
+          <div className={grid}>
+            {Array.from({ length: limit ?? 12 }).map((_, i) => (
+              <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className={grid} data-stagger>{products.map(renderCard)}</div>
 
-            return (
-              <Link
-                to={`/categories/${category.slug}`}
-                key={category.id}
-                className="group flex flex-col items-center text-center"
-              >
-                <div
-                  className={`w-20 h-20 rounded-full border-2 flex items-center justify-center mb-3 transition-all duration-300 ${
-                    isService
-                      ? "bg-accent/10 border-accent/30 group-hover:border-accent group-hover:bg-accent/20"
-                      : "bg-background border-border group-hover:border-primary group-hover:bg-primary/5"
-                  }`}
-                >
-                  <IconComp
-                    className={`w-8 h-8 transition-colors ${
-                      isService
-                        ? "text-accent group-hover:text-accent"
-                        : "text-muted-foreground group-hover:text-primary"
-                    }`}
-                  />
-                </div>
-                <span className="text-sm font-medium text-foreground leading-tight">
-                  {category.name}
-                </span>
-                {isService && (
-                  <Badge variant="outline" className="mt-1 text-[10px] border-accent/40 text-accent px-1.5 py-0">
-                    Service
-                  </Badge>
-                )}
-                {category.item_count > 0 && (
-                  <span className="text-xs text-muted-foreground mt-0.5">
-                    {category.item_count}+ items
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+            {services.length > 0 && (
+              <>
+                <h3 className="text-2xl font-bold text-foreground mt-14 mb-6">Business Services</h3>
+                <div className={grid} data-stagger>{services.map(renderCard)}</div>
+              </>
+            )}
+          </>
+        )}
       </div>
     </section>
   );

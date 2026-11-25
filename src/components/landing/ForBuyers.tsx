@@ -1,52 +1,48 @@
+import { Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { useState } from "react";
-import { PostRequirementDialog } from "@/components/shared/PostRequirementDialog";
+import { PostRfqButton } from "@/components/shared/PostRfqButton";
 
-const ForBuyers = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
+const points = [
+  "Post a requirement free, with no paid membership",
+  "Share product, quantity, specifications and delivery location",
+  "Get matched with suitable manufacturers and suppliers",
+  "Compare quotations on price, MOQ, lead time and terms",
+];
 
-  return (
-    <section id="for-buyers" className="py-24 bg-secondary text-secondary-foreground relative overflow-hidden scroll-mt-20">
-      {/* Yellow diagonal accent */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 skew-x-[-8deg] translate-x-32" />
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="max-w-lg">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              Have a Requirement for Food Products or Supplies?
-            </h2>
-            <p className="text-secondary-foreground/70 text-lg mb-8">
-              Tell us what you need, and we'll connect you with trusted food suppliers,
-              manufacturers, distributors, and brands across India. Find the right products,
-              build direct business connections, and source with zero commissions and no middlemen.
-            </p>
-            <Button
-              variant="hero"
-              size="lg"
-              onClick={() => setDialogOpen(true)}
-            >
-              Post Requirement
-              <ArrowRight className="w-5 h-5" />
+const ForBuyers = () => (
+  <section id="for-buyers" className="py-20 md:py-24 bg-navy-glow text-secondary-foreground scroll-mt-20 relative overflow-hidden">
+    <div className="absolute inset-0 bg-dots-light pointer-events-none" />
+    <div className="container mx-auto px-4 relative">
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-lg">
+          <p className="eyebrow-dark mb-4">For Buyers</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+            Post Your Requirement. Source With Confidence.
+          </h2>
+          <p className="text-secondary-foreground/75 text-lg mb-8">
+            Whether you need raw materials, ingredients, packaged foods, packaging or equipment,
+            tell us what you need and Foodadda will help you find the right suppliers.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <PostRfqButton />
+            <Button asChild size="lg" variant="outline" className="bg-transparent border-secondary-foreground/40 text-secondary-foreground hover:bg-secondary-foreground hover:text-secondary">
+              <Link to="/suppliers">Find Manufacturers</Link>
             </Button>
-            <PostRequirementDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-          </div>
-
-          {/* Right side visual placeholder */}
-          <div className="hidden lg:flex justify-center">
-            <div className="w-80 h-80 rounded-3xl bg-primary/20 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🤝</div>
-                <p className="text-secondary-foreground/80 font-medium">Direct Connections</p>
-                <p className="text-secondary-foreground/50 text-sm mt-1">No middlemen, no commissions</p>
-              </div>
-            </div>
           </div>
         </div>
+
+        <ul data-stagger className="grid sm:grid-cols-2 gap-4">
+          {points.map((p) => (
+            <li key={p} className="card-dark p-6 flex gap-3">
+              <CheckCircle2 className="w-5 h-5 text-brand-orange flex-shrink-0 mt-0.5" />
+              <span className="text-secondary-foreground/90">{p}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default ForBuyers;

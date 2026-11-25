@@ -17,6 +17,7 @@ import { MaskedVendorName } from "@/components/shared/MaskedVendorName";
 import { VendorAccessDialog } from "@/components/shared/VendorAccessDialog";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import { RfqBand } from "@/components/landing/SourcingSections";
 
 interface Vendor {
   id: string;
@@ -240,6 +241,7 @@ const SubCategoryDetail = () => {
       </section>
 
       <VendorAccessDialog open={gateOpen} onOpenChange={setGateOpen} reason={nameGateReason} />
+      <RfqBand title={`Need ${subName}?`} text="Post your RFQ free and our sourcing team will connect you with suitable suppliers." />
       <Footer />
     </div>
   );

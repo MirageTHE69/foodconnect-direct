@@ -1,83 +1,50 @@
+import { Link, useNavigate } from "react-router-dom";
+import { Factory, PackageSearch, Inbox, BadgeCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, TrendingUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useSubscriptionPlans } from "@/hooks/useSubscription";
-import { useAnchorNav } from "@/hooks/useAnchorNav";
+import { tileStyle } from "@/lib/brandVisuals";
 
 const features = [
-  "Unlimited product listings",
-  "Recipe showcase feature",
-  "Direct buyer messaging",
-  "Business analytics dashboard",
-  "Priority search visibility",
-  "Verified supplier badge",
+  { icon: Factory, title: "Capability profile", desc: "Show your facility, capacity, certifications and markets served." },
+  { icon: PackageSearch, title: "Product catalogue", desc: "List products with grade, specifications, pack sizes and MOQ." },
+  { icon: Inbox, title: "Relevant RFQs", desc: "Be considered for buyer requirements that match what you make." },
+  { icon: BadgeCheck, title: "Documented review", desc: "Profiles and documents are reviewed against stated criteria." },
 ];
 
 const ForSuppliers = () => {
   const navigate = useNavigate();
-  const goToAnchor = useAnchorNav();
-  const { plans } = useSubscriptionPlans();
-  const womenPlans = plans.filter((p) => p.business_category === "women_enterprise");
-  const womenPrice = womenPlans.length > 0
-    ? Math.min(...womenPlans.map((p) => p.price_monthly))
-    : null;
-
   return (
-    <section id="for-suppliers" className="py-24 bg-card">
+    <section id="for-suppliers" className="py-20 md:py-28 bg-warm scroll-mt-20">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
+            <p className="eyebrow mb-4">For Manufacturers & Suppliers</p>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-              Subscribe to{" "}
-              <span className="bg-primary text-primary-foreground px-2 -skew-x-1 inline-block">India's B2B</span>{" "}
-              Food Industry Network
+              Showcase Your Capabilities. Receive Relevant RFQs.
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-md">
-              Join FoodAdda, your one-stop platform for food industry needs. Showcase your
-              products, discover food suppliers and buyers, share recipes, and connect with
-              businesses across India.
+              Build a structured profile that helps buyers assess whether you can fulfil their
+              requirement. Basic supplier registration is free.
             </p>
-            <Button variant="hero" size="lg" onClick={() => navigate('/auth')}>
-              Get Started as a Supplier
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="hero" size="lg" onClick={() => navigate("/auth?tab=signup")}>
+                Join as a Supplier <ArrowRight className="w-5 h-5" />
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-xl border-2 border-secondary text-secondary font-semibold hover:bg-secondary hover:text-secondary-foreground">
+                <Link to="/pricing">View Membership</Link>
+              </Button>
+            </div>
           </div>
 
-          {/* Right - Pricing Card */}
-          <div className="relative">
-            <div className="bg-background rounded-3xl p-8 border border-border/50 shadow-hover max-w-sm mx-auto">
-              <p className="text-sm text-muted-foreground mb-1">Women Enterprise Plan</p>
-              <div className="flex items-baseline gap-2 mb-6">
-                {womenPrice !== null ? (
-                  <>
-                    <span className="text-sm text-muted-foreground">from</span>
-                    <span className="text-5xl font-extrabold text-foreground">₹{womenPrice.toLocaleString('en-IN')}</span>
-                    <span className="text-muted-foreground">/mo</span>
-                  </>
-                ) : (
-                  <span className="text-2xl font-bold text-foreground">See plans below</span>
-                )}
+          <div data-stagger className="grid sm:grid-cols-2 gap-4">
+            {features.map(({ icon: Icon, title, desc }, i) => (
+              <div key={title} className="card-modern group p-6">
+                <div className="icon-tile w-12 h-12 mb-5" style={tileStyle(i + 2)}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-heading mb-1 font-sans">{title}</h3>
+                <p className="text-sm text-muted-foreground">{desc}</p>
               </div>
-
-              <Button variant="hero" className="w-full mb-8" size="lg" onClick={goToAnchor("#pricing")}>
-                View Plans
-              </Button>
-
-              <div className="space-y-4">
-                {features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-foreground">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Yellow accent behind card */}
-            <div className="absolute -top-4 -right-4 w-full h-full rounded-3xl bg-primary/10 -z-10" />
+            ))}
           </div>
         </div>
       </div>

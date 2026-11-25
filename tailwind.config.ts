@@ -15,12 +15,14 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        heading: ['"Libre Caslon Display"', 'Georgia', '"Times New Roman"', 'serif'],
+        heading: ['"Bricolage Grotesque"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        heading: "hsl(var(--heading))",
+        "brand-orange": "hsl(var(--brand-orange))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {

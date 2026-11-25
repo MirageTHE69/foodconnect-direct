@@ -167,7 +167,7 @@ export default function BrowseProducts() {
         </div>
         <h1 className="text-3xl font-bold">Browse Products</h1>
         <p className="text-muted-foreground mt-1">
-          Discover quality food products from verified suppliers
+          Discover quality food products from registered suppliers
         </p>
       </div>
 

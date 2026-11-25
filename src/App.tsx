@@ -7,9 +7,11 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { FloatingWidgets } from "@/components/chat/FloatingWidgets";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { ScrollReveal, ScrollProgress } from "@/components/shared/ScrollReveal";
 import { Analytics } from "@/components/shared/Analytics";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import { BuyersPage, SuppliersInfoPage, CategoriesPage, HoReCaPage, SourcingDeskPage, AboutPage, PricingPage } from "./pages/SourcingPages";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 
@@ -81,6 +83,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <ScrollReveal />
+        <ScrollProgress />
         <Analytics />
         <AuthProvider>
           <Routes>
@@ -102,6 +106,13 @@ const App = () => (
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/blog-disclaimer" element={<BlogDisclaimer />} />
+            <Route path="/buyers" element={<BuyersPage />} />
+            <Route path="/for-suppliers" element={<SuppliersInfoPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/horeca" element={<HoReCaPage />} />
+            <Route path="/sourcing-desk" element={<SourcingDeskPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/categories/:id" element={<CategoryDetail />} />
             <Route path="/categories/:categoryId/sub/:subId" element={<SubCategoryDetail />} />
             <Route path="/jobs" element={<Jobs />} />

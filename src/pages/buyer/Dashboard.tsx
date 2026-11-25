@@ -35,7 +35,7 @@ export default function BuyerDashboard() {
               </div>
               <div>
                 <CardTitle className="text-lg">Find Suppliers</CardTitle>
-                <CardDescription>Search verified suppliers</CardDescription>
+                <CardDescription>Search registered suppliers</CardDescription>
               </div>
             </CardHeader>
           </Card>
@@ -84,7 +84,7 @@ export default function BuyerDashboard() {
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">2</div>
                 <div>
                   <h4 className="font-semibold">Connect with Suppliers</h4>
-                  <p className="text-sm text-muted-foreground">Find verified suppliers and view their profiles and products.</p>
+                  <p className="text-sm text-muted-foreground">Find suppliers and view their profiles and products.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">

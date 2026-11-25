@@ -14,6 +14,7 @@ import { isUuid } from "@/lib/utils";
 import { useAnchorNav } from "@/hooks/useAnchorNav";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import { RfqBand } from "@/components/landing/SourcingSections";
 
 const iconMap: Record<string, React.ElementType> = {
   Apple, Wheat, Milk, Beef, Coffee, Flame, Cookie, Package,
@@ -175,6 +176,7 @@ const CategoryDetail = () => {
         </div>
       </section>
 
+      <RfqBand title={`Need ${category.name}?`} text="Post your RFQ free and our sourcing team will connect you with suitable suppliers." />
       <Footer />
     </div>
   );

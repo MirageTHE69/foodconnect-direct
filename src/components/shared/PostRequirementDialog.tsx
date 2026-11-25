@@ -83,20 +83,20 @@ export function PostRequirementDialog({ open, onOpenChange }: PostRequirementDia
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Post a Requirement</DialogTitle>
+          <DialogTitle>Post Your RFQ</DialogTitle>
           <DialogDescription>
-            Tell us what you need and we'll connect you with matching suppliers. Your requirement will be
-            reviewed before it goes live.
+            Share the product, quantity, specifications and delivery location. The Foodadda sourcing team
+            reviews every requirement and connects you with suitable suppliers.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
             <Label htmlFor="req-title">Title *</Label>
-            <Input id="req-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Bulk organic spices supplier needed" />
+            <Input id="req-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Turmeric powder, 5 MT per month" />
           </div>
           <div>
             <Label htmlFor="req-description">Description</Label>
-            <Textarea id="req-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Describe what you're looking for..." />
+            <Textarea id="req-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Grade/quality, specifications, packaging, certifications needed, delivery date..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

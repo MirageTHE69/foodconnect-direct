@@ -86,7 +86,7 @@ export default function Recipes() {
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Recipes</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Discover delicious recipes from our verified suppliers. Find inspiration for your next meal.
+          Discover delicious recipes from our registered suppliers. Find inspiration for your next meal.
         </p>
       </div>
 

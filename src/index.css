@@ -2,66 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Libre+Caslon+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap');
 
 @layer base {
   :root {
-    /* Warm cream background */
-    --background: 47 100% 96%;
-    --foreground: 0 0% 10%;
+    /* Foodadda 2.0: Food Green + Deep Navy + Warm Off-White */
+    --background: 51 30% 95%;       /* #F7F6F0 warm off-white */
+    --foreground: 200 19% 18%;      /* #263238 charcoal body text */
+    --heading: 209 52% 19%;         /* #18324B deep navy headings */
 
-    /* Surface cards */
-    --card: 0 0% 95%;
-    --card-foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 19% 18%;
 
-    --popover: 0 0% 95%;
-    --popover-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 19% 18%;
 
-    /* Golden yellow primary */
-    --primary: 49 100% 48%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 150 55% 27%;         /* #1F6B45 food green */
+    --primary-foreground: 0 0% 100%;
 
-    /* Near-black secondary */
-    --secondary: 0 0% 7%;
-    --secondary-foreground: 47 100% 96%;
+    --secondary: 209 52% 19%;       /* #18324B deep navy */
+    --secondary-foreground: 51 30% 97%;
 
-    /* Muted tones */
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 42%;
+    --muted: 51 20% 92%;
+    --muted-foreground: 200 10% 40%;
 
-    /* Amber accent */
-    --accent: 43 100% 51%;
-    --accent-foreground: 0 0% 10%;
+    /* Subtle green tint used for hover/selected states in menus */
+    --accent: 150 30% 92%;
+    --accent-foreground: 209 52% 19%;
 
-    --destructive: 0 84% 60%;
+    --brand-orange: 33 79% 57%;     /* #E89A3C sparing accents */
+
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 49 100% 48%;
+    --border: 45 15% 86%;
+    --input: 45 15% 82%;
+    --ring: 150 55% 27%;
 
     --radius: 0.75rem;
 
-    /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(49 100% 48%) 0%, hsl(43 100% 51%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 7%) 0%, hsl(0 0% 15%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(47 100% 96%) 0%, hsl(47 80% 93%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(47 80% 95%) 0%, hsl(43 60% 91%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(150 55% 27%) 0%, hsl(150 50% 32%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(209 52% 19%) 0%, hsl(209 45% 26%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(51 30% 95%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(51 30% 96%) 0%, hsl(150 20% 93%) 100%);
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(49 100% 48% / 0.15);
-    --shadow-card: 0 2px 12px -2px hsl(0 0% 10% / 0.08);
-    --shadow-hover: 0 8px 30px -8px hsl(49 100% 48% / 0.25);
+    --shadow-soft: 0 4px 20px -4px hsl(209 52% 19% / 0.10);
+    --shadow-card: 0 2px 12px -2px hsl(209 52% 19% / 0.08);
+    --shadow-hover: 0 8px 24px -8px hsl(150 55% 27% / 0.35);
 
-    /* Sidebar */
-    --sidebar-background: 47 100% 96%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 49 100% 48%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 0 0% 92%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 49 100% 48%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 200 19% 18%;
+    --sidebar-primary: 150 55% 27%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 30% 93%;
+    --sidebar-accent-foreground: 209 52% 19%;
+    --sidebar-border: 45 15% 86%;
+    --sidebar-ring: 150 55% 27%;
   }
 
   .dark {
@@ -74,8 +70,10 @@
     --popover: 0 0% 11%;
     --popover-foreground: 47 100% 96%;
 
-    --primary: 49 100% 52%;
-    --primary-foreground: 0 0% 8%;
+    --primary: 150 45% 45%;
+    --primary-foreground: 0 0% 100%;
+    --heading: 51 30% 96%;
+    --brand-orange: 33 79% 60%;
 
     --secondary: 0 0% 18%;
     --secondary-foreground: 47 100% 96%;
@@ -83,24 +81,24 @@
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 55%;
 
-    --accent: 43 100% 55%;
-    --accent-foreground: 0 0% 8%;
+    --accent: 150 20% 18%;
+    --accent-foreground: 51 30% 96%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 47 100% 96%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 49 100% 52%;
+    --ring: 150 45% 45%;
 
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 47 100% 96%;
-    --sidebar-primary: 49 100% 52%;
+    --sidebar-primary: 150 45% 45%;
     --sidebar-primary-foreground: 0 0% 8%;
     --sidebar-accent: 0 0% 14%;
     --sidebar-accent-foreground: 47 100% 96%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 49 100% 52%;
+    --sidebar-ring: 150 45% 45%;
   }
 }
 
@@ -118,13 +116,11 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
-  /* Caslon Old Face Heavy isn't a licensed web font we can embed, so
-     headings use Libre Caslon Display -- an open-source Caslon revival cut
-     specifically for bold display/headline use (unlike its thinner sibling
-     Libre Caslon Text), the closest free match for a "heavy" Caslon look. */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Libre Caslon Display', Georgia, 'Times New Roman', serif;
+    font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
+
 }
 
 @layer components {
@@ -205,4 +201,147 @@
       transform: scale(1);
     }
   }
+}
+
+/* ---------- Foodadda 2.0 modern UI layer ---------- */
+@layer components {
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-primary;
+  }
+  .eyebrow-dark {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-brand-orange;
+  }
+  .text-gradient-brand {
+    background: linear-gradient(100deg, hsl(150 55% 30%) 0%, hsl(150 50% 40%) 45%, hsl(33 79% 55%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60;
+  }
+  .card-modern {
+    @apply relative rounded-2xl border border-border bg-card transition-all duration-300 ease-out;
+    box-shadow: 0 1px 2px hsl(209 52% 19% / 0.04), 0 4px 16px -6px hsl(209 52% 19% / 0.08);
+  }
+  .card-modern::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; z-index: 2;
+    border-radius: 1rem 1rem 0 0;
+    background: linear-gradient(90deg, hsl(150 55% 35%), hsl(42 90% 52%), hsl(28 85% 55%), hsl(340 62% 52%));
+    transform: scaleX(0); transform-origin: left; transition: transform .45s ease;
+  }
+  .card-modern:hover::before { transform: scaleX(1); }
+  .card-modern:hover {
+    transform: translateY(-6px);
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: 0 24px 48px -20px hsl(150 55% 27% / 0.35), 0 8px 16px -8px hsl(209 52% 19% / 0.12);
+  }
+  .card-dark {
+    @apply relative rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm transition-all duration-300;
+  }
+  .card-dark:hover {
+    transform: translateY(-6px);
+    border-color: hsl(var(--brand-orange) / 0.45);
+    background: rgb(255 255 255 / 0.07);
+  }
+  .icon-tile {
+    @apply flex items-center justify-center rounded-xl text-white transition-transform duration-300;
+    background: linear-gradient(135deg, hsl(150 55% 30%), hsl(150 50% 42%));
+    box-shadow: 0 8px 20px -8px hsl(150 55% 27% / 0.6);
+  }
+  .group:hover .icon-tile { transform: scale(1.08) rotate(-4deg); }
+
+  /* Soft mesh gradient backgrounds */
+  .bg-mesh {
+    background:
+      radial-gradient(60rem 40rem at 85% -10%, hsl(150 55% 27% / 0.14), transparent 60%),
+      radial-gradient(40rem 30rem at -10% 20%, hsl(33 85% 57% / 0.20), transparent 60%),
+      radial-gradient(30rem 24rem at 60% 40%, hsl(340 62% 55% / 0.06), transparent 60%),
+      radial-gradient(50rem 30rem at 50% 110%, hsl(209 52% 19% / 0.08), transparent 60%),
+      hsl(var(--background));
+  }
+  .bg-warm {
+    background:
+      radial-gradient(45rem 30rem at 100% 0%, hsl(38 92% 60% / 0.16), transparent 60%),
+      radial-gradient(40rem 30rem at 0% 100%, hsl(340 62% 55% / 0.08), transparent 60%),
+      linear-gradient(180deg, hsl(40 70% 97%), hsl(51 30% 95%));
+  }
+  .bg-fresh {
+    background:
+      radial-gradient(45rem 30rem at 0% 0%, hsl(150 55% 40% / 0.14), transparent 60%),
+      radial-gradient(40rem 30rem at 100% 100%, hsl(185 70% 35% / 0.10), transparent 60%),
+      linear-gradient(180deg, hsl(150 35% 97%), hsl(51 30% 95%));
+  }
+  .bg-navy-glow {
+    background:
+      radial-gradient(40rem 30rem at 100% 0%, hsl(150 55% 35% / 0.35), transparent 60%),
+      radial-gradient(35rem 25rem at 0% 100%, hsl(33 79% 57% / 0.18), transparent 60%),
+      hsl(var(--secondary));
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(209 52% 19% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(209 52% 19% / 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  .bg-dots-light {
+    background-image: radial-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Button shine sweep */
+  .btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+  .btn-shine::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: shine 3.5s ease-in-out infinite;
+  }
+
+  /* Animated link underline */
+  .nav-underline { position: relative; }
+  .nav-underline::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; border-radius: 2px;
+    background: hsl(var(--primary)); transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
+  }
+  .nav-underline:hover::after, .nav-underline.active::after { transform: scaleX(1); }
+
+  .marquee { display: flex; width: max-content; animation: marquee 40s linear infinite; }
+  .marquee:hover { animation-play-state: paused; }
+
+  .blob { position: absolute; border-radius: 9999px; filter: blur(60px); opacity: .55; animation: blob 18s ease-in-out infinite; pointer-events: none; }
+}
+
+/* Scroll reveal (driven by useScrollReveal) */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+  transition-delay: calc(var(--reveal-i, 0) * 90ms);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+@keyframes shine { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 20px) scale(0.95); }
+}
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.animate-float-slow { animation: floatY 6s ease-in-out infinite; }
+@keyframes heroIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+.hero-in { opacity: 0; animation: heroIn .9s cubic-bezier(.16,1,.3,1) forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .marquee, .blob, .btn-shine::after, .animate-float-slow, .animate-float { animation: none; }
+  .hero-in { opacity: 1; animation: none; }
+}
+
+/* Headings set in the body text colour read as deep navy (brand rule).
+   Kept outside @layer so Tailwind does not generate variants from it. */
+h1.text-foreground, h2.text-foreground, h3.text-foreground, h4.text-foreground {
+  color: hsl(var(--heading));
 }

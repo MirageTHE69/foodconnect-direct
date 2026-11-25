@@ -8,7 +8,7 @@ export default function Dashboard() {
 
   const quickActions = [
     { title: "Browse Products", desc: "Explore food products", icon: ShoppingBag, href: "/products", color: "bg-primary/10 text-primary" },
-    { title: "Find Suppliers", desc: "Search verified suppliers", icon: Search, href: "/suppliers", color: "bg-secondary/10 text-secondary" },
+    { title: "Find Suppliers", desc: "Search registered suppliers", icon: Search, href: "/suppliers", color: "bg-secondary/10 text-secondary" },
     { title: "My Products", desc: "Manage your listings", icon: Package, href: "/supplier/products", color: "bg-accent/10 text-accent" },
     { title: "My Recipes", desc: "Share your recipes", icon: BookOpen, href: "/supplier/recipes", color: "bg-primary/10 text-primary" },
     { title: "Messages", desc: "Chat with others", icon: MessageSquare, href: "/chat", color: "bg-muted text-muted-foreground" },
@@ -49,7 +49,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {[
                 { step: "1", title: "Browse or Post Products", desc: "Explore food products or list your own for others to discover." },
-                { step: "2", title: "Connect with Others", desc: "Find verified suppliers and buyers, view profiles and products." },
+                { step: "2", title: "Connect with Others", desc: "Find suppliers and buyers, view profiles and products." },
                 { step: "3", title: "Start Conversations", desc: "Chat directly with suppliers or buyers to discuss requirements." },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
